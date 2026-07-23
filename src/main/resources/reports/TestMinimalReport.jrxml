@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+    name="TestMinimalReport" pageWidth="595" pageHeight="842" columnWidth="555"
+    leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="11111111-1111-1111-1111-111111111111">
+
+    <parameter name="TITULO_RELATORIO" class="java.lang.String">
+        <defaultValueExpression><![CDATA["RELATÓRIO DE TESTE"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="DATA_INICIAL" class="java.lang.String"/>
+    <parameter name="DATA_FINAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_NOME" class="java.lang.String"/>
+    <parameter name="EMPRESA_CNPJ" class="java.lang.String"/>
+    <parameter name="USUARIO" class="java.lang.String"/>
+    <parameter name="FILTRO_COBRANCA" class="java.lang.String"/>
+    <parameter name="FILTRO_DOCUMENTO" class="java.lang.String"/>
+    <parameter name="FILTRO_SO_PAGOS" class="java.lang.Boolean"/>
+    <parameter name="FILTRO_APENAS_ABERTOS" class="java.lang.Boolean"/>
+
+    <title>
+        <band height="90">
+            <subreport>
+                <reportElement x="0" y="0" width="555" height="80" uuid="c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"/>
+                <subreportParameter name="TITULO_RELATORIO">
+                    <subreportParameterExpression><![CDATA[$P{TITULO_RELATORIO}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="EMPRESA_NOME">
+                    <subreportParameterExpression><![CDATA[$P{EMPRESA_NOME}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="EMPRESA_CNPJ">
+                    <subreportParameterExpression><![CDATA[$P{EMPRESA_CNPJ}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="USUARIO">
+                    <subreportParameterExpression><![CDATA[$P{USUARIO}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="DATA_INICIAL">
+                    <subreportParameterExpression><![CDATA[$P{DATA_INICIAL}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="DATA_FINAL">
+                    <subreportParameterExpression><![CDATA[$P{DATA_FINAL}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="FILTRO_COBRANCA">
+                    <subreportParameterExpression><![CDATA[$P{FILTRO_COBRANCA}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="FILTRO_DOCUMENTO">
+                    <subreportParameterExpression><![CDATA[$P{FILTRO_DOCUMENTO}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="FILTRO_SO_PAGOS">
+                    <subreportParameterExpression><![CDATA[$P{FILTRO_SO_PAGOS}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="FILTRO_APENAS_ABERTOS">
+                    <subreportParameterExpression><![CDATA[$P{FILTRO_APENAS_ABERTOS}]]></subreportParameterExpression>
+                </subreportParameter>
+                <connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+                <subreportExpression><![CDATA["reports/templates/cabecalho_portrait.jasper"]]></subreportExpression>
+            </subreport>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="20"/>
+    </columnHeader>
+
+    <detail>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="555" height="20"/>
+                <textElement>
+                    <font size="12"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Total de registros: " + ($V{REPORT_COUNT} != null ? $V{REPORT_COUNT} : 0)]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="555" height="20"/>
+                <textElement textAlignment="Right">
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Pagina " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+</jasperReport>

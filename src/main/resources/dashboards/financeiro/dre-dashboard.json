@@ -1,0 +1,72 @@
+{
+  "id": "dre-scopla",
+  "title": "DRE - SCOPLA (Bruto)",
+  "description": "Visão DRE linha-a-linha baseada no plano SCOPLA. Cada widget apresenta agregações por nível e por conta (receitas/despesas).",
+  "layout": "financial",
+  "widgets": [
+    {
+      "id": "dre-table",
+      "type": "aggrid",
+      "title": "DRE - Linhas (SCOPLA)",
+      "query": {
+        "id": "dre_scopla_lines",
+        "sql": "SELECT contad_ocai AS conta, descri_scopla AS descricao, nivel, tipo_conta, saldo AS valor FROM dre_scopla_view WHERE ano = :ano AND mes = :mes ORDER BY ordem"
+      },
+      "visual_config": {
+        "grid_columns": [
+          {"field": "conta", "headerName": "Conta", "width": 180},
+          {"field": "descricao", "headerName": "Descrição", "width": 420},
+          {"field": "nivel", "headerName": "Nível", "width": 80},
+          {"field": "tipo_conta", "headerName": "Tipo", "width": 120},
+          {"field": "valor", "headerName": "Valor R$", "width": 140, "cellStyle": {"textAlign": "right"}}
+        ],
+        "grid_height": "640px"
+      }
+    },
+    {
+      "id": "dre-summary",
+      "type": "kpi",
+      "title": "Resumo DRE",
+      "query": {
+        "id": "dre_summary",
+        "sql": "SELECT 'Receita' AS chave, SUM(valor) AS total FROM dre_scopla_view WHERE tipo_conta = 'RECEITA' AND ano = :ano AND mes = :mes UNION ALL SELECT 'Despesa', SUM(valor) FROM dre_scopla_view WHERE tipo_conta = 'DESPESA' AND ano = :ano AND mes = :mes"
+      },
+      "visual_config": { "kpi_style": { "title_size": 14 } }
+    }
+    ,
+    {
+      "id": "dre-12meses-bar",
+      "type": "bar",
+      "title": "DRE - 12 Meses (Previsto x Real)",
+      "query": {
+        "id": "dre_12meses_bar",
+        "sql": "SELECT DATE_FORMAT(ano_mes, '%Y-%m') AS periodo, SUM(valor_previsto) AS previsto, SUM(valor_real) AS real FROM dre_scopla_monthly WHERE conta = :conta GROUP BY periodo ORDER BY periodo"
+      },
+      "visual_config": {
+        "xField": "periodo",
+        "series": [
+          { "name": "Previsto", "field": "previsto" },
+          { "name": "Real", "field": "real" }
+        ],
+        "stack": false
+      }
+    },
+    {
+      "id": "dre-12meses-grid",
+      "type": "aggrid",
+      "title": "DRE - 12 Meses (Grid)",
+      "query": {
+        "id": "dre_12meses_grid",
+        "sql": "SELECT conta, descricao, DATE_FORMAT(ano_mes, '%Y-%m') AS periodo, valor_previsto AS previsto, valor_real AS real FROM dre_scopla_monthly WHERE conta = :conta ORDER BY periodo"
+      },
+      "visual_config": {
+        "grid_columns": [
+          {"field": "periodo", "headerName": "Período", "width": 120},
+          {"field": "previsto", "headerName": "Previsto R$", "width": 140, "cellStyle": {"textAlign": "right"}},
+          {"field": "real", "headerName": "Real R$", "width": 140, "cellStyle": {"textAlign": "right"}}
+        ],
+        "grid_height": "520px"
+      }
+    }
+  ]
+}

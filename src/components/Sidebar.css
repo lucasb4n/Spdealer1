@@ -1,0 +1,151 @@
+.sidebar {
+  width: 240px;
+  background: #23395d;
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+}
+.sidebar-header {
+  padding: 24px 16px 12px 24px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #1a2a44;
+}
+.sidebar-logo {
+  font-size: 1.2rem;
+  color: #fff;
+}
+.sidebar-nav {
+  flex: 1;
+  padding: 12px 0 0 0;
+}
+.sidebar-group {
+  margin-bottom: 8px;
+}
+.sidebar-group-title {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  /* alinhar à esquerda igual aos itens do menu */
+  padding: 8px 8px 8px 8px !important; /* left:8px para alinhamento consistente */
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: padding 0.3s ease, justify-content 0.3s ease;
+}
+.sidebar-group-icon {
+  font-size: 1.1rem;
+  margin-right: 8px;
+  display: inline-flex;
+  min-width: 22px;
+  align-items: center;
+  justify-content: center;
+}
+.sidebar-group-items {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 8px;
+}
+.sidebar-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #1a2a44;
+}
+.sidebar-logout-btn {
+  width: 100%;
+  background: #1a2a44;
+  color: #fff;
+  border: none;
+  padding: 10px 0;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.sidebar-logout-btn:hover {
+  background: #1a4d99;
+  color: #ffffff;
+}
+
+/* Quando sidebar colapsado, botão fica compacto */
+.sidebar.collapsed .sidebar-logout-btn {
+  padding: 8px 0;
+  font-size: 0.8rem;
+}
+.sidebar-loading, .sidebar-error {
+  color: #ffb347;
+  padding: 8px 24px;
+  font-size: 0.95rem;
+}
+
+/* Forçar alinhamento consistente de botões/ícones/labels dentro da sidebar
+   Alguns itens usam styled-components gerando classes dinâmicas; atingir elementos
+   com seletores de botão/svg/span garante alinhamento consistente. */
+.sidebar button,
+.sidebar a,
+.sidebar .menu-item-content,
+.sidebar .sidebar-group-title {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  padding-left: 8px !important;
+}
+
+.sidebar svg {
+  margin-right: 8px !important;
+  flex-shrink: 0 !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.sidebar span {
+  display: inline-block !important;
+}
+
+/* ========================================================================= */
+/* SIDEBAR COLAPSADO - RESPONSIVIDADE */
+/* ========================================================================= */
+
+/* Quando sidebar está colapsado (classe .collapsed) */
+.sidebar.collapsed {
+  width: 60px;
+  min-width: 60px;
+  max-width: 60px;
+}
+
+/* Ícones do grupo quando sidebar colapsado - ALINHAR À ESQUERDA */
+.sidebar.collapsed .sidebar-group-title {
+  justify-content: flex-start;
+  padding: 8px 8px 8px 8px;
+  gap: 0;
+}
+
+/* Ocultar texto do grupo quando colapsado */
+.sidebar.collapsed .sidebar-group-title span:last-child {
+  display: none;
+}
+
+/* Ícone do grupo visível e centralizado quando colapsado */
+.sidebar.collapsed .sidebar-group-icon {
+  margin-right: 0;
+  font-size: 1.3rem;
+  margin-left: 4px;
+}
+
+/* ========================================================================= */
+/* OCULTAR ITENS DE SUBMENU E MOSTRAR APENAS ÍCONES QUANDO COLAPSADO */
+/* ========================================================================= */
+
+/* Remover margin esquerda do grupo de items quando colapsado */
+.sidebar.collapsed .sidebar-group-items {
+  padding: 0 !important;
+}
+

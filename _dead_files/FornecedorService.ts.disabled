@@ -1,0 +1,50 @@
+import { Fornecedor } from 'fornecedor';
+
+export class FornecedorService {
+  static async listar(): Promise<Fornecedor[]> {
+    // Usar endpoint de clientes com filtro cliforn_cli=F para compatibilidade com backend
+    const url = `${process.env.REACT_APP_API_URL}/clientes?cliforn_cli=F`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Erro ao buscar fornecedores');
+    return response.json();
+  }
+
+  static async salvar(fornecedor: Fornecedor): Promise<Fornecedor> {
+    // POST/PUT contra /clientes (fornecedor é apenas cliente com cliforn_cli='F')
+    const method = fornecedor.id ? 'PUT' : 'POST';
+    const url = `${process.env.REACT_APP_API_URL}/clientes${fornecedor.id ? '/' + fornecedor.id : ''}`;
+    const response = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...fornecedor, cliforn_cli: 'F' })
+    });
+    if (!response.ok) throw new Error('Erro ao salvar fornecedor');
+    return response.json();
+  }
+
+  static async remover(id: number): Promise<void> {
+    // Verificar can-delete via endpoint de clientes
+    const canDeleteResp = await fetch(`${process.env.REACT_APP_API_URL}/clientes/${id}/can-delete`);
+    if (!canDeleteResp.ok) throw new Error('Erro ao verificar exclusao do fornecedor');
+    const canDeleteData = await canDeleteResp.json();
+    if (!canDeleteData.canDelete) throw new Error('Fornecedor possui movimentacoes e nao pode ser excluido');
+
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/clientes/${id}`, {
+      method: 'DELETE'
+    });
+    if (!response.ok) throw new Error('Erro ao remover fornecedor');
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

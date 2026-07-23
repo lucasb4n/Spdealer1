@@ -1,0 +1,37 @@
+<!-- Formulário de manutenção de itens de menu -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Manutenção de Itens de Menu</title>
+    <link rel="stylesheet" href="/static/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-4">
+    <h2>Itens de Menu</h2>
+    <form id="formMenuItem" class="mb-3">
+        <div class="row">
+            <div class="col-md-3">
+                <input type="text" class="form-control" name="name" placeholder="Nome do Item" required>
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" name="route" placeholder="Rota">
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" name="icon" placeholder="Ícone">
+            </div>
+            <div class="col-md-2">
+                <input type="number" class="form-control" name="order" placeholder="Ordem" min="0">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-success">Adicionar Item</button>
+            </div>
+        </div>
+    </form>
+    <ul id="menuItemList" class="list-group">
+        <!-- Itens renderizados dinamicamente -->
+    </ul>
+</div>
+<script src="/static/menu/menu-items.js"></script>
+</body>
+</html>

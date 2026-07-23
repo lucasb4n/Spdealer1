@@ -1,0 +1,68 @@
+import React, { useState } from 'react';
+import { Fornecedor } from 'fornecedor';
+import { FornecedorService } from 'services/FornecedorService';
+
+interface FornecedorFormProps {
+  fornecedor?: Fornecedor;
+  onSalvo?: (fornecedor: Fornecedor) => void;
+}
+
+export const FornecedorForm: React.FC<FornecedorFormProps> = ({ fornecedor, onSalvo }) => {
+  const [form, setForm] = useState<Fornecedor>(fornecedor || {
+    id: 0,
+    nome: '',
+    cnpj: '',
+    email: '',
+    telefone: '',
+    endereco: '',
+    ativo: true
+  });
+  const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setErro(null);
+    try {
+      const salvo = await FornecedorService.salvar(form);
+      onSalvo && onSalvo(salvo);
+    } catch (err: any) {
+      setErro(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input name="nome" value={form.nome} onChange={handleChange} placeholder="Nome" required />
+      <input name="cnpj" value={form.cnpj} onChange={handleChange} placeholder="CNPJ" required />
+      <input name="email" value={form.email} onChange={handleChange} placeholder="Email" />
+      <input name="telefone" value={form.telefone} onChange={handleChange} placeholder="Telefone" />
+      <input name="endereco" value={form.endereco} onChange={handleChange} placeholder="Endereço" />
+      <label>
+        <input type="checkbox" name="ativo" checked={form.ativo} onChange={e => setForm({ ...form, ativo: e.target.checked })} /> Ativo
+      </label>
+      <button type="submit" disabled={loading}>Salvar</button>
+      {erro && <div style={{ color: 'red' }}>{erro}</div>}
+    </form>
+  );
+};
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,40 @@
+<!-- Formulário de manutenção de grupos de menu -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Manutenção de Grupos de Menu</title>
+    <link rel="stylesheet" href="/static/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-4">
+    <h2>Grupos de Menu</h2>
+    <form id="formMenuGroup" class="mb-3">
+        <div class="row">
+            <div class="col-md-4">
+                <input type="text" class="form-control" name="name" placeholder="Nome do Grupo" required>
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" name="icon" placeholder="Ícone">
+            </div>
+            <div class="col-md-2">
+                <input type="number" class="form-control" name="order" placeholder="Ordem" min="0">
+            </div>
+            <div class="col-md-2">
+                <select class="form-control" name="active">
+                    <option value="true">Ativo</option>
+                    <option value="false">Inativo</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-success">Adicionar Grupo</button>
+            </div>
+        </div>
+    </form>
+    <ul id="menuGroupList" class="list-group">
+        <!-- Grupos renderizados dinamicamente -->
+    </ul>
+</div>
+<script src="/static/menu/menu-groups.js"></script>
+</body>
+</html>

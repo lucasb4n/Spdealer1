@@ -1,0 +1,262 @@
+/* Context Menu - Menu flutuante com AG Grid (2 abas: Propriedades | Eventos) */
+
+.context-menu {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 450px;
+  max-width: 500px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow: hidden;
+}
+
+.context-menu-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.context-menu-title {
+  flex: 1;
+  font-size: 13px;
+}
+
+.context-menu-close {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.context-menu-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Tabs customizadas */
+.context-menu-tabs {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.context-menu-tabs .nav-link {
+  color: #495057;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 20px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.context-menu-tabs .nav-link:hover {
+  background: #f8f9fa;
+  color: #667eea;
+}
+
+.context-menu-tabs .nav-link.active {
+  background: white;
+  color: #667eea;
+  border-bottom: 3px solid #667eea;
+  font-weight: 600;
+}
+
+/* AG Grid Container */
+.context-menu-grid {
+  height: auto !important;
+  max-height: 400px;
+  overflow-y: auto;
+  font-size: 12px;
+}
+
+/* AG Grid customizações */
+.context-menu-grid .ag-root {
+  border: none !important;
+}
+
+.context-menu-grid .ag-header {
+  display: none !important;  /* Remove cabeçalho */
+}
+
+.context-menu-grid .ag-row {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.context-menu-grid .ag-row:hover {
+  background-color: #f8f9fa !important;
+}
+
+.context-menu-grid .ag-cell {
+  padding: 6px 12px;
+  font-size: 12px;
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
+}
+
+/* Primeira coluna (Propriedade/Evento) - mais escura */
+.context-menu-grid .ag-cell:first-child {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+}
+
+/* Segunda coluna (Valor/Ação) - editável */
+.context-menu-grid .ag-cell:nth-child(2) {
+  color: #212529;
+}
+
+/* Células editáveis */
+.context-menu-grid .ag-cell-edit-input {
+  font-size: 12px;
+  padding: 4px 8px;
+  border: 1px solid #667eea;
+  border-radius: 4px;
+}
+
+/* Footer com botões */
+.context-menu-footer {
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.context-menu-footer .btn {
+  font-size: 12px;
+  padding: 6px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.context-menu-footer .btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+}
+
+.context-menu-footer .btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.context-menu-footer .btn-secondary {
+  background: #6c757d;
+  border: none;
+}
+
+/* Scrollbar customizada */
+.context-menu-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.context-menu-grid::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.context-menu-grid::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.context-menu-grid::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .context-menu {
+    min-width: 320px;
+    max-width: 90vw;
+  }
+  
+  .context-menu-grid {
+    max-height: 300px;
+  }
+}
+
+/* Animação de entrada */
+@keyframes contextMenuSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.context-menu {
+  animation: contextMenuSlideIn 0.2s ease-out;
+}
+
+/* Modal simples usado pelos dialogs de Flow/Params */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 12000;
+}
+.modal-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  max-height: 90vh;
+  overflow: auto;
+}
+
+/* Indicador de célula editável */
+.context-menu-grid .ag-cell[col-id="value"]:hover::after,
+.context-menu-grid .ag-cell[col-id="action"]:hover::after {
+  content: "✏️";
+  position: absolute;
+  right: 8px;
+  font-size: 10px;
+  opacity: 0.5;
+}
+
+/* Tab content */
+.tab-content {
+  padding: 0 !important;
+}
+
+.tab-pane {
+  padding: 0 !important;
+}
+
+/* AG Grid rows zebrada (alternada) */
+.context-menu-grid .ag-row-even {
+  background-color: white;
+}
+
+.context-menu-grid .ag-row-odd {
+  background-color: #fafafa;
+}
+
+/* Destaque ao editar */
+.context-menu-grid .ag-cell-inline-editing {
+  background-color: #fff3cd !important;
+  border: 2px solid #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}

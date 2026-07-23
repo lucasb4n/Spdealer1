@@ -1,0 +1,33 @@
+name: CI - Build and Test React
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+      - name: Instalar dependências
+        run: npm ci
+      - name: Build do projeto
+        run: npm run build
+      - name: Executar testes
+        run: npm test -- --watchAll=false
+      - name: Emitir artefatos de build
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: build/

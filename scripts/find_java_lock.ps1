@@ -1,0 +1,1 @@
+Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -and ($_.CommandLine -match 'spdealer' -or $_.CommandLine -match 'spdealer-1.0.0-exec.war') } | Select-Object ProcessId,CommandLine | Format-List

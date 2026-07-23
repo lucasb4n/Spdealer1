@@ -1,0 +1,18 @@
+
+:root{
+  --sp-color-primary:#0056B3;
+  --sp-color-success:#28A745;
+  --sp-color-error:#DC3545;
+  --sp-input-bg:#F8F9FA;
+  --sp-border:#DDDDDD;
+}
+.sp-card{background:#fff;border:1px solid var(--sp-border);border-radius:8px}
+.sp-card__header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:linear-gradient(90deg,var(--sp-color-primary),#0066cc);color:#fff;border-top-left-radius:8px;border-top-right-radius:8px}
+.sp-card__header-left{display:flex;align-items:center;gap:12px}
+.sp-logo{height:34px;margin-right:8px}
+.sp-card__title{margin:0;font-size:16px}
+.sp-card__subtitle{font-size:12px;opacity:0.9}
+.sp-user{ text-align:right }
+.sp-user__name{font-weight:600}
+.sp-user__status{font-size:11px;opacity:0.85}
+

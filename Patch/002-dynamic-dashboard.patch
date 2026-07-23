@@ -1,0 +1,121 @@
+diff --git a/src/components/DynamicDashboard.tsx b/src/components/DynamicDashboard.tsx
+index 1111111..2222222 100644
+--- a/src/components/DynamicDashboard.tsx
++++ b/src/components/DynamicDashboard.tsx
+@@ -1,12 +1,165 @@
+-import React from 'react';
++import React, { useMemo } from 'react';
++import ContainerWidgetRenderer from './Widget/ContainerWidgetRenderer';
++import KpiWidget from './Widget/KpiWidget';
++import ChartWidget from './Widget/ChartWidget';
++import AgGridWidget from './Widget/AgGridWidget';
+ 
+-const DynamicDashboard: React.FC = ({ theme, dashboard }) => {
+-  const widgets = (dashboard?.widgets || []).filter((w: any) => w?.is_visible !== false);
+-  return (
+-    <>
+-      {widgets.map((w: any) => (
+-        <div key={w.id || w.widget_id}>{w.title}</div>
+-      ))}
+-    </>
+-  );
+-};
++type AnyConfig = Record<string, any>;
++
++function getGroupId(w: AnyConfig): string | undefined {
++  return (
++    w?.group_id ||
++    w?.visual_config?.group_id ||
++    w?.data_config?.group_id ||
++    w?.behavior_config?.group_id
++  );
++}
++
++const DynamicDashboard: React.FC<{ theme?: any; dashboard?: AnyConfig }> = ({ theme, dashboard }) => {
++  const widgets: AnyConfig[] = (dashboard?.widgets || []).filter((w) => w?.is_visible !== false);
++
++  // 1) Containers e seus group_ids
++  const containers = useMemo(
++    () => widgets.filter((w) => w.widget_type === 'container'),
++    [widgets]
++  );
++
++  const containerGroupIds = useMemo(() => {
++    const s = new Set<string>();
++    for (const c of containers) {
++      const gid = getGroupId(c);
++      if (gid) s.add(gid);
++    }
++    return s;
++  }, [containers]);
++
++  // 2) Filhos por group_id (apenas widgets não-container)
++  const childrenByGroup = useMemo(() => {
++    const map: Record<string, AnyConfig[]> = {};
++    for (const w of widgets) {
++      if (w.widget_type === 'container') continue;
++
++      const gid = getGroupId(w);
++      if (gid && containerGroupIds.has(gid)) {
++        if (!map[gid]) map[gid] = [];
++        map[gid].push(w);
++      }
++    }
++    return map;
++  }, [widgets, containerGroupIds]);
++
++  // 3) Renderizador genérico de filho por tipo
++  const renderChild = (w: AnyConfig) => {
++    switch (w.widget_type) {
++      case 'kpi':
++        return <KpiWidget widget={w} theme={theme} />;
++      case 'chart':
++        return <ChartWidget widget={w} theme={theme} />;
++      case 'aggrid':
++        return <AgGridWidget widget={w} theme={theme} />;
++      case 'text':
++        // Opcional: retornar TextWidget se existir
++        return null;
++      default:
++        return null;
++    }
++  };
++
++  // 4) Renderização: evita duplicar filhos no topo
++  return (
++    <>
++      {widgets.map((w) => {
++        const gid = getGroupId(w);
++
++        // Evita duplicidade: filhos de um container não aparecem no topo
++        if (gid && containerGroupIds.has(gid) && w.widget_type !== 'container') {
++          return null;
++        }
++
++        // Render do container com os filhos
++        if (w.widget_type === 'container') {
++          const g = getGroupId(w);
++          const childWidgets = g ? (childrenByGroup[g] || []) : [];
++
++          return (
++            <div key={w.id || w.widget_id}>
++              <ContainerWidgetRenderer
++                widget={w}
++                childrenWidgets={childWidgets}
++                renderChild={renderChild}
++              />
++            </div>
++          );
++        }
++
++        // Widgets sem group_id ou que não pertencem a nenhum container
++        return (
++          <div key={w.id || w.widget_id}>
++            {renderChild(w)}
++          </div>
++        );
++      })}
++    </>
++  );
++};
+ export default DynamicDashboard;

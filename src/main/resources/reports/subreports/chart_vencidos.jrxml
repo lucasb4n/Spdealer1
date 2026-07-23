@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+    name="chart_vencidos" pageWidth="595" pageHeight="842" columnWidth="515" leftMargin="40" rightMargin="40" topMargin="20" bottomMargin="20">
+
+    <parameter name="dataini" class="java.sql.Date"/>
+    <parameter name="datafim" class="java.sql.Date"/>
+    <parameter name="FILIAL" class="java.lang.String"/>
+
+        <queryString language="SQL"><![CDATA[
+                -- Aging buckets (Vencidos): 1-30,31-60,61-90,91-120,>120
+                SELECT bucket AS activity, COALESCE(SUM(value),0) AS total
+                FROM (
+                    SELECT
+                        CASE
+                            WHEN DATEDIFF(COALESCE($P{datafim}, CURDATE()), r.dtvenci_rec) BETWEEN 1 AND 30 THEN '1-30'
+                            WHEN DATEDIFF(COALESCE($P{datafim}, CURDATE()), r.dtvenci_rec) BETWEEN 31 AND 60 THEN '31-60'
+                            WHEN DATEDIFF(COALESCE($P{datafim}, CURDATE()), r.dtvenci_rec) BETWEEN 61 AND 90 THEN '61-90'
+                            WHEN DATEDIFF(COALESCE($P{datafim}, CURDATE()), r.dtvenci_rec) BETWEEN 91 AND 120 THEN '91-120'
+                            ELSE '>120'
+                        END AS bucket,
+                        COALESCE(r.vlrsal_rec,0) AS value
+                    FROM receber r
+                    WHERE r.filial_rec = $P{FILIAL}
+                        AND r.dtpagi_rec IS NULL
+                        AND (r.status_rec IS NULL OR r.status_rec = '')
+                        AND r.vlrsal_rec > 0
+                        AND r.dtvenci_rec < COALESCE($P{datafim}, CURDATE())
+
+                    UNION ALL
+
+                    SELECT
+                        CASE
+                            WHEN DATEDIFF(COALESCE($P{datafim}, CURDATE()), p.dtvenci_pag) BETWEEN 1 AND 30 THEN '1-30'
+                            WHEN DATEDIFF(COALESCE($P{datafim}, CURDATE()), p.dtvenci_pag) BETWEEN 31 AND 60 THEN '31-60'
+                            WHEN DATEDIFF(COALESCE($P{datafim}, CURDATE()), p.dtvenci_pag) BETWEEN 61 AND 90 THEN '61-90'
+                            WHEN DATEDIFF(COALESCE($P{datafim}, CURDATE()), p.dtvenci_pag) BETWEEN 91 AND 120 THEN '91-120'
+                            ELSE '>120'
+                        END AS bucket,
+                        COALESCE(p.vlrsal_pag,0) AS value
+                    FROM pagar p
+                    WHERE p.filial_pag = $P{FILIAL}
+                        AND p.dtpagi_pag IS NULL
+                        AND (p.status_pag IS NULL OR p.status_pag = '')
+                        AND p.vlrsal_pag > 0
+                        AND p.dtvenci_pag < COALESCE($P{datafim}, CURDATE())
+                ) t
+                GROUP BY bucket
+                ORDER BY FIELD(bucket,'1-30','31-60','61-90','91-120','>120')
+        ]]></queryString>
+
+    <field name="activity" class="java.lang.String"/>
+    <field name="total" class="java.math.BigDecimal"/>
+
+    <title>
+        <band height="30">
+            <staticText>
+                <reportElement x="0" y="5" width="515" height="20"/>
+                <textElement>
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Top 10 Atividades - Vencidos]]></text>
+            </staticText>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="20">
+            <staticText>
+                <reportElement x="0" y="0" width="350" height="20"/>
+                <textElement>
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[Atividade]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="350" y="0" width="165" height="20"/>
+                <textElement textAlignment="Right">
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[Total R$]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="18">
+            <textField>
+                <reportElement x="0" y="0" width="350" height="18"/>
+                <textFieldExpression><![CDATA[$F{activity}]]></textFieldExpression>
+            </textField>
+            <textField pattern="#,##0.00">
+                <reportElement x="350" y="0" width="165" height="18"/>
+                <textElement textAlignment="Right"/>
+                <textFieldExpression><![CDATA[$F{total}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+</jasperReport>

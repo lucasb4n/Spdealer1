@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/spdealer/static/css/main.48d35e20.css",
+    "main.js": "/spdealer/static/js/main.7e41b9bc.js",
+    "static/js/488.b37fc468.chunk.js": "/spdealer/static/js/488.b37fc468.chunk.js",
+    "index.html": "/spdealer/index.html",
+    "main.48d35e20.css.map": "/spdealer/static/css/main.48d35e20.css.map",
+    "main.7e41b9bc.js.map": "/spdealer/static/js/main.7e41b9bc.js.map",
+    "488.b37fc468.chunk.js.map": "/spdealer/static/js/488.b37fc468.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.48d35e20.css",
+    "static/js/main.7e41b9bc.js"
+  ]
+}

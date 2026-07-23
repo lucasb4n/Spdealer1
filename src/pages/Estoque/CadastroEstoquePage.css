@@ -1,0 +1,70 @@
+.sp-list-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  padding: 24px;
+  background: #fff;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.sp-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.sp-list-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.sp-list-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: #f9fafb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.sp-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.sp-grid-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+}
+.sp-grid-btn--edit {
+  color: #2563eb;
+}
+.sp-grid-btn--edit:hover {
+  background: #EFF6FF;
+}
+.sp-grid-btn--delete {
+  color: #dc2626;
+}
+.sp-grid-btn--delete:hover {
+  background: #FEF2F2;
+}

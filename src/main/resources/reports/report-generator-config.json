@@ -1,0 +1,234 @@
+{
+  "title": "Gerador de Relatórios",
+  "tables": [
+    {
+      "name": "RECEBER",
+      "displayName": "Contas a Receber",
+      "description": "Tabela de contas a receber",
+      "columns": [
+        {
+          "name": "numero",
+          "displayName": "Número",
+          "type": "string",
+          "description": "Número do documento"
+        },
+        {
+          "name": "cliente",
+          "displayName": "Cliente",
+          "type": "reference",
+          "reference": {
+            "table": "CLIENTES",
+            "display": "nome",
+            "value": "codigo"
+          },
+          "description": "Código do cliente"
+        },
+        {
+          "name": "vencimento",
+          "displayName": "Vencimento",
+          "type": "date",
+          "description": "Data de vencimento"
+        },
+        {
+          "name": "valor",
+          "displayName": "Valor",
+          "type": "decimal",
+          "description": "Valor total"
+        },
+        {
+          "name": "valorpago",
+          "displayName": "Valor Pago",
+          "type": "decimal",
+          "description": "Valor já pago"
+        },
+        {
+          "name": "status",
+          "displayName": "Status",
+          "type": "string",
+          "description": "Status do documento (A=Aberto, C=Cancelado, etc)"
+        }
+      ]
+    },
+    {
+      "name": "PAGAR",
+      "displayName": "Contas a Pagar",
+      "description": "Tabela de contas a pagar",
+      "columns": [
+        {
+          "name": "numero",
+          "displayName": "Número",
+          "type": "string",
+          "description": "Número do documento"
+        },
+        {
+          "name": "fornecedor",
+          "displayName": "Fornecedor",
+          "type": "reference",
+          "reference": {
+            "table": "FORNECEDORES",
+            "display": "nome",
+            "value": "codigo"
+          },
+          "description": "Código do fornecedor"
+        },
+        {
+          "name": "vencimento",
+          "displayName": "Vencimento",
+          "type": "date",
+          "description": "Data de vencimento"
+        },
+        {
+          "name": "valor",
+          "displayName": "Valor",
+          "type": "decimal",
+          "description": "Valor total"
+        },
+        {
+          "name": "valorpago",
+          "displayName": "Valor Pago",
+          "type": "decimal",
+          "description": "Valor já pago"
+        },
+        {
+          "name": "status",
+          "displayName": "Status",
+          "type": "string",
+          "description": "Status do documento (A=Aberto, C=Cancelado, etc)"
+        }
+      ]
+    },
+    {
+      "name": "BANCOS",
+      "displayName": "Bancos",
+      "description": "Tabela de bancos",
+      "columns": [
+        {
+          "name": "codigo",
+          "displayName": "Código",
+          "type": "string",
+          "description": "Código do banco"
+        },
+        {
+          "name": "nome",
+          "displayName": "Nome",
+          "type": "string",
+          "description": "Nome do banco"
+        },
+        {
+          "name": "agencia",
+          "displayName": "Agência",
+          "type": "string",
+          "description": "Número da agência"
+        },
+        {
+          "name": "conta",
+          "displayName": "Conta",
+          "type": "string",
+          "description": "Número da conta"
+        },
+        {
+          "name": "saldo",
+          "displayName": "Saldo",
+          "type": "decimal",
+          "description": "Saldo atual"
+        },
+        {
+          "name": "ativo",
+          "displayName": "Ativo",
+          "type": "string",
+          "description": "Indica se o banco está ativo (S/N)"
+        }
+      ]
+    },
+    {
+      "name": "CLIENTES",
+      "displayName": "Clientes",
+      "description": "Tabela de clientes",
+      "columns": [
+        {
+          "name": "codigo",
+          "displayName": "Código",
+          "type": "string",
+          "description": "Código do cliente"
+        },
+        {
+          "name": "nome",
+          "displayName": "Nome",
+          "type": "string",
+          "description": "Nome do cliente"
+        },
+        {
+          "name": "cnpj",
+          "displayName": "CNPJ",
+          "type": "string",
+          "description": "CNPJ do cliente"
+        }
+      ]
+    },
+    {
+      "name": "FORNECEDORES",
+      "displayName": "Fornecedores",
+      "description": "Tabela de fornecedores",
+      "columns": [
+        {
+          "name": "codigo",
+          "displayName": "Código",
+          "type": "string",
+          "description": "Código do fornecedor"
+        },
+        {
+          "name": "nome",
+          "displayName": "Nome",
+          "type": "string",
+          "description": "Nome do fornecedor"
+        },
+        {
+          "name": "cnpj",
+          "displayName": "CNPJ",
+          "type": "string",
+          "description": "CNPJ do fornecedor"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "cliente_receber",
+      "from": {
+        "table": "RECEBER",
+        "column": "cliente"
+      },
+      "to": {
+        "table": "CLIENTES",
+        "column": "codigo"
+      },
+      "type": "many-to-one"
+    },
+    {
+      "name": "fornecedor_pagar",
+      "from": {
+        "table": "PAGAR",
+        "column": "fornecedor"
+      },
+      "to": {
+        "table": "FORNECEDORES",
+        "column": "codigo"
+      },
+      "type": "many-to-one"
+    }
+  ],
+  "formatters": {
+    "date": {
+      "display": "dd/MM/yyyy",
+      "sql": "yyyy-MM-dd"
+    },
+    "decimal": {
+      "display": "#,##0.00",
+      "sql": "DECIMAL(15,2)"
+    },
+    "cnpj": {
+      "display": "##.###.###/####-##",
+      "sql": "VARCHAR(14)"
+    }
+  }
+}

@@ -1,0 +1,393 @@
+/**
+ * MasforForm.css - Estilos padrão para Tipos de Fornecedores
+ * Segue padrão do projeto: sp-card, sp-form__input, sp-form__label
+ * Data: 17 de janeiro de 2026
+ */
+
+:root {
+  --sp-color-primary: #0056b3;
+  --sp-color-primary-dark: #0044a0;
+  --sp-color-success: #28a745;
+  --sp-color-error: #dc3545;
+  --sp-color-warning: #ffc107;
+  --sp-input-bg: #f8f9fa;
+  --sp-border: #dddddd;
+  --sp-text-primary: #333333;
+  --sp-text-secondary: #666666;
+  --sp-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ============ LISTFORM ============ */
+.masfor-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: var(--sp-shadow);
+}
+
+.masfor-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.masfor-list-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: var(--sp-text-primary);
+}
+
+.masfor-search-bar {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  min-width: 250px;
+}
+
+.masfor-search-bar input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--sp-border);
+  border-radius: 6px;
+  background: var(--sp-input-bg);
+  font-size: 14px;
+  color: var(--sp-text-primary);
+}
+
+.masfor-search-bar input::placeholder {
+  color: var(--sp-text-secondary);
+}
+
+.masfor-btn-incluir {
+  padding: 10px 16px;
+  background: var(--sp-color-success);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.masfor-btn-incluir:hover {
+  background: #218838;
+}
+
+/* ============ AG-GRID ============ */
+.ag-theme-alpine {
+  --ag-header-background-color: var(--sp-color-primary);
+  --ag-header-foreground-color: #ffffff;
+  --ag-row-hover-color: #f0f4f8;
+  --ag-border-color: var(--sp-border);
+}
+
+.ag-grid-container {
+  height: 400px;
+  width: 100%;
+}
+
+.masfor-grid-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.masfor-btn-edit,
+.masfor-btn-delete {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: opacity 0.2s;
+}
+
+.masfor-btn-edit {
+  background: #e3f2fd;
+  color: var(--sp-color-primary);
+}
+
+.masfor-btn-edit:hover {
+  opacity: 0.8;
+}
+
+.masfor-btn-delete {
+  background: #ffebee;
+  color: var(--sp-color-error);
+}
+
+.masfor-btn-delete:hover {
+  opacity: 0.8;
+}
+
+/* ============ MODAL FORM ============ */
+.sp-card {
+  background: #ffffff;
+  border: 1px solid var(--sp-border);
+  border-radius: 8px;
+  box-shadow: var(--sp-shadow);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 820px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+}
+
+.sp-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: linear-gradient(90deg, var(--sp-color-primary), #0066cc);
+  color: #ffffff;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-bottom: 1px solid var(--sp-border);
+}
+
+.sp-card__header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.sp-card__header-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.sp-card__header-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: #ffffff;
+  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sp-card__header-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.sp-card__body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.sp-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .sp-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sp-form__group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sp-form__label {
+  font-weight: 600;
+  color: var(--sp-text-primary);
+  font-size: 14px;
+}
+
+.sp-form__label.required::after {
+  content: ' *';
+  color: var(--sp-color-error);
+}
+
+.sp-form__input {
+  padding: 10px 12px;
+  border: 1px solid var(--sp-border);
+  background: var(--sp-input-bg);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--sp-text-primary);
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.sp-form__input:focus {
+  outline: none;
+  border-color: var(--sp-color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
+  background: #ffffff;
+}
+
+.sp-form__input.error {
+  border-color: var(--sp-color-error);
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.sp-form__error {
+  font-size: 12px;
+  color: var(--sp-color-error);
+  margin-top: 4px;
+}
+
+.sp-card__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--sp-border);
+  background: #f8f9fa;
+}
+
+.sp-card__footer-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.sp-card__footer-btn.primary {
+  background: var(--sp-color-primary);
+  color: #ffffff;
+}
+
+.sp-card__footer-btn.primary:hover {
+  background: var(--sp-color-primary-dark);
+  box-shadow: var(--sp-shadow);
+}
+
+.sp-card__footer-btn.secondary {
+  background: #e9ecef;
+  color: var(--sp-text-primary);
+  border: 1px solid var(--sp-border);
+}
+
+.sp-card__footer-btn.secondary:hover {
+  background: #dee2e6;
+}
+
+.sp-card__footer-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============ MODAL OVERLAY ============ */
+.masfor-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============ LOADING & MESSAGES ============ */
+.masfor-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.masfor-loading-spinner {
+  border: 3px solid var(--sp-input-bg);
+  border-top: 3px solid var(--sp-color-primary);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.masfor-message {
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.masfor-message.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.masfor-message.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 768px) {
+  .sp-card {
+    width: 95%;
+    max-width: 100%;
+    max-height: 95vh;
+  }
+
+  .sp-card__body {
+    padding: 16px;
+  }
+
+  .sp-form-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .masfor-list-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .masfor-search-bar {
+    flex-direction: column;
+  }
+
+  .masfor-btn-incluir {
+    width: 100%;
+    text-align: center;
+  }
+
+  .ag-grid-container {
+    height: 300px;
+  }
+}
+
+/* ============ ACCESSIBILITY ============ */
+.sp-form__input:focus-visible,
+.sp-card__footer-btn:focus-visible {
+  outline: 2px solid var(--sp-color-primary);
+  outline-offset: 2px;
+}

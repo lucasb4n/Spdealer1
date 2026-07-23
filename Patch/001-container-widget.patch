@@ -1,0 +1,60 @@
+diff --git a/src/components/Widget/ContainerWidgetRenderer.tsx b/src/components/Widget/ContainerWidgetRenderer.tsx
+new file mode 100644
+index 0000000..c0ffee0
+--- /dev/null
++++ b/src/components/Widget/ContainerWidgetRenderer.tsx
+@@ -0,0 +1,88 @@
++import React, { ReactNode } from 'react';
++import styled from 'styled-components';
++import { KpiGroupContainer } from './KpiGroupContainer';
++
++type AnyConfig = Record<string, any>;
++
++interface ContainerWidgetRendererProps {
++  widget: AnyConfig;
++  childrenWidgets?: AnyConfig[];
++  renderChild: (w: AnyConfig) => ReactNode;
++}
++
++// Fallbacks mínimos; todo visual deve vir do visual_config (JSON)
++const Wrapper = styled.div<{ vc?: AnyConfig }>`
++  background: ${({ vc }) => vc?.cardBg || 'transparent'};
++  border: ${({ vc }) => vc?.cardBorder || 'none'};
++  border-radius: ${({ vc }) => vc?.cardRadius || '0'};
++  box-shadow: ${({ vc }) => vc?.cardShadow || 'none'};
++  padding: ${({ vc }) => vc?.padding || '0'};
++  display: block;
++  min-width: 1px;
++  min-height: 1px;
++`;
++
++const Title = styled.h3<{ vc?: AnyConfig }>`
++  margin: ${({ vc }) => vc?.titleMargin || '0 0 8px 0'};
++  color: ${({ vc }) => vc?.titleColor || 'inherit'};
++  font-size: ${({ vc }) => vc?.titleSize || 'inherit'};
++  font-weight: ${({ vc }) => vc?.titleWeight || 'inherit'};
++`;
++
++const ContainerWidgetRenderer: React.FC<ContainerWidgetRendererProps> = ({
++  widget,
++  childrenWidgets,
++  renderChild,
++}) => {
++  const vc = widget?.visual_config || {};
++  const groupConfig = vc?.group_config || {};
++
++  return (
++    <Wrapper vc={vc}>
++      {widget?.title ? <Title vc={vc}>{widget.title}</Title> : null}
++      <KpiGroupContainer group_config={groupConfig}>
++        {(childrenWidgets || []).map((child) => (
++          <React.Fragment key={child.id || child.widget_id}>
++            {renderChild(child)}
++          </React.Fragment>
++        ))}
++      </KpiGroupContainer>
++    </Wrapper>
++  );
++};
++
++export default ContainerWidgetRenderer;

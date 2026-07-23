@@ -1,0 +1,465 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                     🤖 INSTRUÇÕES PARA O COPILOT                               ║
+║                                                                                ║
+║  Este documento explica exatamente o que o Copilot deve fazer quando detecta   ║
+║  a palavra-chave "Criar Tarefa" em uma conversa com o usuário.                 ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+🔴 PALAVRA-CHAVE ATIVADORA
+═══════════════════════════════════════════════════════════════════════════════════
+
+Quando o usuário disser qualquer uma dessas frases:
+
+✅ "Criar Tarefa: ..."
+✅ "Nova Tarefa: ..."
+✅ "Registrar Tarefa: ..."
+✅ "Task Management: ..."
+✅ "Criar uma tarefa: ..."
+✅ "Registrar no sistema de tarefas: ..."
+
+RESULTADO: Copilot DEVE ativar modo "Task Manager" automaticamente
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+📋 SEQUÊNCIA DE AÇÕES (PASSO A PASSO)
+═══════════════════════════════════════════════════════════════════════════════════
+
+PASSO 1: EXTRAIR INFORMAÇÕES DO PEDIDO
+────────────────────────────────────────
+
+Do que o usuário escreveu, você deve extrair:
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ ✓ Descrição do problema/tarefa                                          │
+│ ✓ Tempo estimado (se mencionado)                                        │
+│ ✓ Arquivos envolvidos (se mencionado)                                   │
+│ ✓ Bloqueadores/Dependências (se mencionado)                             │
+│ ✓ Prioridade implícita (urgência, "bloqueador", "crítico", etc)        │
+│ ✓ Categoria (Bug Fix, Feature, Refactor, Testing, etc)                 │
+└─────────────────────────────────────────────────────────────────────────┘
+
+Exemplo do usuário:
+"Criar Tarefa: O conflito entre Header.css e AppHeader.css está atrapalhando. 
+ Header.css é antigo e está sobrescrevendo. Precisa definir qual é o principal 
+ e consolidar. Estimado 2-3 horas, bloqueador pra validação visual."
+
+Extração de dados:
+├─ Descrição: Resolver conflito CSS Header (Header.css vs AppHeader.css)
+├─ Tempo estimado: 2.5 horas (média de 2-3)
+├─ Arquivos: Header.css, AppHeader.css
+├─ Bloqueador: SIM (bloqueia validação visual)
+├─ Prioridade: HIGH (bloqueador mencionado)
+└─ Categoria: Bug Fix
+
+
+PASSO 2: GERAR TASK ID ÚNICO
+────────────────────────────────
+
+Formato: TASK-[NNN]-[DESCRICAO-3-5-PALAVRAS]
+
+Regras:
+├─ [NNN] = próximo número sequencial (descobrir no banco atual)
+├─ [DESCRICAO] = extraído do título/resumo
+├─ Máximo 50 caracteres TOTAL
+├─ SEM espaços (usar hífen)
+├─ SEM caracteres especiais (exceto hífen)
+├─ MAIÚSCULA
+
+Exemplo:
+TASK-004-HEADER-CSS-FIX
+
+Validação:
+├─ Verificar se já existe: SELECT COUNT(*) FROM task_management 
+│  WHERE task_id = 'TASK-004-HEADER-CSS-FIX'
+├─ Se COUNT > 0: incrementar número até achar um único
+
+
+PASSO 3: DETERMINAR PRIORIDADE
+──────────────────────────────────
+
+Regras de Prioridade:
+
+🔴 HIGH:
+├─ Mencionou "bloqueador"
+├─ Mencionou "crítico"
+├─ Mencionou "urgente"
+├─ Mencionou "hoje"
+├─ Bloqueia outras tarefas
+└─ Impacto em produção
+
+🟡 MEDIUM:
+├─ Tarefa normal sem urgência
+├─ Aprimoramentos
+├─ Não bloqueia ninguém
+└─ ETA: 1-5 dias
+
+🟢 LOW:
+├─ Melhorias futuras
+├─ Documentação
+├─ Refatoração não urgente
+└─ ETA: > 1 semana
+
+Exemplo:
+Usuário mencionou "bloqueador" e "validação visual"
+→ Prioridade: HIGH
+
+
+PASSO 4: CALCULAR ESTIMATIVA
+───────────────────────────────
+
+Se o usuário mencionou tempo:
+├─ "2-3 horas" → 2.5 horas
+├─ "meio dia" → 4 horas
+├─ "1 dia" → 8 horas
+├─ "rápido" → 0.5 horas
+├─ "complexo" → 6-8 horas
+
+Se o usuário NÃO mencionou:
+├─ Bug simples → 1 hora
+├─ Feature pequena → 2-3 horas
+├─ Feature média → 3-5 horas
+├─ Feature grande → 6-10 horas
+├─ Refatoração → 4-6 horas
+├─ Teste/QA → 2-3 horas
+├─ Documentação → 1-2 horas
+└─ Crítico/Bloqueador → 1-2 horas
+
+
+PASSO 5: MONTAR DESCRIÇÃO DETALHADA
+──────────────────────────────────────
+
+A descrição DEVE TER EXATAMENTE ESTA ESTRUTURA:
+
+```markdown
+## Descrição Completa da Tarefa
+
+### 📌 Resumo Executivo
+[1-2 frases sobre o que precisa ser feito]
+[Use termos do pedido do usuário]
+
+### 🎯 Objetivo
+- [Objetivo 1]
+- [Objetivo 2]
+- [Objetivo 3 - se aplicável]
+
+### 📚 Contexto
+- Por que é importante: [responder]
+- Impacto no sistema: [responder]
+- Relacionamentos: [outras tasks, se houver]
+
+### 🔧 Arquivos Afetados
+- `src/components/Header.css`
+- `src/components/AppHeader.css`
+- `src/App.css`
+
+### ✅ Checklist de Implementação
+- [ ] Ação 1 específica
+- [ ] Ação 2 específica
+- [ ] Ação 3 (build/teste)
+
+### 🧪 Checklist de Validação
+- [ ] Validação 1
+- [ ] Validação 2
+- [ ] Validação 3
+
+### ⏱️ Acompanhamento de Tempo
+- Estimado: [X] horas
+- Início: [Preenchido ao começar]
+- Fim: [Preenchido ao terminar]
+- Real: [Calculado]
+
+### 📝 Observações
+[Notas adicionais do contexto]
+```
+
+IMPORTANTE:
+├─ Ser ESPECÍFICO (não genérico)
+├─ Usar linguagem clara
+├─ Checklists COM AÇÕES CONCRETAS
+├─ Referenciar ARQUIVOS REAIS do projeto
+└─ Ser conciso mas completo
+
+
+PASSO 6: DETERMINAR DEPENDÊNCIAS
+──────────────────────────────────
+
+Verificar:
+├─ A tarefa bloqueia outras? → preencher em outras tasks
+├─ A tarefa é bloqueada por outras? → preencher blocked_by
+├─ Há parent_task? → se for subtarefa, apontar pai (TASK-001 é padrão)
+
+Tags devem incluir:
+├─ Categoria principal (bug-fix, feature, refactor, testing)
+├─ Componentes envolvidos (header, sidebar, dashboard, etc)
+├─ Palavras-chave (css, performance, responsive, etc)
+├─ IDs de tasks relacionadas (TASK-002, TASK-003, etc)
+
+Exemplo de tags:
+"header,css,conflict,consolidation,bug-fix,visual,TASK-005,TASK-006"
+
+Separadas por VÍRGULA (sem espaços)
+
+
+PASSO 7: GERAR SQL INSERT
+────────────────────────────
+
+Montar comando INSERT completo com TODOS os campos:
+
+```sql
+INSERT INTO task_management (
+  task_id,           -- TASK-004-HEADER-CSS-FIX
+  title,             -- Resolver Conflito CSS Header
+  description,       -- [descrição completa acima]
+  task_id,
+  title,
+  description,
+  current_stage_id,      -- 2 (To Do)
+  priority_key,          -- HIGH
+  category_key,          -- Bug Fix
+  module_key,            -- clientes, receber, pagar, caixa, etc
+  due_date,              -- DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+  estimated_hours,       -- 2.5
+  tags,                  -- header,css,conflict,consolidation,bug-fix
+  assigned_to_user_id,   -- NULL (sem atribuição inicial)
+  created_by_user_id,    -- 1 (admin - quem criou)
+  is_blocked,            -- 0 (não bloqueada inicialmente)
+  blocked_reason         -- NULL (sem motivo inicialmente)
+) VALUES (
+  'TASK-004-HEADER-CSS-FIX',
+  'Resolver Conflito CSS Header - Header.css vs AppHeader.css',
+  '[TODA description acima]',
+  2,
+  'HIGH',
+  'Bug Fix',
+  'frontend',
+  '2025-11-02',
+  2.5,
+  'header,css,conflict,consolidation,bug-fix',
+  NULL,
+  1,
+  0,
+  NULL
+);
+```
+
+IMPORTANTE:
+├─ Usar ASPAS SIMPLES para strings
+├─ Usar current_stage_id = 2 (To Do) SEMPRE na criação
+├─ created_by_user_id = 1 (admin - quem criou)
+├─ assigned_to_user_id = NULL (não atribuída inicialmente)
+├─ is_blocked = 0 (não bloqueada inicialmente)
+├─ blocked_reason = NULL (sem motivo até surgir)
+└─ tags SEM ACENTOS (header,css,conflict - nunca "cabeçalho")
+
+
+PASSO 8: APRESENTAR PARA O USUÁRIO
+──────────────────────────────────────
+
+Mostrar EXATAMENTE isto:
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ ✅ TASK-004-HEADER-CSS-FIX CRIADA COM SUCESSO!                         │
+│                                                                         │
+│ 📋 DETALHES:                                                            │
+│ ├─ Status: 📝 TO DO (aguardando execução)                              │
+│ ├─ Prioridade: 🔴 HIGH                                                 │
+│ ├─ Vencimento: 02 NOV 2025                                             │
+│ ├─ Tempo Estimado: 2.5 horas                                           │
+│ ├─ Bloqueadores: Nenhum (pode começar agora)                           │
+│ ├─ Bloqueia: TASK-005, TASK-006, TASK-007                              │
+│ └─ Kanban: http://localhost:3000/tarefas                               │
+│                                                                         │
+│ 📊 PRÓXIMAS AÇÕES:                                                      │
+│ 1. Executar SQL abaixo para registrar no banco                          │
+│ 2. Abrir Kanban → encontrar task no "To Do"                            │
+│ 3. Arrastar para "In Progress" ao começar                              │
+│ 4. Atualizar notas com progresso em tempo real                          │
+│ 5. Arrastar para "Done" ao completar                                   │
+│                                                                         │
+│ 💾 SQL PARA EXECUTAR:                                                   │
+└─────────────────────────────────────────────────────────────────────────┘
+
+[MOSTRAR SQL COMPLETO AQUI]
+
+Depois:
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ 📞 PRONTO PARA COMEÇAR? (Opções)                                        │
+│ ①. "Vou começar agora" → Responder "OK, registre started_at e bom     │
+│                          trabalho!"                                     │
+│ ②. "Preciso ajustar algo" → Perguntar o quê e refazer                 │
+│ ③. "Executar SQL" → Rodar no terminal e confirmar                     │
+└─────────────────────────────────────────────────────────────────────────┘
+
+
+PASSO 9: ATUALIZAR KANBAN AUTOMATICAMENTE
+────────────────────────────────────────────
+
+Se possível, fazer uma chamada para API:
+
+POST http://localhost:3000/api/v1/tasks
+{
+  "task_id": "TASK-004-HEADER-CSS-FIX",
+  "title": "Resolver Conflito CSS Header",
+  "current_stage_id": 2,
+  "priority_key": "HIGH",
+  "due_date": "2025-11-02",
+  "estimated_hours": 2.5
+}
+
+Resultado esperado: HTTP 200 com task_id da resposta
+
+
+PASSO 10: MANTER HISTÓRICO
+────────────────────────────
+
+Documentar em notas:
+"[2025-11-01 14:30] Tarefa criada via Copilot - Contexto: [resumo do pedido]"
+
+Quando começar:
+"[2025-11-01 14:45] ⏱️ INÍCIO - Começou análise de conflito Header.css"
+
+Com atualizações:
+"[2025-11-01 15:20] 50% - Identificado Header.css é antigo, migrar para AppHeader.css"
+"[2025-11-01 15:45] 90% - Estilos consolidados, falta validação"
+
+Ao terminar:
+"[2025-11-01 16:10] ✅ CONCLUÍDO - Header.css deprecado, AppHeader.css é principal"
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+🎯 CHECKLIST COMPLETO PARA O COPILOT
+═══════════════════════════════════════════════════════════════════════════════════
+
+Antes de criar tarefa, validar:
+
+☑️ Palavra-chave "Criar Tarefa" foi detectada?
+☑️ Task ID será único (não duplicado)?
+☑️ Descrição tem todos 8 seções (Resumo, Objetivo, Contexto, etc)?
+☑️ Prioridade definida (HIGH/MEDIUM/LOW) com justificativa?
+☑️ Estimativa de horas é realista?
+☑️ Tags incluem categoria + relacionadas?
+☑️ Due date está 1-5 dias frente (não hoje)?
+☑️ SQL INSERT está bem formatado e completo?
+☑️ User será apresentado com confirmação visual?
+
+Se ALGUM passo falhar:
+→ Perguntar ao usuário antes de prosseguir
+→ Não deixar campos em branco/NULL
+→ Validar dados antes do INSERT
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+❌ O QUE NÃO FAZER
+═══════════════════════════════════════════════════════════════════════════════════
+
+❌ NÃO criar tarefa sem detectar "Criar Tarefa"
+❌ NÃO deixar campos obrigatórios em branco
+❌ NÃO repetir task_id (verificar banco antes)
+❌ NÃO colocar description genérica (ser ESPECÍFICO)
+❌ NÃO esquecer checklists detalhados
+❌ NÃO colocar due_date como HOJE (sempre frente)
+❌ NÃO usar current_stage_id diferente de 2 (To Do)
+❌ NÃO esquecer de apresentar SQL para usuário
+❌ NÃO atualizar Kanban sem sucesso no banco
+❌ NÃO deixar tarefa sem tags
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+✅ EXEMPLO PRÁTICO COMPLETO
+═══════════════════════════════════════════════════════════════════════════════════
+
+ENTRADA DO USUÁRIO:
+─────────────────────────
+"Criar Tarefa: Preciso consolidar os arquivos CSS do header. 
+Tem Header.css e AppHeader.css atuando simultaneamente causando conflito.
+Definir qual é o arquivo principal definitivamente.
+Tempo: uns 2-3 horas, é bloqueador pra gente validar os visuais depois."
+
+PROCESSAMENTO DO COPILOT:
+─────────────────────────
+
+PASSO 1: Extração
+├─ Descrição: Conflito CSS Header (Header.css vs AppHeader.css)
+├─ Tempo: 2.5 horas
+├─ Bloqueador: SIM (validação visual depende)
+├─ Prioridade: HIGH
+└─ Categoria: Bug Fix
+
+PASSO 2: Task ID
+├─ Próximo número: 4 (TASK-004)
+└─ ID: TASK-004-HEADER-CSS-FIX
+
+PASSO 3: Prioridade
+├─ Razão: Bloqueador mencionado
+└─ Valor: HIGH
+
+... (passos 4-9 executados automaticamente) ...
+
+PASSO 10: Apresentação
+├─ Mostrar resumo visual
+├─ Mostrar SQL
+├─ Oferecer opções de próxima ação
+└─ Confirmar criação bem-sucedida
+
+SAÍDA DO COPILOT:
+─────────────────
+
+✅ TASK-004-HEADER-CSS-FIX CRIADA COM SUCESSO!
+
+📋 DETALHES:
+├─ Status: 📝 TO DO
+├─ Prioridade: 🔴 HIGH
+├─ Vencimento: 02 NOV 2025
+├─ Tempo Estimado: 2.5 horas
+├─ Bloqueia: TASK-005, TASK-006, TASK-007
+└─ Kanban: http://localhost:3000/tarefas
+
+[SQL INSERT aqui]
+
+🎯 PRÓXIMAS AÇÕES:
+1. Executar SQL acima
+2. Ir para http://localhost:3000/tarefas
+3. Arrastar TASK-004 para "In Progress" ao começar
+4. Atualizar progresso em tempo real
+5. Arrastar para "Done" ao terminar
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+📞 SUPORTE RÁPIDO
+═══════════════════════════════════════════════════════════════════════════════════
+
+P: O usuário quer fazer VÁRIAS tarefas?
+R: Criar UMA tarefa por vez. Pedir para enumerar se houver múltiplas.
+
+P: Tarefa é muito grande?
+R: Dividir em subtarefas. Usar parent_task_id para agrupar.
+
+P: Usuário quer mudar algo depois de criada?
+R: Simples! Usar UPDATE SQL. Copilot ajuda com novo comando.
+
+P: Como priorizar entre múltiplas tarefas?
+R: Ver coluna priority_key (HIGH > MEDIUM > LOW) + due_date
+
+P: Tarefa fica pronta, o que fazer?
+R: Executar UPDATE para current_stage_id = 5 e completed_at = NOW()
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+🔗 REFERÊNCIAS RÁPIDAS
+═══════════════════════════════════════════════════════════════════════════════════
+
+Instruções completas: `.github/copilot-instructions.md`
+Guia rápido: `.github/TASK_MANAGER_QUICK_GUIDE.md`
+Templates SQL: `database/migrations/TASK_MANAGER_SQL_TEMPLATES.sql`
+Kanban Board: http://localhost:3000/tarefas
+Status Atual: `SISTEMA_MONITORAMENTO_RESUMO_FINAL.md`
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+✅ VERSÃO: 1.0 - OPERACIONAL
+⏰ DATA: 01 NOV 2025
+🎯 STATUS: Pronto para uso em todas as tarefas do SPDealer

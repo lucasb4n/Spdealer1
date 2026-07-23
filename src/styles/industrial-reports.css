@@ -1,0 +1,126 @@
+/* 
+ * industrial-reports.css - SPDealer
+ * Estética: Industrial Brutalism (Heavy Machinery)
+ * 
+ * Este arquivo define os tokens de design "pesados" para o módulo de relatórios,
+ * utilizando variáveis CSS que serão sobrescritas dinamicamente pelas preferências
+ * do usuário configuradas no SPDealer.
+ */
+
+:root {
+  /* Dynamic Fallbacks (Injetados via DashboardTheme no React) */
+  --user-primary: #FACC15; /* Safety Yellow por padrão */
+  --user-bg-heavy: #0F172A; /* Deep Carbon */
+  --user-bg-card: #1E293B; /* Slate Card */
+  --user-accent: #E11D48; /* Red Stop */
+  
+  /* Industrial Constants */
+  --industrial-border-width: 2px;
+  --industrial-radius: 0px; /* Cantos vivos = Brutalismo */
+  --industrial-shadow: 6px 6px 0px rgba(0,0,0,0.4);
+  --industrial-glow: 0 0 15px rgba(250, 204, 21, 0.2);
+}
+
+.industrial-canvas {
+  background-color: var(--user-bg-heavy);
+  color: #F8FAFC;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Efeito de Textura Industrial (Grain) */
+.industrial-texture::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: url("https://www.transparenttextures.com/patterns/carbon-fibre.png");
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* Tipografia Brutalista */
+.industrial-h1 {
+  font-size: 5rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+  background: linear-gradient(to bottom, #FFFFFF 50%, #94A3B8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(4px 4px 0px rgba(0,0,0,1));
+}
+
+/* Cards de Relatórios "Tanque" */
+.industrial-card {
+  background-color: var(--user-bg-card);
+  border: var(--industrial-border-width) solid #334155;
+  border-left: 5px solid var(--user-primary); /* Acerto dinâmico do usuário */
+  border-radius: var(--industrial-radius);
+  padding: 1.5rem;
+  box-shadow: var(--industrial-shadow);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.industrial-card:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: 10px 10px 0px rgba(0,0,0,0.6);
+  border-color: var(--user-primary);
+}
+
+.industrial-card::after {
+  content: "REF: " attr(data-ref);
+  position: absolute;
+  top: 0.5rem; right: 0.5rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.7rem;
+  color: #475569;
+}
+
+/* Botões Hidráulicos */
+.industrial-btn {
+  background-color: var(--user-primary);
+  color: #000;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 0;
+  box-shadow: 4px 4px 0px rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.industrial-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px rgba(0,0,0,0.3);
+}
+
+/* Widgets de Dados com visual de Instrumento */
+.industrial-kpi {
+  font-family: 'Courier New', monospace;
+  background: #000;
+  padding: 0.5rem 1rem;
+  border: 1px solid #334155;
+  color: var(--user-primary);
+  display: inline-block;
+}
+
+.industrial-kpi .value {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+/* Animações Pesadas (Spring) */
+@keyframes heavyIn {
+  from { transform: translateY(50px); opacity: 0; filter: blur(10px); }
+  to { transform: translateY(0); opacity: 1; filter: blur(0); }
+}
+
+.reveal-heavy {
+  animation: heavyIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}

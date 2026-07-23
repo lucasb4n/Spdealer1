@@ -1,0 +1,13 @@
+mascai_code,scopla_code,contad_ocai,notes
+500,000511101,0005111010001,exemplo do resumo (500 -> contad_ocai exemplo)
+001,000411108,0004111080001,MATERIAL DE USO (from Mascai.java comment)
+700,000711102,0007111020001,PAGAR FORNECEDOR (from Mascai.java comment)
+501,000511102,0005111020001,
+505,000511105,0005111050001,
+515,000511115,0005111150001,
+516,000511116,0005111160001,
+600,000611101,0006111010001,
+601,000611102,0006111020001,
+609,000611109,0006111090001
+# Adicione outras linhas aqui seguindo o formato: mascai_code,scopla_code,contad_ocai
+# Se nao souber, deixe scopla_code e contad_ocai vazios e preencha manualmente

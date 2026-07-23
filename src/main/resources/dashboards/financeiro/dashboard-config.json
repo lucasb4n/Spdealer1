@@ -1,0 +1,63 @@
+{
+  "titulo": "Dashboard Financeiro",
+  "atualizacao": "5min",
+  "componentes": [
+    {
+      "tipo": "grafico",
+      "id": "fluxo-caixa",
+      "titulo": "Fluxo de Caixa",
+      "subtitulo": "Comparativo Receber x Pagar",
+      "tipoGrafico": "line",
+      "periodoDefault": "mes",
+      "fonte": "sql/fluxo-caixa.sql",
+      "config": {
+        "eixoX": "data",
+        "series": ["receber", "pagar"],
+        "formatoValor": "currency"
+      }
+    },
+    {
+      "tipo": "card",
+      "id": "total-receber",
+      "titulo": "Total a Receber",
+      "fonte": "sql/total-receber.sql",
+      "config": {
+        "formatoValor": "currency",
+        "cor": "success"
+      }
+    },
+    {
+      "tipo": "card",
+      "id": "total-pagar",
+      "titulo": "Total a Pagar",
+      "fonte": "sql/total-pagar.sql",
+      "config": {
+        "formatoValor": "currency",
+        "cor": "danger"
+      }
+    },
+    {
+      "tipo": "card",
+      "id": "saldo-bancos",
+      "titulo": "Saldo Bancário",
+      "fonte": "sql/saldo-bancos.sql",
+      "config": {
+        "formatoValor": "currency",
+        "cor": "info"
+      }
+    },
+    {
+      "tipo": "tabela",
+      "id": "indicadores-atraso",
+      "titulo": "Indicadores de Atraso",
+      "fonte": "sql/indicadores-atraso.sql",
+      "config": {
+        "colunas": [
+          {"campo": "periodo", "titulo": "Período"},
+          {"campo": "valor", "titulo": "Valor", "formato": "currency"},
+          {"campo": "percentual", "titulo": "%", "formato": "percent"}
+        ]
+      }
+    }
+  ]
+}

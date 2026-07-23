@@ -1,0 +1,59 @@
+.label-style {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.input-style {
+  width: 100%;
+  background-color: #ffffff;
+  border-color: transparent;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 14px;
+  color: #334155;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.input-style:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: #0066cc;
+  background-color: #ffffff;
+}
+
+/* Forçar fundo dos inputs especificamente na aba Cobrança */
+.billing-form-root input,
+.billing-form-root textarea,
+.billing-form-root select {
+  background-color: #ffffff !important;
+}
+.billing-form-root input:focus,
+.billing-form-root textarea:focus,
+.billing-form-root select:focus {
+  background-color: #ffffff !important;
+}
+
+.input-style:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Grid específico para a primeira linha da aba Cobrança (75% / 25%) */
+.row-first {
+  display: grid;
+  grid-template-columns: 3fr 1fr; /* 75% / 25% */
+  gap: 12px;
+  align-items: start;
+}
+
+@media (max-width: 640px) {
+  .row-first {
+    grid-template-columns: 1fr; /* empilha em telas pequenas */
+  }
+}

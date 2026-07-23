@@ -1,0 +1,505 @@
+/* ============================================
+   RELATÓRIO CRUD - ESTILOS GLOBAIS
+   ============================================ */
+
+.relatorioCrudContainer {
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+  min-height: 100vh;
+}
+
+.relatorioCrudContainer h2 {
+  color: #2c3e50;
+  font-weight: 600;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 0.5rem;
+}
+
+/* ============================================
+   SEÇÃO 1: FILTROS - LAYOUT GRID OTIMIZADO
+   ============================================ */
+
+.filtrosSection {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #007bff;
+}
+
+.filtrosGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.filtrosGrid > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.filtrosGrid label {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.4rem;
+  font-size: 0.9rem;
+}
+
+.filtrosGrid .form-control,
+.filtrosGrid .form-select {
+  font-size: 0.95rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.3rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.filtrosGrid .form-select:focus,
+.filtrosGrid .form-control:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* ============================================
+   SEÇÃO 2: CHECKBOXES + BOTÕES (1 LINHA)
+   ============================================ */
+
+.filtrosCheckboxEBotoes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #dee2e6;
+  flex-wrap: wrap;
+}
+
+.checkboxGroup {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.checkboxGroup .form-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.checkboxGroup .form-check-input {
+  cursor: pointer;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0;
+}
+
+.checkboxGroup .form-check-label {
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: 0;
+  font-size: 0.95rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.botoes {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.botoes .btn {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: 0.3rem;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.botoes .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.botoes .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.botoes .btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.botoes .btn-primary:hover:not(:disabled) {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+.botoes .btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+.botoes .btn-success:hover:not(:disabled) {
+  background-color: #1e7e34;
+  border-color: #1e7e34;
+}
+
+/* ============================================
+   ALERTAS E MENSAGENS
+   ============================================ */
+
+.alert {
+  margin-bottom: 1.5rem;
+  border-radius: 0.3rem;
+  border-left: 4px solid;
+  animation: slideInDown 0.3s ease;
+}
+
+.alert-danger {
+  border-left-color: #dc3545;
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.alert-warning {
+  border-left-color: #ffc107;
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.alert-info {
+  border-left-color: #17a2b8;
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   SEÇÃO 3: BUSCA NA TABELA
+   ============================================ */
+
+.searchBoxSection {
+  background-color: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.searchBoxSection .form-control {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #e9ecef;
+  border-radius: 0.3rem;
+  transition: border-color 0.2s ease;
+}
+
+.searchBoxSection .form-control:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.searchBoxSection .text-muted {
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+/* ============================================
+   SEÇÃO 4: TABELA E TOTALIZADORES
+   ============================================ */
+
+.tabelaContainer {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.tableScrollable {
+  max-height: 600px;
+  overflow-y: auto;
+  border-top: 1px solid #dee2e6;
+}
+
+.tableRelatorio {
+  margin-bottom: 0;
+  font-size: 0.9rem;
+}
+
+.tableRelatorio thead {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.tableRelatorio th {
+  padding: 0.75rem;
+  font-weight: 600;
+  color: #333;
+  background-color: #f8f9fa;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tableRelatorio tbody tr {
+  border-bottom: 1px solid #dee2e6;
+  transition: background-color 0.2s ease;
+}
+
+.tableRelatorio tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.tableRelatorio td {
+  padding: 0.75rem;
+  vertical-align: middle;
+}
+
+.tableRelatorio td.text-end {
+  text-align: right;
+  font-family: 'Courier New', monospace;
+}
+
+/* Header sticky */
+.stickyHeader {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+/* ============================================
+   SEÇÃO 5: TOTALIZADORES - STICKY FOOTER
+   ============================================ */
+
+.totalizadoresSticky {
+  background-color: #f8f9fa;
+  border-top: 3px solid #007bff;
+  padding: 1rem;
+  margin-top: 0;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  bottom: 0;
+  z-index: 9;
+}
+
+.totalizadoresContent {
+  padding: 0.5rem;
+}
+
+.totalizadoresContent > strong {
+  display: block;
+  color: #333;
+  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.totalizadoresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.totalizadorItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background-color: white;
+  border-radius: 0.3rem;
+  border-left: 3px solid #28a745;
+}
+
+.totalizadorLabel {
+  font-weight: 500;
+  color: #666;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+.totalizadorValor {
+  font-weight: 700;
+  color: #28a745;
+  font-size: 1rem;
+  font-family: 'Courier New', monospace;
+  text-align: right;
+}
+
+/* ============================================
+   RESPONSIVIDADE
+   ============================================ */
+
+/* Tablets (768px e acima) */
+@media (max-width: 768px) {
+  .filtrosGrid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .filtrosCheckboxEBotoes {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .checkboxGroup {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .botoes {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .totalizadoresGrid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .tableScrollable {
+    max-height: 500px;
+  }
+
+  .tableRelatorio {
+    font-size: 0.85rem;
+  }
+
+  .tableRelatorio th,
+  .tableRelatorio td {
+    padding: 0.5rem;
+  }
+}
+
+/* Mobile (até 576px) */
+@media (max-width: 576px) {
+  .relatorioCrudContainer {
+    padding: 0.75rem;
+  }
+
+  .filtrosSection {
+    padding: 1rem;
+  }
+
+  .filtrosGrid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .filtrosCheckboxEBotoes {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .checkboxGroup {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .checkboxGroup .form-check {
+    padding: 0.5rem;
+    background-color: #f8f9fa;
+    border-radius: 0.3rem;
+    border-left: 2px solid #007bff;
+    padding-left: 1rem;
+  }
+
+  .botoes {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .botoes .btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+  }
+
+  .tableScrollable {
+    max-height: 400px;
+  }
+
+  .tableRelatorio {
+    font-size: 0.8rem;
+  }
+
+  .tableRelatorio th,
+  .tableRelatorio td {
+    padding: 0.4rem;
+  }
+
+  .totalizadoresGrid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .totalizadorItem {
+    padding: 0.4rem;
+  }
+
+  .totalizadorLabel {
+    font-size: 0.75rem;
+  }
+
+  .totalizadorValor {
+    font-size: 0.9rem;
+  }
+}
+
+/* ============================================
+   ACESSIBILIDADE
+   ============================================ */
+
+.form-check-input:focus {
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.btn:focus {
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* ============================================
+   IMPRESSÃO
+   ============================================ */
+
+@media print {
+  .filtrosSection,
+  .searchBoxSection,
+  .botoes {
+    display: none;
+  }
+
+  .totalizadoresSticky {
+    position: static;
+    margin-top: 1rem;
+  }
+
+  .tableScrollable {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .tableRelatorio {
+    font-size: 0.9rem;
+  }
+
+  .tableRelatorio tbody tr:hover {
+    background-color: white;
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "layout": {
+    "rows": [
+      {
+        "columns": [
+          { "widgetId": "chart1", "width": 12 }
+        ]
+      },
+      {
+        "columns": [
+          { "widgetId": "kpi_pagar", "width": 4 },
+          { "widgetId": "kpi_receber", "width": 4 },
+          { "widgetId": "kpi_vendas", "width": 4 }
+        ]
+      }
+    ]
+  },
+  "widgets": {
+    "chart1": {
+      "type": "chart",
+      "title": "Vendas e Receitas por Mês",
+      "chartType": "area",
+      "xKey": "mes",
+      "yKey": "valor",
+      "sqlQuery": "SELECT mes, SUM(vendas) as vendas, SUM(receita) as receita FROM vendas_mensal GROUP BY mes ORDER BY mes"
+    },
+    "kpi_pagar": {
+      "type": "kpi",
+      "title": "Contas a Pagar",
+      "format": "currency",
+      "sqlQuery": "SELECT SUM(valor) FROM contas_pagar WHERE data_vencimento >= CURDATE()"
+    },
+    "kpi_receber": {
+      "type": "kpi",
+      "title": "Contas a Receber",
+      "format": "currency",
+      "sqlQuery": "SELECT SUM(valor) FROM contas_receber WHERE data_vencimento >= CURDATE()"
+    },
+    "kpi_vendas": {
+      "type": "kpi",
+      "title": "Total Vendas",
+      "format": "currency",
+      "sqlQuery": "SELECT SUM(valor) FROM vendas WHERE data >= CURDATE() - INTERVAL 30 DAY"
+    }
+  }
+}

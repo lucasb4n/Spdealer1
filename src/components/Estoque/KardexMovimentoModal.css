@@ -1,0 +1,236 @@
+/* ============================================
+   KardexMovimentoModal.css
+   Visual identity: Orcamento de Pecas (tema escuro)
+   ============================================ */
+
+/* ---------- Overlay ---------- */
+.kardex-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- Modal ---------- */
+.kardex-modal {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 1000px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  animation: kardexFadeIn 0.2s ease-out;
+}
+
+@keyframes kardexFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Header ---------- */
+.kardex-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.kardex-modal__header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.kardex-modal__header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.kardex-modal__product-info {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.kardex-modal__close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #64748b;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.kardex-modal__close:hover {
+  color: #1e293b;
+}
+
+/* ---------- Filters ---------- */
+.kardex-modal__filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.kardex-modal__filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.kardex-modal__filter-label {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.kardex-modal__filter-input {
+  height: 1.75rem;
+  padding: 0 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  color: #1e293b;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 150px;
+}
+
+.kardex-modal__filter-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+/* ---------- Toggle Buttons (E/S/A) ---------- */
+.kardex-modal__toggle-group {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.kardex-modal__toggle {
+  height: 1.75rem;
+  min-width: 2rem;
+  padding: 0 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  background: #fff;
+  color: #64748b;
+  transition: all 0.15s;
+}
+
+.kardex-modal__toggle:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.kardex-modal__toggle--on {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.kardex-modal__toggle--on:hover {
+  background: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.kardex-modal__filter-actions {
+  display: flex;
+  align-items: flex-end;
+}
+
+/* ---------- Body ---------- */
+.kardex-modal__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.75rem 1rem;
+  min-height: 300px;
+}
+
+.kardex-modal__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  font-size: 0.8125rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* AG-Grid overrides */
+.kardex-modal__body .ag-theme-alpine .ag-header-cell-label {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.kardex-modal__body .ag-theme-alpine .ag-cell {
+  font-size: 0.75rem;
+}
+
+.kardex-modal__body .ag-theme-alpine .ag-cell.text-end {
+  text-align: right;
+}
+
+.kardex-modal__body .ag-theme-alpine .ag-header-cell.text-end .ag-header-cell-label {
+  justify-content: flex-end;
+}
+
+/* ---------- Footer ---------- */
+.kardex-modal__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.kardex-modal__footer-left {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ---------- Alert ---------- */
+.orcamento-alert {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.orcamento-alert--danger {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}

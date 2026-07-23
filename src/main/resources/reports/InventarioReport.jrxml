@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE jasperReport PUBLIC "-//JasperReports//DTD Report Design//EN" "http://jasperreports.sourceforge.net/dtds/jasperreport.dtd">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="InventarioReport" pageWidth="595" pageHeight="842" columnWidth="515" leftMargin="40" rightMargin="40" topMargin="50" bottomMargin="50" uuid="7a9d5c8b-3b2f-4f1a-8d2e-0b1c2d3e4f5a">
+    <property name="com.jaspersoft.studio.data.defaultdataadapter" value=""/>
+    
+    <parameter name="TITULO_RELATORIO" class="java.lang.String">
+      <defaultValueExpression><![CDATA["RELATÓRIO DE INVENTÁRIO"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="DATA_INICIAL" class="java.lang.String"/>
+    <parameter name="DATA_FINAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_NOME" class="java.lang.String"/>
+    <parameter name="EMPRESA_CNPJ" class="java.lang.String"/>
+    <parameter name="USUARIO" class="java.lang.String"/>
+    <parameter name="FILTRO_COBRANCA" class="java.lang.String"/>
+    <parameter name="FILTRO_DOCUMENTO" class="java.lang.String"/>
+    <parameter name="FILTRO_SO_PAGOS" class="java.lang.Boolean"/>
+    <parameter name="FILTRO_APENAS_ABERTOS" class="java.lang.Boolean"/>
+
+    <field name="date_inv" class="java.sql.Date"/>
+    <field name="categoria" class="java.lang.String"/>
+    <field name="produto" class="java.lang.String"/>
+    <field name="descricao" class="java.lang.String"/>
+    <field name="unid_med" class="java.lang.String"/>
+    <field name="qtde" class="java.math.BigDecimal"/>
+    <field name="custo_uni" class="java.math.BigDecimal"/>
+    <field name="custo_total" class="java.math.BigDecimal"/>
+
+    <variable name="categorySubtotal" class="java.math.BigDecimal" calculation="Sum" resetType="Group" resetGroup="CategoriaGroup">
+        <variableExpression><![CDATA[$F{custo_total}]]></variableExpression>
+    </variable>
+
+    <variable name="grandTotal" class="java.math.BigDecimal" calculation="Sum">
+        <variableExpression><![CDATA[$F{custo_total}]]></variableExpression>
+    </variable>
+
+    <group name="CategoriaGroup">
+        <groupExpression><![CDATA[$F{categoria}]]></groupExpression>
+        <groupHeader>
+            <band height="20">
+                <textField>
+                    <reportElement x="0" y="0" width="515" height="16"/>
+                    <textElement>
+                        <font isBold="true"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA["Categoria: " + $F{categoria}]]></textFieldExpression>
+                </textField>
+            </band>
+        </groupHeader>
+        <groupFooter>
+            <band height="20">
+                <textField>
+                    <reportElement x="350" y="0" width="100" height="16"/>
+                    <textElement textAlignment="Right">
+                        <font isBold="true"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA["Subtotal: "]]></textFieldExpression>
+                </textField>
+                <textField pattern="#,##0.00">
+                    <reportElement x="450" y="0" width="65" height="16"/>
+                    <textElement textAlignment="Right"/>
+                    <textFieldExpression><![CDATA[$V{categorySubtotal}]]></textFieldExpression>
+                </textField>
+            </band>
+        </groupFooter>
+    </group>
+
+    <title>
+        <band height="62">
+            <subreport>
+                <reportElement x="0" y="0" width="515" height="62" uuid="a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d"/>
+                <subreportParameter name="TITULO_RELATORIO">
+                    <subreportParameterExpression><![CDATA[$P{TITULO_RELATORIO}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="EMPRESA_NOME">
+                    <subreportParameterExpression><![CDATA[$P{EMPRESA_NOME}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="EMPRESA_CNPJ">
+                    <subreportParameterExpression><![CDATA[$P{EMPRESA_CNPJ}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="USUARIO">
+                    <subreportParameterExpression><![CDATA[$P{USUARIO}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="DATA_INICIAL">
+                    <subreportParameterExpression><![CDATA[$P{DATA_INICIAL}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="DATA_FINAL">
+                    <subreportParameterExpression><![CDATA[$P{DATA_FINAL}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="FILTRO_COBRANCA">
+                    <subreportParameterExpression><![CDATA[$P{FILTRO_COBRANCA}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="FILTRO_DOCUMENTO">
+                    <subreportParameterExpression><![CDATA[$P{FILTRO_DOCUMENTO}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="FILTRO_SO_PAGOS">
+                    <subreportParameterExpression><![CDATA[$P{FILTRO_SO_PAGOS}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="FILTRO_APENAS_ABERTOS">
+                    <subreportParameterExpression><![CDATA[$P{FILTRO_APENAS_ABERTOS}]]></subreportParameterExpression>
+                </subreportParameter>
+                <connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+                <subreportExpression><![CDATA["reports/templates/cabecalho_portrait.jasper"]]></subreportExpression>
+            </subreport>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="20">
+            <staticText>
+                <reportElement x="0" y="0" width="70" height="16"/>
+                <textElement/>
+                <text><![CDATA[Data]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="70" y="0" width="90" height="16"/>
+                <textElement/>
+                <text><![CDATA[Categoria]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="160" y="0" width="90" height="16"/>
+                <textElement/>
+                <text><![CDATA[Produto]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="250" y="0" width="120" height="16"/>
+                <textElement/>
+                <text><![CDATA[Descrição]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="370" y="0" width="40" height="16"/>
+                <textElement/>
+                <text><![CDATA[Unid]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="410" y="0" width="50" height="16"/>
+                <textElement textAlignment="Right"/>
+                <text><![CDATA[Qtde]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="460" y="0" width="55" height="16"/>
+                <textElement textAlignment="Right"/>
+                <text><![CDATA[CustoUni]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="520" y="0" width="60" height="16"/>
+                <textElement textAlignment="Right"/>
+                <text><![CDATA[CustoTotal]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="18">
+            <textField pattern="yyyy-MM-dd">
+                <reportElement x="0" y="0" width="70" height="14"/>
+                <textFieldExpression><![CDATA[$F{date_inv}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="70" y="0" width="90" height="14"/>
+                <textFieldExpression><![CDATA[$F{categoria}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="160" y="0" width="90" height="14"/>
+                <textFieldExpression><![CDATA[$F{produto}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="250" y="0" width="120" height="14"/>
+                <textFieldExpression><![CDATA[$F{descricao}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="370" y="0" width="40" height="14"/>
+                <textFieldExpression><![CDATA[$F{unid_med}]]></textFieldExpression>
+            </textField>
+            <textField pattern="#,##0.###">
+                <reportElement x="410" y="0" width="50" height="14"/>
+                <textElement textAlignment="Right"/>
+                <textFieldExpression><![CDATA[$F{qtde}]]></textFieldExpression>
+            </textField>
+            <textField pattern="#,##0.00">
+                <reportElement x="460" y="0" width="55" height="14"/>
+                <textElement textAlignment="Right"/>
+                <textFieldExpression><![CDATA[$F{custo_uni}]]></textFieldExpression>
+            </textField>
+            <textField pattern="#,##0.00">
+                <reportElement x="520" y="0" width="60" height="14"/>
+                <textElement textAlignment="Right"/>
+                <textFieldExpression><![CDATA[$F{custo_total}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <summary>
+        <band height="30">
+            <textField>
+                <reportElement x="350" y="5" width="100" height="16"/>
+                <textElement textAlignment="Right">
+                    <font isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Total Geral: "]]></textFieldExpression>
+            </textField>
+            <textField pattern="#,##0.00">
+                <reportElement x="450" y="5" width="130" height="16"/>
+                <textElement textAlignment="Right">
+                    <font isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$V{grandTotal}]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+
+</jasperReport>

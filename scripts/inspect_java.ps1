@@ -1,0 +1,1 @@
+Get-CimInstance Win32_Process -Filter "Name = 'java.exe'" | Select-Object ProcessId, CommandLine | Out-String -Width 400 | Write-Output

@@ -1,0 +1,67 @@
+[33m5bd3454[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m feat(branding): modernização completa do frontend, estabilização do módulo de orçamento e correções críticas no backend
+[33m2727ad4[m feat: modernizacao completa do modulo de orcamentos e implementacao de parametros gerais
+[33m3973928[m feat: stabilization, login path fixes, NfeMonitor Linux support, and unignore refatorado
+[33m74aade0[m[33m ([m[1;31morigin/publish-missing-files_20260407_165113[m[33m)[m merge: resolver conflitos favoring backup (remover prod menu files)
+[33mf72c9fd[m chore: preparar merge para main (index changes)
+[33m5ad9dfb[m merge: integração das rotinas do Lucas B4n com as melhorias locais
+[33m560e0fe[m feat: commit de todas as melhorias locais pendentes
+[33m5ef3569[m feat: melhorias no cadastro de usuários, monitoramento de NFe, utilidades de segurança e script de inicialização
+[33mc828d8d[m Merge feature/reparo-duplicate into main (sync local)
+[33m9534b53[m Atualiza versão local: aplica mudanças locais
+[33m0a6701c[m feat(reparo): UI duplicar / Enviar Para (ManutencaoGrupoReparoList)
+[33m4d609f8[m feat(reparo): duplicação em lote via /api/refatorado/reparo/duplicate + UI
+[33me18a5c2[m Merge feature/clientes-cadastro into main
+[33mfb186f4[m Enviar apenas arquivos modificados (seletivo) -
+[33m79827cd[m Backup local: sincroniza alterações rastreadas
+[33m0c8867d[m Initial commit from local
+[33mebb9b10[m Support filtered total by tipofor: backend filter + frontend dropdown and total
+[33me98356f[m Filter fornecedores by tipo_for: add tipofor param backend + dropdown frontend (masfor) and map labels
+[33m57dd7da[m fix: Adiciona rota /financeiro/nfe_Saida para menu NF-e
+[33mfd01c14[m feat: Implementacao do servico de Geracao de XML NF-e
+[33mc7ec8ff[m restore: trazer pasta Lucas com CRUDs de Clientes, Masfor e artefatos de homologação (do branch recovered-from-origin)
+[33mc261dc9[m chore(ci): ignore TSV files (*.tsv, *.tvs) (2026-01-19)
+[33ma07cdc0[m chore(ci): ignore logs/ (2026-01-19)
+[33me66254d[m chore(ci): update .gitignore (add *.zip, pack, tar.gz, .cache)
+[33m03232e7[m chore(ci): update .gitignore for large build artefacts (zip, pack, tar.gz, .cache, node_modules)
+[33m8cdab65[m feat(kanban/menu): DnD fixes, priority bar, assignee selector, menu route normalization (2026-01-19)
+[33m7fe3fde[m chore(ci): remove large DB dumps from repo and add to .gitignore (2026-01-19)
+[33m4de8f8b[m chore(menu): normaliza rotas do menu e fallback para dictionary; ajustes de sidebar (2026-01-19)
+[33m8d939a6[m feat: abrir editor visual FlowStudio no modal do FormBuilder (FlowStudioEditor)
+[33m3a7c644[m feat: abrir FlowStudio visual ao editar/criar flow no FormBuilder (FlowStudioEditor)
+[33ma9c805d[m fix: mapear variantes de Flow/Form para FlowRunnerPage
+[33m49e90f9[m fix: mapear /parametros/dicionario para Dicionario page
+[33m664cd3c[m chore: remove logs from repository and add to .gitignore
+[33m720ad2f[m feat: Flow UI + DynamicRoutes + Dicionario; fix start_system npm invocation; frontend loader/retry for PermissionSelector
+[33m744fbcd[m chore(sql): add migration to register Flow Runner menu in dictionary_tables
+[33meaff652[m feat(flow): add flow schema, example, FlowRunner and route /parametros/flow-runner
+[33mf8ce646[m DOC: add ISSUE_NEXT_STEPS for Flow→FormBuilder integration
+[33m61615b8[m WIP: add estrutura_dados migration, DictionaryLocalizar, MenuAdminForm, dynamic menu integration, audit endpoint stub
+[33m403d7c2[m import: ParametrosGerais* from origin/tmp/commit-params-20260115-204700
+[33m6d6f812[m chore: update .gitignore (ignore backups,playwright,tmp,Depreciados,RTC,Jdk*,*.war)
+[33m7caefee[m chore: aplicar mudanças recentes (deploy, formbuilder, dictionary, frontend)
+[33mc6eb53f[m chore: local exclude Depreciados/ and *.war (20260114)
+[33m350a051[m backup: 20260114 full repo snapshot
+[33m1be6d29[m Co-authored-by: sprolucas <sprolucas@users.noreply.github.com>
+[33m72fff91[m docs: adiciona resumo completo do commit e backup JAN/2026
+[33m50e5f61[m feat: FormBuilder - Container/Tabs child rendering fix + 30 components + Dynamic metadata (JAN/2026)
+[33mc07a0f4[m docs: atualiza README.md de src/refatorado com workflow completo FormBuilder v2.0 (11JAN2026)
+[33m2fc3b09[m docs: atualiza FORMBUILD_GUIA_VISUAL com Layout Otimizado + Metadados de Componentes (11JAN2026)
+[33m6421c01[m feat: FormBuilder V2 - Engenharia Reversa Generica TSX/CSS - Backup 20260108
+[33m991d25e[m fix: corrigir nomes vlracre, ajustar MovimentoCaixaController e docs
+[33maada6d7[m chore(estoque): mover botao Gerencial para canto inferior esquerdo do container de filtros
+[33m634d522[m feat(ag-grid): adicionar localeText pt-BR para filtros e menus
+[33m639489f[m chore(estoque): remover checkboxes semMovimento do filtro e adicionar colunas Referencia/Dt Ult Entr/Dt Ult Saida no grid
+[33m9d4071b[m feat(inventario): modal e endpoint para popular tabela invent a partir do grid
+[33mde73ed4[m feat(gerencial): incluir descricao da categoria (NNN - DESCRICAO) via masfab mapping
+[33m5e57a69[m fix(filter): send single semMovimentoDias (max selected) to backend to avoid BadRequest
+[33m47366af[m fix(gerencial): ordenar resumo por categoria pelo codigo numerico
+[33m716bca5[m fix(gerencial): ordenar resumo por grupo pelo codigo numerico
+[33m7677702[m fix(gerencial): highlight product via grid ref instead of re-filtering
+[33mee468cc[m chore(estoque): adicionar preco_pub, destaque AG Grid, Gerencial ABC/XYZ e ajustes
+[33mbd265ce[m feat(estoque): adicionar coluna Grupo (masgru.descr_gru) e mapear no grid
+[33ma07aa06[m chore(estoque): reduzir largura coluna Categoria
+[33me8a29b0[m fix(estoque): remove deposito field; reorder sem-movimento; enable floating filters; map backend fields; label Categoria (pesquisar)
+[33m4a01c5e[m feat: estoque typeahead (fab), produto autocomplete; backend /api/estoque/produtos; filtros e fallback deposito; ajustes financeiro/caixa e rota /pecas/consulta-estoque
+[33mff62dd1[m feat(pagar): adicionar coluna 'Autorizado' editavel; normalizar selects de master-data; atualizar controllers investigacao masdep
+[33mc167055[m fix: ajustar SELECT documentos vinculados + padronizar vlracre_rec
+[33mc97cecc[m chore: cleaned branch without history (removed large-file history)

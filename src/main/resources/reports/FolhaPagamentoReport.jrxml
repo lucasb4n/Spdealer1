@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports
+              http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="FolhaPagamentoReport"
+              pageWidth="842"
+              pageHeight="595"
+              orientation="Landscape"
+              columnWidth="762"
+              leftMargin="40"
+              rightMargin="40"
+              topMargin="20"
+              bottomMargin="20">
+
+    <property name="com.jaspersoft.studio.data.defaultdataadapter" value="MySQL Connector"/>
+
+    <template><![CDATA["reports/templates/BaseTemplate_landscape.jasper"]]></template>
+
+    <parameter name="TITULO_RELATORIO" class="java.lang.String">
+      <defaultValueExpression><![CDATA["RELATÓRIO DE FOLHA DE PAGAMENTO"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="DATA_INICIAL" class="java.lang.String"/>
+    <parameter name="DATA_FINAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_NOME" class="java.lang.String"/>
+    <parameter name="EMPRESA_CNPJ" class="java.lang.String"/>
+    <parameter name="USUARIO" class="java.lang.String"/>
+    <parameter name="FILTRO_COBRANCA" class="java.lang.String"/>
+    <parameter name="FILTRO_DOCUMENTO" class="java.lang.String"/>
+    <parameter name="FILTRO_SO_PAGOS" class="java.lang.Boolean"/>
+    <parameter name="FILTRO_APENAS_ABERTOS" class="java.lang.Boolean"/>
+    <parameter name="SUBREPORT_HEADER" class="java.lang.Object"/>
+
+    <!-- ===================== -->
+    <!-- QUERY -->
+    <!-- ===================== -->
+    <queryString>
+        <![CDATA[
+        SELECT 
+            c.nome_cli,
+            p.tipodoc_pag,
+            p.dtmovi_pag,
+            p.dtvenci_pag,
+            p.dtpagi_pag,
+            p.vlrdup_pag,
+            COALESCE(p.vlrpag_pag,0) AS vlrpag_pag
+        FROM pagar p
+        LEFT JOIN clientes c 
+            ON p.codigo_pag = c.codigo_cli 
+           AND c.cliforn_cli = 'F'
+        LEFT JOIN masdocp doc 
+            ON p.tipodoc_pag = doc.codigo_docp
+        WHERE doc.abrev_docp = 'FOLHA'
+          AND p.filial_pag = '001'
+          AND DATE(p.dtemissi_pag) BETWEEN $P{DATA_INICIAL} AND $P{DATA_FINAL}
+          AND (p.status_pag IS NULL OR p.status_pag = '')
+        ORDER BY c.nome_cli, p.dtmovi_pag
+        ]]>
+    </queryString>
+
+    <!-- ===================== -->
+    <!-- FIELDS -->
+    <!-- ===================== -->
+    <field name="nome_cli" class="java.lang.String"/>
+    <field name="tipodoc_pag" class="java.lang.String"/>
+    <field name="dtmovi_pag" class="java.sql.Date"/>
+    <field name="dtvenci_pag" class="java.sql.Date"/>
+    <field name="dtpagi_pag" class="java.sql.Date"/>
+    <field name="vlrdup_pag" class="java.math.BigDecimal"/>
+    <field name="vlrpag_pag" class="java.math.BigDecimal"/>
+
+    <!-- ===================== -->
+    <!-- VARIÁVEIS -->
+    <!-- ===================== -->
+    <variable name="TOTAL_FUNC_VLRDUP" class="java.math.BigDecimal"
+              resetType="Group" resetGroup="GrupoFuncionario" calculation="Sum">
+        <variableExpression><![CDATA[$F{vlrdup_pag}]]></variableExpression>
+        <initialValueExpression><![CDATA[java.math.BigDecimal.ZERO]]></initialValueExpression>
+    </variable>
+
+    <variable name="TOTAL_FUNC_VLRPAG" class="java.math.BigDecimal"
+              resetType="Group" resetGroup="GrupoFuncionario" calculation="Sum">
+        <variableExpression><![CDATA[$F{vlrpag_pag}]]></variableExpression>
+        <initialValueExpression><![CDATA[java.math.BigDecimal.ZERO]]></initialValueExpression>
+    </variable>
+
+    <variable name="TOTAL_GERAL_VLRDUP" class="java.math.BigDecimal"
+              calculation="Sum">
+        <variableExpression><![CDATA[$F{vlrdup_pag}]]></variableExpression>
+        <initialValueExpression><![CDATA[java.math.BigDecimal.ZERO]]></initialValueExpression>
+    </variable>
+
+    <variable name="TOTAL_GERAL_VLRPAG" class="java.math.BigDecimal"
+              calculation="Sum">
+        <variableExpression><![CDATA[$F{vlrpag_pag}]]></variableExpression>
+        <initialValueExpression><![CDATA[java.math.BigDecimal.ZERO]]></initialValueExpression>
+    </variable>
+
+    <!-- ===================== -->
+    <!-- GROUP (Corrigido: Movido para antes do pageHeader) -->
+    <!-- ===================== -->
+    <group name="GrupoFuncionario">
+        <groupExpression><![CDATA[$F{nome_cli}]]></groupExpression>
+
+        <groupHeader>
+            <band height="28">
+                <textField>
+                    <reportElement x="0" y="4" width="400" height="18"/>
+                    <textElement><font size="11" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA["Funcionário: " + $F{nome_cli}]]></textFieldExpression>
+                </textField>
+                <line>
+                    <reportElement x="0" y="24" width="762" height="1"/>
+                </line>
+            </band>
+        </groupHeader>
+
+        <groupFooter>
+            <band height="22">
+                <line>
+                    <reportElement x="0" y="0" width="762" height="1"/>
+                </line>
+                <staticText>
+                    <reportElement x="0" y="4" width="200" height="15"/>
+                    <textElement><font isBold="true"/></textElement>
+                    <text><![CDATA[TOTAL FUNCIONÁRIO:]]></text>
+                </staticText>
+                <textField pattern="#,##0.00">
+                    <reportElement x="320" y="4" width="100" height="15"/>
+                    <textElement textAlignment="Right"><font isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$V{TOTAL_FUNC_VLRDUP}]]></textFieldExpression>
+                </textField>
+                <textField pattern="#,##0.00">
+                    <reportElement x="420" y="4" width="100" height="15"/>
+                    <textElement textAlignment="Right"><font isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$V{TOTAL_FUNC_VLRPAG}]]></textFieldExpression>
+                </textField>
+            </band>
+        </groupFooter>
+    </group>
+
+    <!-- ===================== -->
+    <!-- CABEÇALHO DA PÁGINA -->
+    <!-- ===================== -->
+    <pageHeader>
+        <band height="62">
+            <subreport>
+                <reportElement x="0" y="0" width="762" height="62" uuid="f1e2d3c4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"/>
+                <subreportParameter name="TITULO_RELATORIO">
+                    <subreportParameterExpression><![CDATA[$P{TITULO_RELATORIO}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="EMPRESA_NOME">
+                    <subreportParameterExpression><![CDATA[$P{EMPRESA_NOME}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="EMPRESA_CNPJ">
+                    <subreportParameterExpression><![CDATA[$P{EMPRESA_CNPJ}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="USUARIO">
+                    <subreportParameterExpression><![CDATA[$P{USUARIO}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="DATA_INICIAL">
+                    <subreportParameterExpression><![CDATA[$P{DATA_INICIAL}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="DATA_FINAL">
+                    <subreportParameterExpression><![CDATA[$P{DATA_FINAL}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="FILTRO_COBRANCA">
+                    <subreportParameterExpression><![CDATA[$P{FILTRO_COBRANCA}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="FILTRO_DOCUMENTO">
+                    <subreportParameterExpression><![CDATA[$P{FILTRO_DOCUMENTO}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="FILTRO_SO_PAGOS">
+                    <subreportParameterExpression><![CDATA[$P{FILTRO_SO_PAGOS}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="FILTRO_APENAS_ABERTOS">
+                    <subreportParameterExpression><![CDATA[$P{FILTRO_APENAS_ABERTOS}]]></subreportParameterExpression>
+                </subreportParameter>
+                <connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+                <subreportExpression><![CDATA[$P{SUBREPORT_HEADER}]]></subreportExpression>
+            </subreport>
+        </band>
+    </pageHeader>
+
+    <!-- ===================== -->
+    <!-- DETAIL -->
+    <!-- ===================== -->
+    <detail>
+        <band height="14">
+            <textField>
+                <reportElement x="0" y="0" width="80" height="14"/>
+                <textFieldExpression><![CDATA[$F{tipodoc_pag}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="80" y="0" width="80" height="14"/>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression><![CDATA[
+                    $F{dtmovi_pag} != null 
+                    ? new java.text.SimpleDateFormat("dd/MM/yyyy").format($F{dtmovi_pag}) 
+                    : "-"
+                ]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="160" y="0" width="80" height="14"/>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression><![CDATA[
+                    $F{dtvenci_pag} != null 
+                    ? new java.text.SimpleDateFormat("dd/MM/yyyy").format($F{dtvenci_pag}) 
+                    : "-"
+                ]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="240" y="0" width="80" height="14"/>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression><![CDATA[
+                    $F{dtpagi_pag} != null 
+                    ? new java.text.SimpleDateFormat("dd/MM/yyyy").format($F{dtpagi_pag}) 
+                    : "-"
+                ]]></textFieldExpression>
+            </textField>
+            <textField pattern="#,##0.00">
+                <reportElement x="320" y="0" width="100" height="14"/>
+                <textElement textAlignment="Right"/>
+                <textFieldExpression><![CDATA[$F{vlrdup_pag}]]></textFieldExpression>
+            </textField>
+            <textField pattern="#,##0.00">
+                <reportElement x="420" y="0" width="100" height="14"/>
+                <textElement textAlignment="Right"/>
+                <textFieldExpression><![CDATA[$F{vlrpag_pag}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <!-- ===================== -->
+    <!-- SUMMARY -->
+    <!-- ===================== -->
+    <summary>
+        <band height="30">
+            <line>
+                <reportElement x="0" y="0" width="762" height="2"/>
+            </line>
+            <staticText>
+                <reportElement x="0" y="6" width="200" height="16"/>
+                <textElement><font size="11" isBold="true"/></textElement>
+                <text><![CDATA[TOTAL GERAL:]]></text>
+            </staticText>
+            <textField pattern="#,##0.00">
+                <reportElement x="320" y="6" width="100" height="16"/>
+                <textElement textAlignment="Right" ><font isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$V{TOTAL_GERAL_VLRDUP}]]></textFieldExpression>
+            </textField>
+            <textField pattern="#,##0.00">
+                <reportElement x="420" y="6" width="100" height="16"/>
+                <textElement textAlignment="Right" ><font isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$V{TOTAL_GERAL_VLRPAG}]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+
+</jasperReport>

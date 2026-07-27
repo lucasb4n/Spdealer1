@@ -1,0 +1,38 @@
+- iframe [ref=e2]:
+  - generic [ref=f1e2]:
+    - generic [ref=f1e3]: "Compiled with problems:"
+    - button "Dismiss" [ref=f1e4] [cursor=pointer]: ×
+    - generic [ref=f1e5]:
+      - generic [ref=f1e6]:
+        - generic [ref=f1e7] [cursor=pointer]: ERROR in ./src/pages/ClienteFormOriginalDemo.tsx 21:35-46
+        - generic [ref=f1e8]: "export 'ClienteForm' (imported as 'ClienteForm') was not found in '../components/Forms/ClienteForm' (possible exports: default)"
+      - generic [ref=f1e9]:
+        - generic [ref=f1e10]: ERROR in src/pages/ClienteFormOriginalDemo.tsx:2:10
+        - generic [ref=f1e11]:
+          - text: "TS2614: Module '\"../components/Forms/ClienteForm\"' has no exported member 'ClienteForm'. Did you mean to use 'import ClienteForm from \"../components/Forms/ClienteForm\"' instead?"
+          - generic [ref=f1e12]:
+            - text: 1 | import React from 'react';
+            - generic [ref=f1e13]: ">"
+            - text: "2 | import { ClienteForm } from '../components/Forms/ClienteForm'; |"
+            - generic [ref=f1e14]: ^
+            - generic [ref=f1e15]: ^
+            - generic [ref=f1e16]: ^
+            - generic [ref=f1e17]: ^
+            - generic [ref=f1e18]: ^
+            - generic [ref=f1e19]: ^
+            - generic [ref=f1e20]: ^
+            - generic [ref=f1e21]: ^
+            - generic [ref=f1e22]: ^
+            - generic [ref=f1e23]: ^
+            - generic [ref=f1e24]: ^
+            - text: "3 | 4 | const ClienteFormOriginalDemo: React.FC = () => { 5 | return ("
+      - generic [ref=f1e25]:
+        - generic [ref=f1e26]: ERROR in src/pages/ClienteFormOriginalDemo.tsx:11:18
+        - generic [ref=f1e27]:
+          - text: "TS7006: Parameter 'c' implicitly has an 'any' type."
+          - generic [ref=f1e28]:
+            - text: "9 | showLocalizer={true} 10 | onCancel={() => console.log('cancel')}"
+            - generic [ref=f1e29]: ">"
+            - text: "11 | onSave={(c) => console.log('save', c)} |"
+            - generic [ref=f1e30]: ^
+            - text: 12 | /> 13 | </div> 14 | );

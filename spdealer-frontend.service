@@ -1,0 +1,40 @@
+[Unit]
+Description=SPDealer Frontend - React Application (Node.js)
+After=network.target
+
+[Service]
+Type=simple
+User=spdealer
+WorkingDirectory=/opt/spdealer/frontend
+
+# Variáveis de ambiente
+Environment="NODE_ENV=production"
+Environment="PORT=3000"
+Environment="REACT_APP_API_BASE_URL=http://192.168.10.70:8080"
+Environment="REACT_APP_API_URL=http://192.168.10.70:8080/api"
+Environment="TZ=America/Sao_Paulo"
+
+# Comando de inicialização
+# Opção 1: Serve (mais leve para produção)
+ExecStart=/usr/local/bin/serve -s /opt/spdealer/frontend/build -l 3000
+
+# Opção 2: Node direto (se tiver server.js)
+# ExecStart=/usr/bin/node /opt/spdealer/frontend/server.js
+
+# Auto-restart
+Restart=always
+RestartSec=10
+StartLimitInterval=60
+StartLimitBurst=5
+
+# Logs
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=spdealer-frontend
+
+# Limites
+LimitNOFILE=65536
+LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target

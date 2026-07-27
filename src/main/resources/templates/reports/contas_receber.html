@@ -1,0 +1,49 @@
+<div th:fragment="content">
+  <h1>Relatório de Contas a Receber</h1>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div th:if="${logoBase64 != null}">
+        <img th:src="${logoBase64}" alt="Logo" style="height:48px;" />
+      </div>
+      <div>
+        <div style="font-weight:700; font-size:14px;" th:text="${EMPRESA_NOME}">Empresa</div>
+        <div class="muted" th:text="${EMPRESA_CNPJ}">00.000.000/0001-00</div>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <div class="muted">Gerado em: <span th:text="${generatedDate}"></span></div>
+      <div class="muted">Usuário: <span th:text="${USUARIO}"></span></div>
+      <div class="muted">Total de registros: <span th:text="${totalRegistros}"></span></div>
+    </div>
+  </div>
+
+  <div th:with="rowHeight=${layout?.rowHeight ?: '20px'}, fontSize=${layout?.fontSize ?: '12px'}">
+    <style>
+      .report-table th, .report-table td { padding: 6px; border:1px solid #ddd }
+      .report-table tbody tr { height: [[${rowHeight}]]; }
+      .report-table { font-size: [[${fontSize}]]; width:100%; border-collapse:collapse }
+      .muted { color: #6b7280 }
+    </style>
+
+    <table class="report-table">
+      <thead>
+        <tr>
+          <th th:each="col : ${columns}" th:text="${col.label}">Col</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="row : ${records}">
+          <td th:each="col : ${columns}" th:text="${row[col.field]}">-</td>
+        </tr>
+        <tr th:if="${records == null or records.size() == 0}">
+          <td th:colspan="${columns.size()}">Nenhum registro encontrado</td>
+        </tr>
+      </tbody>
+      <tfoot th:if="${totals != null}">
+        <tr>
+          <td th:each="col : ${columns}" th:utext="${totals[col.field] != null ? totals[col.field] : ''}"></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>

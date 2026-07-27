@@ -1,0 +1,69 @@
+{
+  "id": "fluxo-caixa-12meses",
+  "title": "Fluxo de Caixa - 12 Meses",
+  "description": "Visão 12 meses: previsões vs realizados por linha do fluxo (mapeado do SCOPLA).",
+  "layout": "financial",
+  "widgets": [
+    {
+      "id": "fluxo-grid",
+      "type": "aggrid",
+      "title": "Fluxo de Caixa - Linhas e Meses",
+      "query": {
+        "id": "fluxo_12_meses",
+        "sql": "SELECT fcl.id AS linha_id, fcl.codigo_linha, fcl.descricao, fcd.ano_mes, fcd.valor_esperado, fcd.valor_real, fcd.variacao FROM fluxo_caixa_linhas fcl LEFT JOIN fluxo_caixa_dados fcd ON fcd.fluxo_caixa_linha_id = fcl.id AND YEAR(fcd.ano_mes) = :ano ORDER BY fcl.ordem, fcd.ano_mes"
+      },
+      "visual_config": {
+        "grid_columns": [
+          {"field": "codigo_linha", "headerName": "Código", "width": 120},
+          {"field": "descricao", "headerName": "Descrição", "width": 380},
+          {"field": "ano_mes", "headerName": "Mês", "width": 120},
+          {"field": "valor_esperado", "headerName": "Previsto R$", "width": 140, "cellStyle": {"textAlign": "right"}},
+          {"field": "valor_real", "headerName": "Realizado R$", "width": 140, "cellStyle": {"textAlign": "right"}},
+          {"field": "variacao", "headerName": "% Variação", "width": 120, "cellStyle": {"textAlign": "right"}}
+        ],
+        "grid_height": "680px"
+      }
+    },
+    {
+      "id": "fluxo-chart",
+      "type": "timeseries",
+      "title": "Fluxo - Previsto vs Real",
+      "query": {
+        "id": "fluxo_timeseries",
+        "sql": "SELECT DATE_FORMAT(ano_mes, '%Y-%m') AS periodo, SUM(valor_esperado) AS previsto, SUM(valor_real) AS real FROM fluxo_caixa_dados fcd JOIN fluxo_caixa_linhas fcl ON fcl.id = fcd.fluxo_caixa_linha_id GROUP BY periodo ORDER BY periodo"
+      },
+      "visual_config": { "series": [ { "name": "Previsto", "field": "previsto" }, { "name": "Real", "field": "real" } ] }
+    }
+    ,
+    {
+      "id": "fluxo-pie-despesas",
+      "type": "pie",
+      "title": "Despesas - Top categorias (pizza)",
+      "query": {
+        "id": "fluxo_pie_despesas",
+        "sql": "SELECT fcl.descricao AS categoria, ROUND(SUM(COALESCE(fcd.valor_real,0)),2) AS total FROM fluxo_caixa_dados fcd JOIN fluxo_caixa_linhas fcl ON fcl.id = fcd.fluxo_caixa_linha_id WHERE fcl.tipo_linha = 'DESPESA' AND YEAR(fcd.ano_mes) = :ano GROUP BY categoria ORDER BY total DESC LIMIT 10"
+      },
+      "visual_config": {
+        "legendPosition": "right",
+        "colors": "category",
+        "showLabels": true
+      }
+    },
+    {
+      "id": "fluxo-top-despesas-grid",
+      "type": "aggrid",
+      "title": "Top Despesas (Grid)",
+      "query": {
+        "id": "fluxo_top_despesas_grid",
+        "sql": "SELECT fcl.descricao AS categoria, ROUND(SUM(COALESCE(fcd.valor_real,0)),2) AS total FROM fluxo_caixa_dados fcd JOIN fluxo_caixa_linhas fcl ON fcl.id = fcd.fluxo_caixa_linha_id WHERE fcl.tipo_linha = 'DESPESA' AND YEAR(fcd.ano_mes) = :ano GROUP BY categoria ORDER BY total DESC LIMIT 50"
+      },
+      "visual_config": {
+        "grid_columns": [
+          {"field": "categoria", "headerName": "Categoria", "width": 360},
+          {"field": "total", "headerName": "Total R$", "width": 140, "cellStyle": {"textAlign": "right"}}
+        ],
+        "grid_height": "420px"
+      }
+    }
+  ]
+}

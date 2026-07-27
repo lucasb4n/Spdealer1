@@ -1,0 +1,52 @@
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - img "SpDealer Logo" [ref=e7]
+    - paragraph [ref=e8]: Sistema completo de gestão empresarial. Controle financeiro, operacional e estratégico em uma única plataforma.
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - img [ref=e12]
+        - generic [ref=e14]: Dashboards dinâmicos e personalizáveis
+      - generic [ref=e15]:
+        - img [ref=e17]
+        - generic [ref=e19]: Controle de acesso por usuário e grupo
+      - generic [ref=e20]:
+        - img [ref=e22]
+        - generic [ref=e24]: Integração com sistemas fiscais e NF-e
+  - generic [ref=e26]:
+    - heading "Bem-vindo" [level=2] [ref=e27]
+    - paragraph [ref=e28]: Faça login para acessar o sistema
+    - generic [ref=e54]: ⚠ Selecione uma filial para continuar
+    - generic [ref=e29]:
+      - generic [ref=e30]:
+        - generic [ref=e31]: Empresa
+        - combobox "Empresa" [disabled] [ref=e32]:
+          - option "Carregando empresas..." [selected]
+      - generic [ref=e33]:
+        - generic [ref=e34]: Filial
+        - combobox "Filial" [disabled] [ref=e35]:
+          - option "Carregando filiais..." [selected]
+      - generic [ref=e36]:
+        - generic [ref=e37]: Usuário
+        - textbox "Usuário" [ref=e38]:
+          - /placeholder: Seu nome de usuário
+          - text: admin
+      - generic [ref=e39]:
+        - generic [ref=e40]: Senha
+        - generic [ref=e41]:
+          - textbox "Senha" [ref=e42]:
+            - /placeholder: Sua senha
+            - text: admin
+          - button "Mostrar senha" [ref=e43] [cursor=pointer]:
+            - img [ref=e44]
+      - button "Esqueceu a senha?" [ref=e47] [cursor=pointer]
+      - button "Entrar" [ref=e48] [cursor=pointer]
+    - contentinfo [ref=e49]:
+      - separator [ref=e50]
+      - generic [ref=e51]:
+        - text: "@Seprocom Software e Serviços"
+        - text: Curitiba - Paraná
+        - link "www.seprocom.com.br" [ref=e52] [cursor=pointer]:
+          - /url: https://www.seprocom.com.br/
+        - text: (41) 3122-2028
+        - link "seprocom@seprocom.com.br" [ref=e53] [cursor=pointer]:
+          - /url: mailto:seprocom@seprocom.com.br

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Web site created using create-react-app"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <!--
+      Notice the use of %PUBLIC_URL% in the tags above.
+      It will be replaced with the URL of the `public` folder during the build.
+      Only files inside the `public` folder can be referenced from the HTML.
+
+      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running `npm run build`.
+    -->
+    <title>React App</title>
+  </head>
+  <body>
+    <!-- Console Overlay Debug (hidden by default). Activates with Ctrl + Right-Shift + L -->
+    <div id="console-overlay" style="position: fixed; right: 10px; width: 400px; height: 200px; background: #222; color: #0f0; border: 1px solid #0f0; border-radius: 4px; padding: 8px; font-family: monospace; font-size: 11px; overflow-y: auto; z-index: 9999; display: none;"></div>
+    <button id="console-overlay-toggle" style="position: fixed; right: 10px; width: 40px; height: 40px; background: #0f0; color: #222; border: none; border-radius: 50%; font-size: 20px; font-weight: bold; z-index: 10000; cursor: pointer; display: none;">🖥️</button>
+    <script>
+      (function() {
+        // Lazy init: do NOT override console until user activates the overlay with the specific key combo.
+        let initialized = false;
+        let lines = [];
+        let originalLog, originalError, originalDebug, originalWarn;
+        const overlay = document.getElementById('console-overlay');
+        const toggleBtn = document.getElementById('console-overlay-toggle');
+        let rightShiftActive = false;
+
+        function addLine(type, msg) {
+          lines.push('[' + type + '] ' + msg);
+          if (lines.length > 25) lines.shift();
+          overlay.innerHTML = lines.map(l => '<div>' + l + '</div>').join('');
+          if (lines.length > 0) overlay.style.display = 'block';
+        }
+
+        function initConsoleOverlay() {
+          if (initialized) return;
+          initialized = true;
+          originalLog = console.log; originalError = console.error; originalDebug = console.debug; originalWarn = console.warn;
+          console.log = function(...args) { originalLog.apply(console, args); addLine('LOG', args.join(' ')); };
+          console.debug = function(...args) { originalDebug.apply(console, args); addLine('DBG', args.join(' ')); };
+          console.error = function(...args) { originalError.apply(console, args); addLine('ERR', args.join(' ')); };
+          console.warn = function(...args) { originalWarn.apply(console, args); addLine('WRN', args.join(' ')); };
+
+          window.clearConsoleOverlay = () => { lines = []; overlay.innerHTML = ''; overlay.style.display = 'none'; };
+          window.exportConsoleOverlay = () => { const text = lines.join('\n'); const blob = new Blob([text], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'console-logs.txt'; a.click(); };
+
+          // make toggle visible and bind click
+          toggleBtn.style.display = 'block';
+          // expose activation flag to React components and notify listeners
+          try { window.__DEV_OVERLAY_ACTIVATED = true; document.dispatchEvent(new CustomEvent('dev-overlay-activated')); } catch (e) { /* ignore */ }
+          // compute a bottom offset 10% of viewport height to lift overlay up
+          const offset = Math.round(window.innerHeight * 0.10);
+          overlay.style.bottom = offset + 'px';
+          toggleBtn.style.bottom = (offset + 220) + 'px';
+          toggleBtn.addEventListener('click', () => {
+            overlay.style.display = overlay.style.display === 'none' ? 'block' : 'none';
+          });
+          // show a small init log
+          originalLog('✅ Console overlay ativado (pressione Ctrl + ShiftRight + L para alternar)');
+        }
+
+        // Track Right Shift separately so we require the right-side Shift key
+        document.addEventListener('keydown', (e) => {
+          if (e.code === 'ShiftRight') {
+            rightShiftActive = true;
+          }
+          // Activation key: press L while holding Ctrl + Right Shift
+          if (e.code === 'KeyL' && e.ctrlKey && rightShiftActive) {
+            if (!initialized) initConsoleOverlay();
+            // toggle overlay visibility
+            overlay.style.display = overlay.style.display === 'none' ? 'block' : 'none';
+            // also ensure the toggle button is shown when activated
+            toggleBtn.style.display = overlay.style.display === 'none' ? 'none' : 'block';
+          }
+          // Allow Escape to hide overlay when active
+          if (e.key === 'Escape' && initialized) {
+            overlay.style.display = 'none';
+          }
+        });
+
+        document.addEventListener('keyup', (e) => {
+          if (e.code === 'ShiftRight') {
+            rightShiftActive = false;
+          }
+        });
+      })();
+    </script>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <!--
+      This HTML file is a template.
+      If you open it directly in the browser, you will see an empty page.
+
+      You can add webfonts, meta tags, or analytics to this file.
+      The build step will place the bundled scripts into the <body> tag.
+
+      To begin the development, run `npm start` or `yarn start`.
+      To create a production bundle, use `npm run build` or `yarn build`.
+    -->
+  </body>
+</html>

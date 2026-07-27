@@ -1,0 +1,148 @@
+/* ClienteListPage.css */
+@import url('../../index.css');
+
+.sp-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: var(--sp-page-padding, 24px);
+  background: var(--sp-bg-page, #F1F5F9);
+  min-height: 100vh;
+}
+
+/* Page Header */
+.sp-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--sp-section-gap, 24px);
+  gap: var(--sp-header-gap, 16px);
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--sp-border, #E5E7EB);
+}
+
+.sp-page-header h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--sp-text-primary, #1F2937);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* KPI Cards Layout */
+.sp-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.sp-kpi-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid var(--sp-primary, #2563EB);
+  box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sp-kpi-card--success { border-left-color: var(--sp-success, #16A34A); }
+.sp-kpi-card--danger { border-left-color: var(--sp-danger, #EF4444); }
+.sp-kpi-card--muted { border-left-color: var(--sp-secondary, #6B7280); }
+
+.sp-kpi-label {
+  font-size: 13px;
+  color: var(--sp-text-secondary, #6B7280);
+  font-weight: 500;
+}
+
+.sp-kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--sp-text-primary, #111827);
+}
+
+/* Filter Card */
+.sp-filter-card {
+  margin-bottom: 24px;
+}
+
+/* List Container Refined */
+.sp-list-container {
+  background: var(--sp-bg-card, #FFFFFF);
+  border: 1px solid var(--sp-border, #E5E7EB);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 400px;
+}
+
+.sp-list-body {
+  flex: 1;
+  padding: 16px;
+  min-height: 0;
+}
+
+/* AG-Grid Overrides to match standard */
+.ag-theme-alpine {
+  --ag-header-background-color: #f8fafc;
+  --ag-header-foreground-color: #64748b;
+  --ag-font-size: 12px;
+  --ag-header-font-size: 9px;
+  --ag-header-font-weight: 700;
+}
+
+.ag-header-cell-label {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Custom Grid Utilities */
+.sp-clickable-cell {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sp-clickable-cell:hover {
+  text-decoration: underline;
+}
+
+.sp-grid-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 100%;
+}
+
+.sp-btn-icon {
+  background: none;
+  border: 1px solid var(--sp-border, #E5E7EB);
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--sp-text-secondary, #64748B);
+}
+
+.sp-btn-icon:hover {
+  background: var(--sp-bg-page, #F1F5F9);
+  color: var(--sp-text-primary, #1F2937);
+}
+
+.sp-btn-icon--primary { color: var(--sp-primary, #2563EB); }
+.sp-btn-icon--primary:hover { background: var(--sp-blue-50, #EFF6FF); border-color: var(--sp-primary, #2563EB); }
+
+.sp-btn-icon--danger { color: var(--sp-danger, #EF4444); }
+.sp-btn-icon--danger:hover { background: #FEF2F2; border-color: var(--sp-danger, #EF4444); }

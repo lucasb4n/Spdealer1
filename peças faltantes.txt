@@ -1,0 +1,331 @@
+       GRAVA-ORCAMP-TMP SECTION.
+           INITIALIZE REG-ORPP
+           MOVE NUMERO-ORP OF DATA-BLOCK TO NUMERO-ORPP OF REG-ORPP
+           MOVE 1                        TO REQUIS-ORPP OF REG-ORPP
+           MOVE FAB-ORP    OF DATA-BLOCK TO FAB-ORPP    OF REG-ORPP
+           MOVE CODIGO-ORP OF DATA-BLOCK TO CODIGO-ORPP OF REG-ORPP
+           IF TIPO-ORP OF DATA-BLOCK = "P"
+              PERFORM LE-ORCAMPP
+              IF QTSOL-ORPP OF REG-ORPP = ZEROS
+                 MOVE 01 TO WK-STAFILE
+              END-IF
+              IF WK-STAFILE = 01
+                 MOVE WK-DATA(1:8)
+                   TO DTREQ-ORPP      OF REG-ORPP
+                 MOVE DISPONIVEL      OF DATA-BLOCK
+                   TO QTMMI-ORPP      OF REG-ORPP
+
+                 IF SEQ-ORPP OF REG-ORPP = ZEROS OR
+                    SEQ-ORPP OF REG-ORPP NOT NUMERIC
+                    COMPUTE SEQ-ORPP OF REG-ORPP = WK-NUMSEQ + 1
+                 END-IF
+
+              END-IF
+              MOVE DISPONIVEL      OF DATA-BLOCK
+                TO QTDISP-ORPP     OF REG-ORPP
+              MOVE DESCR-EST       OF DATA-BLOCK
+                TO DESCR-ORPP      OF REG-ORPP
+              MOVE QTSOL-ORP       OF DATA-BLOCK
+                TO QTSOL-ORPP      OF REG-ORPP
+                   QTREC-ORPP      OF REG-ORPP
+              MOVE QTFALTA-ORP     OF DATA-BLOCK
+                TO QTFALTA-ORPP    OF REG-ORPP
+              MOVE PRECOPUB-ORP    OF DATA-BLOCK
+                TO PRECOPUB-ORPP   OF REG-ORPP
+              MOVE PRAZOENTR-ORP   OF DATA-BLOCK
+                TO PRAZOENTR-ORPP  OF REG-ORPP
+              MOVE VLREMPENHO-ORP  OF DATA-BLOCK
+                TO VLREMPENHO-ORPP OF REG-ORPP
+              MOVE VALORAVI-ORP    OF DATA-BLOCK
+                TO VALORAVI-ORPP   OF REG-ORPP
+              MOVE VALORIPI-ORP    OF DATA-BLOCK
+                TO VALORIPI-ORPP   OF REG-ORPP
+              MOVE DISPONIVEL-ORP  OF DATA-BLOCK
+                TO DISPONIVEL-ORPP OF REG-ORPP
+              MOVE MODELO-ORP      OF DATA-BLOCK
+                TO MODELO-ORPP     OF REG-ORPP
+              MOVE VENDEDOR-ORP    OF DATA-BLOCK
+                TO VENDEDOR-ORPP   OF REG-ORPP
+              MOVE DESCONTO-ORP    OF DATA-BLOCK
+                TO DESCONTO-ORPP   OF REG-ORPP
+              MOVE SERIE-ORP       OF DATA-BLOCK
+                TO CHASSI-ORPP     OF REG-ORPP
+              MOVE ITEMCLI-ORPP    OF DATA-BLOCK
+                TO ITEMCLI-ORPP    OF REG-ORPP
+              MOVE ZEROS
+                TO MOTIVO-ORPP     OF REG-ORPP
+
+              IF W-INATIVA NOT = SPACES
+                 MOVE "I" TO PI-ORPP OF REG-ORPP
+                 IF W-P = "P"
+                    MOVE "IP" TO PI-ORPP OF REG-ORPP
+                 END-IF
+                 IF W-P = "T"
+                    MOVE "IT" TO PI-ORPP OF REG-ORPP
+                 END-IF
+              ELSE
+                 MOVE W-P TO PI-ORPP OF REG-ORPP
+              END-IF
+
+              MOVE WK-AUTORIZADO
+                TO AUTORIZADO-ORPP OF REG-ORPP
+              MOVE PEDIDOCLI-ORP  OF DATA-BLOCK
+                TO PEDIDOCLI-ORPP OF REG-ORPP
+              MOVE SEQPEDCLI-ORP  OF DATA-BLOCK
+                TO SEQPEDCLI-ORPP OF REG-ORPP
+
+              IF PRECOPUB-ORP OF DATA-BLOCK NOT = WK-PRECORIG
+                 INITIALIZE REG-LOG
+                 MOVE FUNCTION CURRENT-DATE TO WK-DATA
+                 MOVE WK-DATA       TO CHAVE-LOG
+                 MOVE N0ME-USU      TO USUARIO-LOG
+                 MOVE "EST006 "     TO PROGRAMA-LOG
+                 MOVE 01            TO OPER-LOG
+                 MOVE WK-PRECORIG   TO WK-VALORM1
+                 MOVE PRECOPUB-ORP OF DATA-BLOCK
+                   TO WK-VALORM2
+                 STRING "Preco de venda alterado ("
+                         CODIGO-ORPP OF REG-ORPP ") de "
+                         WK-VALORM1 " para " WK-VALORM2
+                         " no Orc/Ped "
+                         NUMERO-ORP   OF DATA-BLOCK
+                         DELIMITED BY SIZE INTO HISTOR-LOG
+                 END-STRING
+                 PERFORM GRAVA-LOG
+                 MOVE PRECOPUB-ORP  OF DATA-BLOCK
+                   TO VALORAVI-ORPP OF REG-ORPP
+                 MOVE PRECUSTO-ORP  OF DATA-BLOCK
+                   TO PRECUSTO-ORPP OF REG-ORPP
+              END-IF
+              IF PRECUSTO-ORPP OF REG-ORPP = ZEROS OR
+                 PRECUSTO-ORPP OF REG-ORPP IS NOT NUMERIC
+                 MOVE PRECUSTO-ORP  OF DATA-BLOCK
+                   TO PRECUSTO-ORPP OF REG-ORPP
+              END-IF
+
+              INITIALIZE REG-KAR
+              MOVE WK-DEP
+                TO DEP-KAR      OF REG-KAR
+              MOVE 01
+                TO REGISTRO-KAR OF REG-KAR
+              MOVE FAB-ORPP     OF REG-ORPP
+                TO FAB-KAR      OF REG-KAR
+              MOVE CODIGO-ORPP  OF REG-ORPP
+                TO CODPROD-KAR  OF REG-KAR
+              MOVE SPACES TO RESTO-KAR OF REG-KAR
+
+              PERFORM LE-KARDEX-TEMPORIZADOR
+      *
+      *       COMPUTE DISPONIVEL = QTDE-KAR   OF REG-KAR -
+      *                            QTALOC-KAR OF REG-KAR
+      *       IF TIPO-ORP OF REG-ORP = "P"
+      *          COMPUTE DISPONIVEL = QTDE-KAR   OF REG-KAR -
+      *                               QTALOC-KAR OF REG-KAR
+      *       END-IF
+      *
+      *       IF DISPONIVEL < ZEROS
+      *          MOVE ZEROS TO DISPONIVEL
+      *       END-IF
+      *
+      *       IF QTSOL-ORP OF DATA-BLOCK > DISPONIVEL
+      *          COMPUTE QTFALTA-ORP  OF DATA-BLOCK =
+      *                  QTSOL-ORP    OF DATA-BLOCK -
+      *                  QTDEV-ORP    OF DATA-BLOCK -
+      *                  DISPONIVEL   OF DATA-BLOCK 
+      *          MOVE QTFALTA-ORP     OF DATA-BLOCK 
+      *            TO QTFALTA-ORPP    OF REG-ORPP
+      *       ELSE
+      *          MOVE ZEROS TO QTFALTA-ORP OF DATA-BLOCK
+      *       END-IF
+      *
+              COMPUTE QTALOC-ORPP  OF REG-ORPP   =
+                      QTSOL-ORP    OF DATA-BLOCK -
+                      QTFALTA-ORP  OF DATA-BLOCK
+
+              COMPUTE PRECOTOT-ORPP OF REG-ORPP ROUNDED =
+                      PRECOPUB-ORPP OF REG-ORPP *
+                      QTSOL-ORPP    OF REG-ORPP
+
+              IF QTALOC-ORPP OF REG-ORPP > ZEROS
+                 MOVE "S"    TO ALOCADO-ORPP OF REG-ORPP
+                 IF WK-STAFILE = 00
+                    ADD QTALOC-ORPP OF REG-ORPP
+                     TO QTALOC-KAR  OF REG-KAR
+                    PERFORM REGRAVA-KARDEX
+                 END-IF
+              END-IF
+
+              IF QTSOL-ORPP OF REG-ORPP IS NUMERIC
+
+                 PERFORM EXCLUI-PECFAL
+                 IF MOTIVO-ORPP     OF REG-ORPP = ZEROS
+                    IF QTFALTA-ORPP OF REG-ORPP > ZEROS AN
+                       NOVO-ORPP    OF REG-ORPP = ZEROS
+                       IF PECFAL-GER = "S"
+                          PERFORM GERA-PECFAL
+                       END-IF
+                    END-IF
+                 END-IF
+
+                 PERFORM GRAVA-ORCAMPP
+                 PERFORM VERIFICA-STATUS
+                 IF VERFS1 NOT = "0" AND "2"
+                    MOVE "Orcamp Item" TO WK-ARQ
+                    MOVE "S"           TO NAO-CRITICO
+                    MOVE "DISPLAY-MSG" TO DS-PROCEDURE
+                    MOVE "Registro nao gravado!" TO TEX-MSG
+                    MOVE WK-MSG                  TO MSG
+                    CALL "dsgrun" USING DS-CONTROL-BLOCK
+                                       DATA-BLOCK
+                    END-CALL
+                 ELSE
+                    PERFORM EXEC-COMMIT
+                 END-IF
+
+                 PERFORM CONSISTE-ALOC
+
+              END-IF
+           END-IF
+           IF TIPO-ORP OF DATA-BLOCK NOT = "O" OR " "
+
+              PERFORM LE-ORCAMPP
+              IF QTSOL-ORPP OF REG-ORPP = ZEROS
+                 MOVE 01 TO WK-STAFILE
+              END-IF
+              IF WK-STAFILE = 01
+                 MOVE WK-DATA(1:8)
+                   TO DTREQ-ORPP      OF REG-ORPP
+                 MOVE DISPONIVEL      OF DATA-BLOCK
+                   TO QTMMI-ORPP      OF REG-ORPP
+
+                 IF SEQ-ORPP OF REG-ORPP = ZEROS OR
+                    SEQ-ORPP OF REG-ORPP NOT NUMERIC
+                    COMPUTE SEQ-ORPP OF REG-ORPP = WK-NUMSEQ + 1
+                    ADD 1 TO WK-NUMSEQ
+                 END-IF
+
+                 PERFORM GRAVA-ORCAMPP
+                 PERFORM EXEC-COMMIT
+
+              END-IF
+              MOVE DESCR-EST       OF DATA-BLOCK
+                TO DESCR-ORPP      OF REG-ORPP
+              MOVE QTSOL-ORP       OF DATA-BLOCK
+                TO QTSOL-ORPP      OF REG-ORPP
+                   QTREC-ORPP      OF REG-ORPP
+              MOVE QTFALTA-ORP     OF DATA-BLOCK
+                TO QTFALTA-ORPP    OF REG-ORPP
+              MOVE PRECOPUB-ORP    OF DATA-BLOCK
+                TO PRECOPUB-ORPP   OF REG-ORPP
+              MOVE PRAZOENTR-ORP   OF DATA-BLOCK
+                TO PRAZOENTR-ORPP  OF REG-ORPP
+              MOVE VLREMPENHO-ORP  OF DATA-BLOCK
+                TO VLREMPENHO-ORPP OF REG-ORPP
+              MOVE VALORAVI-ORP    OF DATA-BLOCK
+                TO VALORAVI-ORPP   OF REG-ORPP
+              MOVE VALORIPI-ORP    OF DATA-BLOCK
+                TO VALORIPI-ORPP   OF REG-ORPP
+              MOVE DISPONIVEL      OF DATA-BLOCK
+                TO QTDISP-ORPP     OF REG-ORPP
+              MOVE DISPONIVEL-ORP  OF DATA-BLOCK
+                TO DISPONIVEL-ORPP OF REG-ORPP
+              MOVE MODELO-ORP      OF DATA-BLOCK
+                TO MODELO-ORPP     OF REG-ORPP
+              MOVE VENDEDOR-ORP    OF DATA-BLOCK
+                TO VENDEDOR-ORPP   OF REG-ORPP
+              MOVE DESCONTO-ORP    OF DATA-BLOCK
+                TO DESCONTO-ORPP   OF REG-ORPP
+              MOVE SERIE-ORP       OF DATA-BLOCK
+                TO CHASSI-ORPP     OF REG-ORPP
+              MOVE ZEROS
+                TO MOTIVO-ORPP     OF REG-ORPP
+              IF W-INATIVA NOT = SPACES
+                 MOVE "I" TO PI-ORPP OF REG-ORPP
+                 IF W-P = "P"
+                    MOVE "IP" TO PI-ORPP OF REG-ORPP
+                 END-IF
+                 IF W-P = "T"
+                    MOVE "IT" TO PI-ORPP OF REG-ORPP
+                 END-IF
+              ELSE
+                 MOVE W-P TO PI-ORPP OF REG-ORPP
+              END-IF
+
+              MOVE WK-AUTORIZADO
+                TO AUTORIZADO-ORPP OF REG-ORPP
+              MOVE PEDIDOCLI-ORP  OF DATA-BLOCK
+                TO PEDIDOCLI-ORPP OF REG-ORPP
+              MOVE SEQPEDCLI-ORP  OF DATA-BLOCK
+                TO SEQPEDCLI-ORPP OF REG-ORPP
+              MOVE ITEMCLI-ORPP   OF DATA-BLOCK
+                TO ITEMCLI-ORPP   OF REG-ORPP
+
+              IF W-P = "P" OR "T"
+                 MOVE ZEROS TO W-NIVELMIN
+              END-IF
+
+              MOVE W-NIVELMIN     TO PERC-NIVEL-ORPP
+              MOVE WK-PRECO       TO VLR-NIVEL-ORPP
+
+              IF PRECOPUB-ORP OF DATA-BLOCK NOT = WK-PRECORIG
+                 INITIALIZE REG-LOG
+                 MOVE FUNCTION CURRENT-DATE TO WK-DATA
+                 MOVE WK-DATA       TO CHAVE-LOG
+                 MOVE N0ME-USU      TO USUARIO-LOG
+                 MOVE "EST006 "     TO PROGRAMA-LOG
+                 MOVE 01            TO OPER-LOG
+                 MOVE WK-PRECORIG   TO WK-VALORM1
+                 MOVE PRECOPUB-ORP OF DATA-BLOCK
+                   TO WK-VALORM2
+                 STRING "Preco de venda alterado ("
+                         CODIGO-ORPP OF REG-ORPP ") de "
+                         WK-VALORM1 " para " WK-VALORM2
+                         " no Orc/Ped "
+                         NUMERO-ORP   OF DATA-BLOCK
+                         DELIMITED BY SIZE INTO HISTOR-LOG
+                 END-STRING
+                 PERFORM GRAVA-LOG
+                 MOVE PRECOPUB-ORP  OF DATA-BLOCK
+                   TO VALORAVI-ORPP OF REG-ORPP
+                 MOVE PRECUSTO-ORP  OF DATA-BLOCK
+                   TO PRECUSTO-ORPP OF REG-ORPP
+              END-IF
+              IF PRECUSTO-ORPP OF REG-ORPP = ZEROS OR
+                 PRECUSTO-ORPP OF REG-ORPP IS NOT NUMERIC
+                 MOVE PRECUSTO-ORP OF DATA-BLOCK
+                   TO PRECUSTO-ORPP OF REG-ORPP
+              END-IF
+              COMPUTE PRECOTOT-ORPP OF REG-ORPP ROUNDED =
+                      PRECOPUB-ORPP OF REG-ORPP *
+                      QTSOL-ORPP    OF REG-ORPP
+
+              IF QTFALTA-ORPP OF REG-ORPP IS NUMERIC OR
+                 QTFALTA-ORPP OF REG-ORPP > ZEROS
+
+                 PERFORM EXCLUI-PECFAL
+                 IF MOTIVO-ORPP     OF REG-ORPP   = ZEROS
+                    IF QTFALTA-ORPP OF REG-ORPP   > ZEROS AND
+                       NOVO-ORPP    OF REG-ORPP   = ZEROS AND
+                       PEDPEN-ORP   OF DATA-BLOCK = 1
+                       IF PECFAL-GER = "S"
+                          PERFORM GERA-PECFAL
+                       END-IF
+                    END-IF
+                 END-IF
+
+                 PERFORM GRAVA-ORCAMPP
+                 PERFORM VERIFICA-STATUS
+                 IF VERFS1 NOT = "0" AND "2"
+                    MOVE "Orcamp Item" TO WK-ARQ
+                    MOVE "S"           TO NAO-CRITICO
+                    MOVE "DISPLAY-MSG" TO DS-PROCEDURE
+                    MOVE "Registro nao gravado!" TO TEX-MSG
+                    MOVE WK-MSG                  TO MSG
+                    CALL "dsgrun" USING DS-CONTROL-BLOCK
+                                       DATA-BLOCK
+                    END-CALL
+                 END-IF
+                 PERFORM EXEC-COMMIT
+              END-IF
+           END-IF
+           EXIT SECTION.

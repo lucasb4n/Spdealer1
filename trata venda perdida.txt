@@ -1,0 +1,264 @@
+       GRAVA-VENDPER-ORPP SECTION.
+           MOVE ZEROS  TO TOTPEC, TOTGER, WK-ERRO, WK-CTD1,
+                          WK-SEQUENCIA-CPR
+           MOVE SPACES TO WK-ORIGEM-CPR
+
+           PERFORM WITH TEST BEFORE VARYING WK-CTD  FROM 1 BY 1
+              UNTIL LVDATA-COLUMN1(WK-CTD) = SPACES OR WK-CTD = 999
+              MOVE WK-CTD        TO NUM-REG
+              IF LVDATA-COLUMN6(NUM-REG)          = SPACES
+                 MOVE "000" TO LVDATA-COLUMN6(NUM-REG)
+              END-IF
+              IF LVDATA-COLUMN6(NUM-REG)(1:3) NOT = ZEROS
+                 MOVE NUMERO-ORP OF DATA-BLOCK
+                   TO NUMERO-ORPP OF REG-ORPP
+                 MOVE 1
+                   TO REQUIS-ORPP OF REG-ORPP
+
+                 INITIALIZE REG-KAR
+                 MOVE WK-DEP
+                   TO DEP-KAR      OF REG-KAR
+                 MOVE 01
+                   TO REGISTRO-KAR OF REG-KAR
+                 MOVE LVDATA-COLUMN1(NUM-REG),
+                   TO FAB-ORPP     OF REG-ORPP,
+                      FAB-EST      OF REG-EST,
+                      FAB-KAR      OF REG-KAR
+                 MOVE LVDATA-COLUMN2(NUM-REG),
+                   TO CODIGO-ORPP  OF REG-ORPP,
+                      CODPROD-EST  OF REG-EST,
+                      CODPROD-KAR  OF REG-KAR
+                 MOVE SPACES
+                   TO RESTO-KAR OF REG-KAR
+                 MOVE FUNCTION NUMVAL(LVDATA-COLUMN6(NUM-REG))
+                   TO WK-CODPERN
+                 ADD 1 TO WK-CTD1
+                 PERFORM LE-ORCAMPP
+                 IF WK-STAFILE = 00
+                    PERFORM LE-ESTOQUE
+                    IF TIPO-ORP OF DATA-BLOCK = "O"
+                       PERFORM LE-KARDEX
+                    END-IF
+                    IF TIPO-ORP OF DATA-BLOCK = "P"
+                       IF QTALOC-ORPP OF REG-ORPP NOT = ZEROS AND
+                          WK-CODPERN             NOT = ZEROS
+                          PERFORM LE-KARDEX-TEMPORIZADOR
+                          SUBTRACT QTALOC-ORPP OF REG-ORPP
+                              FROM QTALOC-KAR OF REG-KAR
+                          MOVE ZEROS   TO QTALOC-ORPP OF REG-ORPP
+                          MOVE SPACES  TO ALOCADO-ORPP OF REG-ORPP
+                          PERFORM REGRAVA-KARDEX
+                          PERFORM GRAVA-ORCAMPP
+                       ELSE
+                          PERFORM LE-KARDEX
+                       END-IF
+                    END-IF
+                    IF WK-STAFILE = 01
+                       MOVE ZEROS TO PRECUSTO-KAR OF REG-KAR
+                                     PRECOGAR-KAR OF REG-KAR
+                    END-IF
+                    INITIALIZE REG-PER
+                    MOVE WK-DATA(1:12)     TO DATAHR-PER   OF REG-PER
+                    MOVE VENDEDOR-ORPP     OF REG-ORPP
+                      TO VENDEDOR-PER OF REG-PER
+                    MOVE DPPECAS-GER       OF REG-GER
+                      TO DEPTO-PER         OF REG-PER
+                    MOVE WK-DEP
+                      TO DEP-PER           OF REG-PER
+                    MOVE FAB-ORPP          OF REG-ORPP
+                      TO FAB-PER           OF REG-PER
+                    MOVE CODIGO-ORPP       OF REG-ORPP
+                      TO PRODUTO-PER       OF REG-PER
+                    MOVE DESCR-ORPP        OF REG-ORPP
+                      TO DESCR-PER         OF REG-PER
+                    MOVE QTFALTA-ORPP      OF REG-ORPP
+                      TO QTNATEND-PER      OF REG-PER
+                    MOVE NUMERO-ORP        OF DATA-BLOCK
+                      TO OS-PER            OF REG-PER
+                    MOVE TIPOCLI-ORP       OF DATA-BLOCK
+                      TO TIPOPESSOA-PER    OF REG-PER
+                    MOVE CGCCPF-ORP        OF DATA-BLOCK
+                      TO CGCCPF-PER        OF REG-PER
+                    MOVE PRECUSTO-KAR      OF REG-KAR
+                      TO PRECUSTO-PER      OF REG-PER
+                    MOVE PRECOPUB-ORPP     OF REG-ORPP
+                      TO PRECOPUB-PER      OF REG-PER
+                    MOVE PRECOGAR-KAR      OF REG-KAR
+                      TO PRECOGAR-PER      OF REG-PER
+                    MOVE MODELO-ORPP       OF REG-ORPP
+                      TO MODELO-PER        OF REG-PER
+                    MOVE CODIGO-ORPP       OF REG-ORPP
+                      TO ITEM-PER          OF REG-PER
+                    MOVE MOTIVO-ORPP       OF REG-ORPP
+                      TO MOTIVO-PER        OF REG-PER
+                    IF MOTIVO-ORPP         OF REG-ORPP     = ZEROS OR
+                       MOTIVO-ORPP         OF REG-ORPP NOT = WK-CODPERN
+                       PERFORM LE-VENDPER-A04
+                       IF WK-STAFILE = ZEROS
+                          PERFORM DELETA-VENDPER
+                       END-IF
+                       MOVE WK-CODPERN TO MOTIVO-ORPP OF REG-ORPP,
+                                          MOTIVO-PER OF REG-PER
+                       IF MOTIVO-ORPP OF REG-ORPP NOT = ZEROS
+                          PERFORM LE-VENDPER-A04
+                          IF WK-STAFILE = 01
+                             MOVE FAB-ORPP   OF REG-ORPP
+                               TO CODIGO-FAB OF REG-FAB
+                             PERFORM LE-MASFAB
+                             PERFORM REMCUSTO
+                             MOVE WK-REMCUSTO TO
+                                  REMCUSTO-PER OF REG-PER
+                             MOVE WK-DATA(1:12)
+                               TO DATAHR-PER   OF REG-PER
+                             MOVE VENDEDOR-ORPP     OF REG-ORPP
+                               TO VENDEDOR-PER OF REG-PER
+                             PERFORM GRAVA-VENDPER
+                          END-IF
+                       END-IF
+                    ELSE
+                       MOVE WK-CODPERN TO MOTIVO-ORPP OF REG-ORPP,
+                                          MOTIVO-PER OF REG-PER
+                       PERFORM LE-VENDPER-A04
+                       IF WK-STAFILE = 01
+                          PERFORM REMCUSTO
+                          MOVE WK-REMCUSTO TO REMCUSTO-PER OF REG-PER
+                          PERFORM GRAVA-VENDPER
+                       END-IF
+                    END-IF
+                    PERFORM GRAVA-ORCAMPP
+                    PERFORM EXEC-COMMIT
+                 END-IF
+              ELSE
+                 INITIALIZE REG-PER
+                 MOVE WK-DEP
+                   TO DEP-PER           OF REG-PER
+                 MOVE NUMERO-ORP        OF DATA-BLOCK
+                   TO OS-PER            OF REG-PER
+                 MOVE LVDATA-COLUMN1(NUM-REG)
+                   TO FAB-PER           OF REG-PER
+                 MOVE LVDATA-COLUMN2(NUM-REG)
+                   TO PRODUTO-PER       OF REG-PER
+                 IF MOTIVO-ORPP         OF REG-ORPP     = ZEROS OR
+                    MOTIVO-ORPP         OF REG-ORPP NOT = WK-CODPERN
+                    MOVE 15 TO W-VAR
+                    CALL "Igualacmp" USING W-VAR
+                    MOVE ZEROS TO WK-ERRO
+                    PERFORM START-VENDPER-A04
+                    PERFORM UNTIL TIPOSER-PER OF REG-PER    NOT =
+                                  SPACES                    OR
+                                  NUMERO-ORP  OF DATA-BLOCK NOT =
+                                  OS-PER      OF REG-PER    OR
+                                  LVDATA-COLUMN1(NUM-REG)   NOT =
+                                  FAB-PER     OF REG-PER    OR
+                                  LVDATA-COLUMN2(NUM-REG)   NOT =
+                                  PRODUTO-PER OF REG-PER    OR
+                                  WK-ERRO      = 093
+                       PERFORM LE-VENDPER-NEXT
+                       IF WK-ERRO = ZEROS
+                          PERFORM DELETA-VENDPER
+                       END-IF
+                    END-PERFORM
+                 END-IF
+                 INITIALIZE REG-KAR
+                 MOVE WK-DEP   TO DEP-KAR OF REG-KAR
+                 MOVE 01       TO REGISTRO-KAR OF REG-KAR
+                 MOVE LVDATA-COLUMN1(NUM-REG)
+                   TO FAB-KAR  OF REG-KAR
+                      FAB-ORPP OF REG-ORPP
+                 MOVE LVDATA-COLUMN2(NUM-REG)
+                   TO CODPROD-KAR OF REG-KAR
+                      CODIGO-ORPP OF REG-ORPP
+                 MOVE SPACES TO RESTO-KAR OF REG-KAR
+                 PERFORM LE-ORCAMPP
+                 PERFORM LE-KARDEX-TEMPORIZADOR
+                 IF WK-STAFILE = 0
+                    IF QTSOL-ORPP OF REG-ORPP <=
+                      (QTDE-KAR  OF REG-KAR -
+                      (QTALOC-KAR OF REG-KAR - QTALOC-ORPP OF REG-ORPP))
+                       COMPUTE QTALOC-KAR OF REG-KAR =
+                               QTALOC-KAR OF REG-KAR +
+                             ( QTSOL-ORPP OF REG-ORPP -
+                               QTDEV-ORPP OF REG-ORPP -
+                               QTALOC-ORPP OF REG-ORPP)
+                       MOVE "S"     TO ALOCADO-ORPP OF REG-ORPP
+                       MOVE QTSOL-ORPP  OF REG-ORPP
+                         TO QTALOC-ORPP OF REG-ORPP
+                       MOVE ZEROS TO MOTIVO-ORPP  OF REG-ORPP
+                       MOVE ZEROS TO QTFALTA-ORPP OF REG-ORPP
+                       PERFORM GRAVA-ORCAMPP
+                    ELSE
+                       COMPUTE WK-QTDE =
+                               QTDE-KAR  OF REG-KAR  -
+                               QTALOC-KAR OF REG-KAR -
+                             ( QTSOL-ORPP OF REG-ORPP -
+                               QTDEV-ORPP OF REG-ORPP )
+                       COMPUTE WK-QTDE = WK-QTDE * -1
+                       COMPUTE QTALOC-KAR OF REG-KAR =
+                               QTALOC-KAR OF REG-KAR +
+                             ( QTSOL-ORPP OF REG-ORPP -
+                               WK-QTDE               )
+                       MOVE "S"     TO ALOCADO-ORPP OF REG-ORPP
+                       COMPUTE QTALOC-ORPP OF REG-ORPP =
+                               QTSOL-ORPP  OF REG-ORPP -
+                               WK-QTDE
+                       MOVE ZEROS TO MOTIVO-ORPP OF REG-ORPP
+                       IF QTALOC-ORPP OF REG-ORPP = ZEROS
+                          MOVE SPACE
+                            TO ALOCADO-ORPP OF REG-ORPP
+                       END-IF
+                       MOVE WK-QTDE  TO QTFALTA-ORPP OF REG-ORPP
+
+                       MOVE LVDATA-COLUMN8(NUM-REG)(1:1)
+                         TO FAL-ORIGEM-ORPP OF REG-ORPP
+                       MOVE LVDATA-COLUMN8(NUM-REG)(3:6)
+                         TO FAL-SEQUENCIA-ORPP OF REG-ORPP
+
+                       PERFORM GRAVA-ORCAMPP
+                    END-IF
+                    PERFORM REGRAVA-KARDEX
+                    IF QTFALTA-ORPP OF REG-ORPP > ZEROS AND
+                       NOVO-ORPP    OF REG-ORPP = ZEROS
+                       PERFORM EXCLUI-PECFAL
+                       IF PECFAL-GER = "S"
+                          PERFORM GERA-PECFAL
+                       END-IF
+                    END-IF
+                    PERFORM EXEC-COMMIT
+                 END-IF
+              END-IF
+           END-PERFORM.
+           IF NUMERO-ORP OF DATA-BLOCK NOT = ZEROS
+              INITIALIZE  REG-ORP
+              MOVE NUMERO-ORP OF DATA-BLOCK TO
+                   NUMERO-ORP OF REG-ORP
+              PERFORM LE-ORCAMP
+              IF WK-STAFILE = 00
+                 IF TIPO-ORP OF DATA-BLOCK = "P" OR "O"
+                    IF WK-CTD - 1 = WK-CTD1
+                       MOVE 2 TO FECHADO-ORP  OF REG-ORP,
+                                 FECHADO-ORP  OF DATA-BLOCK
+                       MOVE NUMERO-ORP OF DATA-BLOCK
+                         TO NOTA-ORP   OF REG-ORP
+                       MOVE "O" TO TIPO-ORP   OF REG-ORP
+                       MOVE SPACES TO USO-ORP OF REG-ORP
+                    ELSE
+                       IF NOTA-ORP   OF DATA-BLOCK =
+                          NUMERO-ORP OF DATA-BLOCK
+                          MOVE 0 TO FECHADO-ORP     OF REG-ORP,
+                                    FECHADO-ORP     OF DATA-BLOCK
+                          MOVE ZEROS TO NOTA-ORP    OF REG-ORP
+                                        NOTA-ORP    OF DATA-BLOCK
+                       ELSE
+                          MOVE 0 TO FECHADO-ORP     OF REG-ORP,
+                                    FECHADO-ORP     OF DATA-BLOCK
+                       END-IF
+                    END-IF
+      *             IF TIPO-ORP OF REG-ORP = "P"
+      *                PERFORM EXCLUI-PECFAL
+      *             END-IF
+                    PERFORM GRAVA-ORCAMP
+                 END-IF
+              END-IF
+           END-IF
+           EXIT SECTION.
+           .

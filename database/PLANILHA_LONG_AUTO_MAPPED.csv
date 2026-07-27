@@ -1,0 +1,442 @@
+descricao,tipo_linha,contad_ocai,ano_mes,previsto,realizado
+Receita de vendas serviços,,,2025-01,,69424.62
+Receita de vendas serviços,,,2025-02,,65029.33
+Receita de vendas serviços,,,2025-03,,1440.0
+Receita de vendas serviços,,,2025-05,,12835.5
+Receita de vendas serviços,,,2025-08,,14387.0
+receita de vendas peças e serv.,,,2025-03,,122046.63
+receita de vendas peças e serv.,,,2025-05,,155447.69
+receita de vendas peças e serv.,,,2025-06,,66469.9
+receita de vendas peças e serv.,,,2025-07,,94755.76
+receita de vendas peças e serv.,,,2025-08,,281383.5
+receita de vendas peças e serv.,,,2025-09,,65050.0
+Receita de peças,,,2025-01,,183063.8
+Receita de peças,,,2025-02,,111733.23
+Receita de peças,,,2025-03,,36307.0
+Receita de peças,,,2025-05,,42295.5
+Receita de peças,,,2025-06,,103981.0
+Receita de peças,,,2025-07,,102871.0
+Receita de peças,,,2025-08,,111224.45
+Receita de peças,,,2025-09,,103963.0
+venda peças-romaneio,,,2025-08,,53568.57
+venda peças-romaneio,,,2025-09,,33267.5
+mão de obra-romaneio,,,2025-08,,1800.0
+mão de obra-romaneio,,,2025-09,,3088.0
+peças e serv- romaneio,,,2025-03,,78325.2
+peças e serv- romaneio,,,2025-05,,64305.5
+peças e serv- romaneio,,,2025-06,,495332.3
+peças e serv- romaneio,,,2025-07,,253646.0
+peças e serv- romaneio,,,2025-08,,113808.0
+peças e serv- romaneio,,,2025-09,,61071.5
+retroativo,,,2025-07,,39675.0
+retroativo,,,2025-08,,247761.65
+Fornec diversos com nota,,,2025-02,,163012.49
+Fornec diversos com nota,,,2025-03,,112371.23
+Fornec diversos com nota,,,2025-05,,108109.1
+Fornec diversos com nota,,,2025-06,,282407.95
+Fornec diversos com nota,,,2025-07,,141027.37
+Fornec diversos com nota,,,2025-08,,207321.94
+Fornec diversos com nota,,,2025-09,,244438.79
+fornecedor sem nota,,,2025-01,,60299.0
+fornecedor sem nota,,,2025-02,,37700.0
+fornecedor sem nota,,,2025-03,,43490.0
+fornecedor sem nota,,,2025-05,,13026.0
+fornecedor sem nota,,,2025-06,,44614.0
+fornecedor sem nota,,,2025-07,,51099.0
+fornecedor sem nota,,,2025-08,,43557.0
+fornecedor sem nota,,,2025-09,,60718.1
+ferramental oficina,,,2025-07,,2754.07
+ferramental oficina,,,2025-08,,368.81
+ferramental oficina,,,2025-09,,200.1
+Uniforme,,,2025-05,,520.0
+Uniforme,,,2025-06,,520.0
+Fretes - fora da NF de Fornec.,,,2025-01,,1446.17
+Fretes - fora da NF de Fornec.,,,2025-02,,2099.68
+Fretes - fora da NF de Fornec.,,,2025-07,,259.02
+Fretes - fora da NF de Fornec.,,,2025-08,,792.88
+Fretes - fora da NF de Fornec.,,,2025-09,,1655.86
+Estopas uso prestação serviço,,,2025-02,,300.0
+Estopas uso prestação serviço,,,2025-05,,300.0
+Estopas uso prestação serviço,,,2025-06,,300.0
+Estopas uso prestação serviço,,,2025-07,,700.0
+Estopas uso prestação serviço,,,2025-09,,400.0
+Estopas uso prestação serviço,,,2025-10,,400.0
+"Cortesia, Brindes a clientes",,,2025-01,,170.0
+Percentual em relação as compras de fornecedores c/ Faturamento total,,,2025-01,,0.2445465419760637
+Percentual em relação as compras de fornecedores c/ Faturamento total,,,2025-02,,1.1490678229597941
+Percentual em relação as compras de fornecedores c/ Faturamento total,,,2025-03,,0.6545523090299074
+Percentual em relação as compras de fornecedores c/ Faturamento total,,,2025-05,,0.44365992820467415
+Percentual em relação as compras de fornecedores c/ Faturamento total,,,2025-06,,0.49241547398612645
+Percentual em relação as compras de fornecedores c/ Faturamento total,,,2025-07,,0.3989008117686493
+Percentual em relação as compras de fornecedores c/ Faturamento total,,,2025-08,,0.4374402782004914
+Percentual em relação as compras de fornecedores c/ Faturamento total,,,2025-09,,1.1537788995646299
+água,,,2025-01,,40.94
+água,,,2025-02,,39.55
+água,,,2025-03,,39.55
+água,,,2025-05,,39.55
+água,,,2025-06,,39.55
+água,,,2025-07,,119.88
+água,,,2025-08,,145.32
+água,,,2025-09,,103.14
+lanches/refeições,,,2025-01,,125.5
+lanches/refeições,,,2025-02,,152.5
+lanches/refeições,,,2025-03,,237.5
+lanches/refeições,,,2025-05,,939.21
+lanches/refeições,,,2025-06,,763.01
+lanches/refeições,,,2025-07,,421.13
+lanches/refeições,,,2025-08,,439.01
+lanches/refeições,,,2025-09,,625.84
+aluguel,,,2025-01,,3200.0
+aluguel,,,2025-02,,3200.0
+aluguel,,,2025-03,,3200.0
+aluguel,,,2025-05,,3200.0
+aluguel,,,2025-06,,3200.0
+aluguel,,,2025-07,,3200.0
+aluguel,,,2025-08,,3200.0
+aluguel,,,2025-09,,3400.0
+aluguel,,,2025-10,,3400.0
+Energia,,,2025-01,,664.96
+Energia,,,2025-02,,789.13
+Energia,,,2025-03,,804.81
+Energia,,,2025-05,,804.81
+Energia,,,2025-06,,814.48
+Energia,,,2025-07,,900.85
+Energia,,,2025-08,,810.0
+Salários,,,2025-01,,11481.4
+Salários,,,2025-02,,8560.96
+Salários,,,2025-03,,7600.42
+Salários,,,2025-05,,9943.34
+Salários,,,2025-06,,10733.45
+Salários,,,2025-07,,8841.66
+Salários,,,2025-08,,8841.66
+Salários,,,2025-09,,8841.66
+Comissões vendedor,,,2025-02,,150.0
+FGTS,,,2025-01,,530.16
+FGTS,,,2025-02,,658.16
+FGTS,,,2025-03,,658.16
+FGTS,,,2025-05,,658.16
+FGTS,,,2025-06,,1285.58
+FGTS,,,2025-07,,767.28
+FGTS,,,2025-09,,767.28
+Vale alimentação funcionarios,,,2025-03,,600.0
+Vale alimentação funcionarios,,,2025-05,,1300.0
+Vale alimentação funcionarios,,,2025-06,,1500.0
+Vale alimentação funcionarios,,,2025-07,,1400.0
+Vale alimentação funcionarios,,,2025-08,,1400.0
+Vale alimentação funcionarios,,,2025-09,,1200.0
+Unimed Sócios,,,2025-01,,3587.1
+Unimed Sócios,,,2025-02,,3587.1
+Unimed Sócios,,,2025-03,,3587.1
+Unimed Sócios,,,2025-05,,3587.1
+Unimed Sócios,,,2025-06,,3587.1
+Unimed Sócios,,,2025-07,,3587.1
+Unimed Sócios,,,2025-08,,3587.1
+Unimed Sócios,,,2025-09,,3587.1
+Unimed Sócios,,,2025-10,,3668.76
+Plano Odonto - Amil Dental,,,2025-01,,363.36
+Plano Odonto - Amil Dental,,,2025-02,,363.36
+Plano Odonto - Amil Dental,,,2025-03,,363.36
+Plano Odonto - Amil Dental,,,2025-05,,363.36
+Plano Odonto - Amil Dental,,,2025-06,,363.36
+Plano Odonto - Amil Dental,,,2025-07,,363.36
+Plano Odonto - Amil Dental,,,2025-08,,363.36
+Plano Odonto - Amil Dental,,,2025-09,,363.36
+Plano Odonto - Amil Dental,,,2025-10,,363.36
+Diarista,,,2025-01,,200.0
+Diarista,,,2025-02,,300.0
+Diarista,,,2025-03,,200.0
+Diarista,,,2025-05,,200.0
+Diarista,,,2025-06,,400.0
+Diarista,,,2025-07,,400.0
+Diarista,,,2025-08,,450.0
+Diarista,,,2025-09,,450.0
+Gratificação Funcionários,,,2025-01,,2021.0
+Gratificação Funcionários,,,2025-02,,2021.0
+Gratificação Funcionários,,,2025-03,,1521.23
+Gratificação Funcionários,,,2025-05,,1521.23
+Gratificação Funcionários,,,2025-07,,600.0
+Gratificação Funcionários,,,2025-08,,820.23
+Gratificação Funcionários,,,2025-09,,1200.0
+doação,,,2025-03,,234.82
+doação,,,2025-05,,150.0
+doação,,,2025-06,,1070.0
+doação,,,2025-07,,278.52
+doação,,,2025-08,,300.0
+doação,,,2025-09,,361.06
+doação,,,2025-10,,300.0
+Confraternização,,,2025-01,,908.0
+Confraternização,,,2025-02,,200.0
+Confraternização,,,2025-03,,373.21
+Confraternização,,,2025-05,,1017.69
+Confraternização,,,2025-07,,1235.72
+Confraternização,,,2025-08,,756.05
+Confraternização,,,2025-09,,2089.62
+DAS Simples Nacional,,,2025-01,,11672.91
+DAS Simples Nacional,,,2025-02,,14796.31
+DAS Simples Nacional,,,2025-03,,13686.65
+DAS Simples Nacional,,,2025-05,,16978.43
+DAS Simples Nacional,,,2025-06,,12466.93
+DAS Simples Nacional,,,2025-07,,15194.53
+DAS Simples Nacional,,,2025-08,,14132.62
+DAS Simples Nacional,,,2025-09,,19347.28
+Parcelamento Simples,,,2025-01,,348.69
+Parcelamento Simples,,,2025-02,,348.69
+Parcelamento Simples,,,2025-03,,348.69
+Parcelamento Simples,,,2025-05,,357.65
+Parcelamento Simples,,,2025-06,,360.86
+Parcelamento Simples,,,2025-07,,364.31
+Parcelamento Simples,,,2025-08,,348.69
+DARE - Estadual,,,2025-01,,16620.89
+DARE - Estadual,,,2025-02,,11938.08
+DARE - Estadual,,,2025-03,,11980.39
+DARE - Estadual,,,2025-05,,14927.8
+DARE - Estadual,,,2025-06,,9810.53
+DARE - Estadual,,,2025-07,,13894.92
+DARE - Estadual,,,2025-08,,4961.99
+DARE - Estadual,,,2025-09,,19347.28
+DARF DCTF WEB,,,2025-01,,846.17
+DARF DCTF WEB,,,2025-02,,839.31
+DARF DCTF WEB,,,2025-03,,960.54
+DARF DCTF WEB,,,2025-05,,960.54
+DARF DCTF WEB,,,2025-06,,960.54
+DARF DCTF WEB,,,2025-07,,1083.3
+DARF DCTF WEB,,,2025-08,,1083.3
+DARF DCTF WEB,,,2025-09,,1083.3
+Material de uso e consumo,,,2025-01,,109.71
+Material de uso e consumo,,,2025-02,,192.73
+Material de uso e consumo,,,2025-03,,184.77
+Material de uso e consumo,,,2025-05,,148.56
+Material de uso e consumo,,,2025-06,,932.82
+Material de uso e consumo,,,2025-07,,640.53
+Material de uso e consumo,,,2025-08,,113.0
+Material de uso e consumo,,,2025-09,,784.27
+Material de expediente,,,2025-01,,95.0
+Material de expediente,,,2025-02,,80.26
+Material de expediente,,,2025-03,,445.67
+Material de expediente,,,2025-05,,1090.67
+Material de expediente,,,2025-06,,142.0
+Material de expediente,,,2025-07,,125.0
+Material de expediente,,,2025-09,,1965.25
+Despesas com viagens,,,2025-01,,3424.57
+Despesas com viagens,,,2025-02,,303.0
+Despesas com viagens,,,2025-03,,4644.61
+Despesas com viagens,,,2025-05,,1618.14
+Despesas com viagens,,,2025-06,,3072.97
+Despesas com viagens,,,2025-07,,3028.31
+Despesas com viagens,,,2025-08,,2232.11
+Despesas com viagens,,,2025-09,,6853.68
+Consultoria,,,2025-01,,1300.0
+Consultoria,,,2025-02,,360.0
+Consultoria,,,2025-03,,360.0
+Consultoria,,,2025-05,,360.0
+Consultoria,,,2025-06,,843.33
+Consultoria,,,2025-07,,433.33
+Consultoria,,,2025-08,,653.34
+Consultoria,,,2025-09,,30.0
+CDL Associação comercial,,,2025-01,,278.74
+CDL Associação comercial,,,2025-02,,98.42
+CDL Associação comercial,,,2025-03,,98.42
+CDL Associação comercial,,,2025-05,,98.42
+CDL Associação comercial,,,2025-06,,147.42
+CDL Associação comercial,,,2025-07,,145.78
+CDL Associação comercial,,,2025-08,,98.42
+CDL Associação comercial,,,2025-09,,100.42
+Telefone,,,2025-01,,50.0
+Telefone,,,2025-02,,80.91
+Telefone,,,2025-03,,40.42
+Telefone,,,2025-05,,108.65
+Telefone,,,2025-06,,43.63
+Telefone,,,2025-07,,68.13
+Telefone,,,2025-08,,42.75
+Telefone,,,2025-09,,74.83
+Internet,,,2025-01,,169.72
+Internet,,,2025-02,,169.72
+Internet,,,2025-03,,169.72
+Internet,,,2025-05,,169.72
+Internet,,,2025-06,,169.72
+Internet,,,2025-07,,169.72
+Internet,,,2025-08,,169.72
+Internet,,,2025-09,,169.72
+Pró-labore Retirada - Leandro,,,2025-01,,25520.32
+Pró-labore Retirada - Leandro,,,2025-02,,30190.0
+Pró-labore Retirada - Leandro,,,2025-03,,32240.86
+Pró-labore Retirada - Leandro,,,2025-05,,14787.18
+Pró-labore Retirada - Leandro,,,2025-06,,35890.17
+Pró-labore Retirada - Leandro,,,2025-07,,35892.73
+Pró-labore Retirada - Leandro,,,2025-08,,23271.48
+Pró-labore Retirada - Leandro,,,2025-09,,28288.2
+Pró-labore Retirada - Sergio,,,2025-01,,19707.53
+Pró-labore Retirada - Sergio,,,2025-02,,22840.0
+Pró-labore Retirada - Sergio,,,2025-03,,22566.65
+Pró-labore Retirada - Sergio,,,2025-05,,15595.2
+Pró-labore Retirada - Sergio,,,2025-06,,30900.61
+Pró-labore Retirada - Sergio,,,2025-07,,26554.25
+Pró-labore Retirada - Sergio,,,2025-08,,22396.5
+Pró-labore Retirada - Sergio,,,2025-09,,22126.54
+Honorários contabeis,,,2025-01,,706.0
+Honorários contabeis,,,2025-02,,706.0
+Honorários contabeis,,,2025-03,,706.0
+Honorários contabeis,,,2025-05,,706.0
+Honorários contabeis,,,2025-06,,706.0
+Honorários contabeis,,,2025-07,,706.0
+Honorários contabeis,,,2025-08,,706.0
+Honorários contabeis,,,2025-09,,706.0
+Comunicação interna,,,2025-01,,926.42
+Comunicação interna,,,2025-02,,926.42
+Comunicação interna,,,2025-03,,926.42
+Comunicação interna,,,2025-05,,926.42
+Comunicação interna,,,2025-06,,926.42
+Certificado digital,,,2025-01,,50.72
+Certificado digital,,,2025-02,,55.04
+Certificado digital,,,2025-03,,48.8
+Certificado digital,,,2025-05,,48.8
+Certificado digital,,,2025-06,,36.65
+Certificado digital,,,2025-07,,0.48
+Certificado digital,,,2025-08,,0.48
+Serviço de Licença Software,,,2025-01,,1350.0
+Serviço de Licença Software,,,2025-02,,1350.0
+Serviço de Licença Software,,,2025-03,,1350.0
+Serviço de Licença Software,,,2025-05,,550.0
+Serviço de Licença Software,,,2025-06,,550.0
+Serviço de Licença Software,,,2025-07,,550.0
+Serviço de Licença Software,,,2025-08,,550.0
+Serviço de Licença Software,,,2025-09,,550.0
+Seguro de vida - Colaboradores,,,2025-01,,188.51
+Seguro de vida - Colaboradores,,,2025-02,,188.51
+Seguro de vida - Colaboradores,,,2025-03,,188.51
+Seguro de vida - Colaboradores,,,2025-05,,188.51
+Seguro de vida - Colaboradores,,,2025-06,,188.51
+Seguro de vida - Colaboradores,,,2025-07,,188.51
+Seguro de vida - Colaboradores,,,2025-08,,188.51
+Seguro de vida - Colaboradores,,,2025-09,,188.51
+seguro carro RSV5E43,,,2025-07,,524.8
+seguro carro RSV5E43,,,2025-08,,524.8
+seguro carro RSV5E43,,,2025-09,,524.8
+Desp Financeiras/bancos,,,2025-01,,404.43
+Desp Financeiras/bancos,,,2025-02,,798.47
+Desp Financeiras/bancos,,,2025-03,,195.56
+Desp Financeiras/bancos,,,2025-05,,455.96
+Desp Financeiras/bancos,,,2025-06,,278.95
+Desp Financeiras/bancos,,,2025-07,,294.72
+Desp Financeiras/bancos,,,2025-08,,120.37
+Desp Financeiras/bancos,,,2025-09,,22.47
+Desp liq boletos/cartão,,,2025-06,,1371.57
+Desp liq boletos/cartão,,,2025-07,,135.61
+Desp liq boletos/cartão,,,2025-08,,168.75
+Desp liq boletos/cartão,,,2025-09,,161.21
+Financiamento/emprestimo bco parc,,,2025-01,,3716.32
+Financiamento/emprestimo bco parc,,,2025-02,,3879.84
+Financiamento/emprestimo bco parc,,,2025-03,,3642.92
+Financiamento/emprestimo bco parc,,,2025-05,,3766.65
+Financiamento/emprestimo bco parc,,,2025-06,,3696.26
+Financiamento/emprestimo bco parc,,,2025-07,,3779.59
+Financiamento/emprestimo bco parc,,,2025-08,,3620.59
+Financiamento/emprestimo bco parc,,,2025-09,,3702.85
+Finan. Carro RSV5E43,,,2025-08,,5536.39
+Finan. Carro RSV5E43,,,2025-09,,5506.82
+juros FINAN RSV5E43,,,2025-08,,1125.29
+juros FINAN RSV5E43,,,2025-09,,1157.86
+IPVA txas diversas RSW1E87,,,2025-07,,2485.73
+IPVA e taxas diversas RSV5E43,,,2025-07,,1375.11
+FINAN. Carro RSW1E87,,,2025-01,,3592.52
+FINAN. Carro RSW1E87,,,2025-02,,3592.52
+FINAN. Carro RSW1E87,,,2025-03,,3592.52
+FINAN. Carro RSW1E87,,,2025-05,,3592.52
+FINAN. Carro RSW1E87,,,2025-06,,3592.52
+FINAN. Carro RSW1E87,,,2025-07,,3592.52
+FINAN. Carro RSW1E87,,,2025-08,,3592.52
+Combustivel,,,2025-01,,3324.59
+Combustivel,,,2025-03,,3334.26
+Combustivel,,,2025-05,,1136.89
+Combustivel,,,2025-06,,221.37
+Impressos/Grafica,,,2025-06,,410.0
+Impressos/Grafica,,,2025-07,,410.0
+Coleta Resíduos,,,2025-01,,250.0
+Coleta Resíduos,,,2025-02,,250.0
+Coleta Resíduos,,,2025-03,,250.0
+Coleta Resíduos,,,2025-05,,250.0
+Coleta Resíduos,,,2025-06,,250.0
+Coleta Resíduos,,,2025-07,,250.0
+Coleta Resíduos,,,2025-08,,250.0
+Coleta Resíduos,,,2025-09,,250.0
+Coleta Resíduos,,,2025-10,,250.0
+Férias,,,2025-02,,1100.0
+Alvará,,,2025-01,,1738.42
+Alvará,,,2025-02,,1697.0
+Alvará,,,2025-03,,1697.0
+Alvará,,,2025-05,,1697.37
+Exames admissional/demissional,,,2025-02,,50.0
+Engenheiro ambiental,,,2025-01,,500.0
+Engenheiro ambiental,,,2025-02,,500.0
+Engenheiro ambiental,,,2025-08,,450.0
+Marketing/mídia digital,,,2025-01,,700.0
+Marketing/mídia digital,,,2025-02,,700.0
+Marketing/mídia digital,,,2025-03,,188.0
+aquisição imobilizados,,,2025-05,,2000.0
+aquisição imobilizados,,,2025-06,,2000.0
+aquisição imobilizados,,,2025-07,,30000.0
+Manut de Informatica,,,2025-01,,145.0
+Manut de Informatica,,,2025-02,,320.0
+Manut de Informatica,,,2025-03,,233.15
+Manut de Informatica,,,2025-05,,940.0
+Manut de Informatica,,,2025-06,,150.0
+Manut de Informatica,,,2025-07,,125.0
+Manut de Informatica,,,2025-08,,7.98
+Manut de Informatica,,,2025-10,,2559.0
+Manutenção veículo,,,2025-01,,366.0
+Manutenção veículo,,,2025-02,,461.0
+Manutenção veículo,,,2025-03,,461.86
+Manutenção veículo,,,2025-05,,461.86
+Manutenção veículo,,,2025-06,,467.33
+Manutenção veículo,,,2025-07,,668.67
+Manutenção veículo,,,2025-08,,1558.89
+Manutenção veículo,,,2025-09,,1815.38
+Manutenção veículo,,,2025-10,,442.26
+Manutenção Prédio Instalação,,,2025-01,,150.0
+Manutenção Prédio Instalação,,,2025-06,,52.5
+Manutenção Prédio Instalação,,,2025-07,,136.0
+Manutenção Prédio Instalação,,,2025-08,,250.0
+Manutenção Prédio Instalação,,,2025-09,,700.0
+custos -garantia peças e serv,,,2025-08,,600.0
+RESULTADO OPERACIONAL,,,2025-01,,131112.82
+RESULTADO OPERACIONAL,,,2025-02,,57928.57000000001
+RESULTADO OPERACIONAL,,,2025-03,,114156.28000000004
+RESULTADO OPERACIONAL,,,2025-05,,167237.80000000002
+RESULTADO OPERACIONAL,,,2025-06,,531387.0599999999
+RESULTADO OPERACIONAL,,,2025-07,,326014.68000000005
+RESULTADO OPERACIONAL,,,2025-08,,466904.30000000005
+RESULTADO OPERACIONAL,,,2025-09,,127994.27000000002
+RESULTADO OPERACIONAL,,,2025-10,,-10983.38
+RESULTADO OPERACIONAL,,,2025-11,,0.0
+RESULTADO OPERACIONAL,,,2025-12,,0.0
+RESULTADO OPERACIONAL,,,2025-13,,0.0
+RESULTADO LIQUIDO OPERC,,,2025-01,,69367.65000000001
+RESULTADO LIQUIDO OPERC,,,2025-02,,-145183.59999999998
+RESULTADO LIQUIDO OPERC,,,2025-03,,-41704.94999999994
+RESULTADO LIQUIDO OPERC,,,2025-05,,45282.70000000001
+RESULTADO LIQUIDO OPERC,,,2025-06,,203545.10999999996
+RESULTADO LIQUIDO OPERC,,,2025-07,,130175.22000000006
+RESULTADO LIQUIDO OPERC,,,2025-08,,214863.67000000004
+RESULTADO LIQUIDO OPERC,,,2025-09,,-179418.57999999996
+RESULTADO LIQUIDO OPERC,,,2025-10,,-11383.38
+RESULTADO LIQUIDO OPERC,,,2025-11,,0.0
+RESULTADO LIQUIDO OPERC,,,2025-12,,0.0
+RESULTADO LIQUIDO OPERC,,,2025-13,,0.0
+Percentual Custo Fixo  %,,,2025-01,,0.48071749191507473
+Percentual Custo Fixo  %,,,2025-02,,0.6722803177324428
+Percentual Custo Fixo  %,,,2025-03,,0.5205911267076189
+Percentual Custo Fixo  %,,,2025-05,,0.39160633428936015
+Percentual Custo Fixo  %,,,2025-06,,0.20186171714756393
+Percentual Custo Fixo  %,,,2025-07,,0.3359483298182275
+Percentual Custo Fixo  %,,,2025-08,,0.18964356308343733
+Percentual Custo Fixo  %,,,2025-09,,0.5196131586848821
+Receita Total,,,2025-01,,2941596.48
+Custo Variavel Fornecedor diversos,,,2025-01,,1626208.56
+Lucro Bruto,,,2025-01,,1315387.92
+Custo Fixo,,,2025-01,,1029844.0799999998
+Lucro operacional Liquido,,,2025-01,,285543.8400000001
+,,,2025-01,,420228.0685714286
+,,,2025-01,,42022.80685714286
+,,,2025-01,,462250.8754285715
+,,,2025-01,,2656052.6399999997
+,,,2025-01,,379436.0914285714

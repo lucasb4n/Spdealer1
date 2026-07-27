@@ -1,0 +1,874 @@
+/* TaskManagerKanban.css */
+
+.task-manager-kanban {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f5f5f5;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ============================================================================ */
+/* HEADER */
+/* ============================================================================ */
+
+.kanban-header {
+  background: white;
+  border-radius: 0;
+  padding: 12px 15px;
+  margin-bottom: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.kanban-header h1 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+  display: inline-block;
+}
+
+.kanban-controls {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: nowrap;
+  margin-left: 20px;
+}
+
+.search-box {
+  flex: 0 1 300px;
+  min-width: 200px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  transition: border-color 0.3s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #0066cc;
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+}
+
+.priority-filter {
+  flex: 0 0 auto;
+}
+
+.filter-select {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  background: white;
+  cursor: pointer;
+}
+
+.btn-refresh,
+.btn-add-ticket {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.btn-refresh {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.btn-refresh:hover {
+  background: #e0e0e0;
+}
+
+.btn-add-ticket {
+  background: #28a745;
+  color: white;
+}
+
+.btn-add-ticket:hover {
+  background: #218838;
+}
+
+/* ============================================================================ */
+/* LOADING */
+/* ============================================================================ */
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  font-size: 18px;
+  color: #666;
+  background: white;
+  border-radius: 8px;
+}
+
+/* ============================================================================ */
+/* KANBAN BOARD */
+/* ============================================================================ */
+
+.kanban-board {
+  display: flex;
+  gap: 15px;
+  overflow-x: auto;
+  overflow-y: auto;
+  padding: 12px 15px 10px 15px;
+  flex: 1;
+}
+
+.kanban-column {
+  flex: 0 0 calc(20% - 16px);
+  min-width: 300px;
+  background: white;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+}
+
+.kanban-column.dragging-over {
+  background: #f0f8ff;
+  box-shadow: 0 0 0 2px #0066cc;
+}
+
+/* ============================================================================ */
+/* COLUMN HEADER */
+/* ============================================================================ */
+
+.column-header {
+  padding: 10px 12px;
+  border-bottom: 2px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f9f9f9;
+  border-radius: 8px 8px 0 0;
+}
+
+.column-header h2 {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+  font-weight: 600;
+}
+
+.ticket-count {
+  background: #0066cc;
+  color: white;
+  border-radius: 20px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+/* ============================================================================ */
+/* TICKETS CONTAINER */
+/* ============================================================================ */
+
+.tickets-container {
+  flex: 1;
+  padding: 8px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.empty-column {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: #999;
+  font-style: italic;
+  text-align: center;
+}
+
+/* ============================================================================ */
+/* TICKET CARD */
+/* ============================================================================ */
+
+.ticket-card {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px;
+  cursor: grab;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.ticket-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.ticket-card.dragging {
+  opacity: 0.5;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  transform: rotate(5deg);
+}
+
+/* BADGE */
+.ticket-badge {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.ticket-number {
+  font-size: 12px;
+  font-weight: bold;
+  color: #0066cc;
+  background: #e6f0ff;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.ticket-priority {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: #f0f0f0;
+}
+
+/* CÓDIGO */
+.ticket-code {
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.ticket-code strong {
+  color: #666;
+  background: #f5f5f5;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+}
+
+/* TÍTULO */
+.ticket-title {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+/* INFO TAGS */
+.ticket-hours {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+  padding: 4px;
+  background: #fffbf0;
+  border-left: 2px solid #ff9800;
+  border-radius: 2px;
+}
+
+.ticket-blocked {
+  font-size: 12px;
+  color: #d32f2f;
+  margin-bottom: 4px;
+  padding: 4px;
+  background: #ffebee;
+  border-left: 2px solid #d32f2f;
+  border-radius: 2px;
+}
+
+.ticket-due-date {
+  font-size: 12px;
+  color: #0066cc;
+  margin-bottom: 8px;
+  padding: 4px;
+  background: #e6f0ff;
+  border-left: 2px solid #0066cc;
+  border-radius: 2px;
+}
+
+/* ============================================================================ */
+/* AÇÕES DO TICKET */
+/* ============================================================================ */
+
+.ticket-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.btn-view,
+.btn-edit,
+.btn-comment,
+.btn-timeline {
+  flex: 1;
+  padding: 6px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.btn-view:hover,
+.btn-edit:hover,
+.btn-comment:hover,
+.btn-timeline:hover {
+  background: #f5f5f5;
+  border-color: #0066cc;
+}
+
+.btn-view:active,
+.btn-edit:active,
+.btn-comment:active,
+.btn-timeline:active {
+  background: #e6f0ff;
+}
+
+/* ============================================================================ */
+/* RESPONSIVE */
+/* ============================================================================ */
+
+@media (max-width: 1400px) {
+  .kanban-column {
+    flex: 0 0 calc(25% - 15px);
+  }
+}
+
+@media (max-width: 1024px) {
+  .kanban-column {
+    flex: 0 0 calc(33.333% - 14px);
+    min-width: 280px;
+  }
+
+  .kanban-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-box {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .task-manager-kanban {
+    padding: 10px;
+  }
+
+  .kanban-header {
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+
+  .kanban-header h1 {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+
+  .kanban-board {
+    gap: 15px;
+  }
+
+  .kanban-column {
+    flex: 0 0 calc(50% - 7.5px);
+    min-width: 250px;
+  }
+
+  .ticket-card {
+    padding: 10px;
+  }
+
+  .ticket-title {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .kanban-column {
+    flex: 0 0 100%;
+    min-width: 100%;
+  }
+
+  .column-header h2 {
+    font-size: 14px;
+  }
+
+  .ticket-badge {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .search-input {
+    font-size: 16px; /* iOS zoom prevention */
+  }
+}
+
+/* ============================================================================ */
+/* SCROLLBAR PERSONALIZADA */
+/* ============================================================================ */
+
+.tickets-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tickets-container::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 3px;
+}
+
+.tickets-container::-webkit-scrollbar-thumb {
+  background: #999;
+  border-radius: 3px;
+}
+
+.tickets-container::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+.kanban-board::-webkit-scrollbar {
+  height: 6px;
+}
+
+.kanban-board::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+
+.kanban-board::-webkit-scrollbar-thumb {
+  background: #999;
+  border-radius: 3px;
+}
+
+.kanban-board::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+/* ============================================================================ */
+/* ANIMAÇÕES */
+/* ============================================================================ */
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.ticket-card {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* ============================================================================ */
+/* MODAL FLUTUANTE */
+/* ============================================================================ */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #999;
+  transition: color 0.2s;
+}
+
+.modal-close:hover {
+  color: #333;
+}
+
+.modal-tabs {
+  display: flex;
+  border-bottom: 1px solid #ddd;
+  background: #f8f9fa;
+  padding: 0 20px;
+}
+
+.tab-button {
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #666;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+}
+
+.tab-button:hover {
+  color: #333;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.tab-button.active {
+  color: #0066cc;
+  border-bottom-color: #0066cc;
+  background: white;
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.info-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-group label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.info-group p {
+  margin: 0;
+  color: #666;
+  padding: 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.info-group.blocked {
+  background: #fff3cd;
+  padding: 12px;
+  border-radius: 4px;
+  border-left: 4px solid #ffc107;
+}
+
+.info-group.blocked p {
+  background: transparent;
+  color: #856404;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.form-input,
+.comment-input {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus,
+.comment-input:focus {
+  outline: none;
+  border-color: #0066cc;
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+}
+
+.btn-save,
+.btn-add-comment {
+  padding: 10px 16px;
+  background: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+
+.btn-save:hover,
+.btn-add-comment:hover {
+  background: #0052a3;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 102, 204, 0.3);
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.no-comments {
+  text-align: center;
+  color: #999;
+  padding: 20px;
+  font-style: italic;
+}
+
+.comment-item {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 4px;
+  border-left: 3px solid #0066cc;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.comment-header strong {
+  color: #333;
+  font-size: 14px;
+}
+
+.comment-date {
+  font-size: 12px;
+  color: #999;
+}
+
+.comment-text {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.comment-input {
+  resize: vertical;
+}
+
+/* ========== DRAG-DROP FEEDBACK ========== */
+
+/* Banner de Erro */
+.drag-error-banner {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #721c24;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.1);
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.drag-error-close {
+  background: none;
+  border: none;
+  color: #721c24;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.drag-error-close:hover {
+  color: #5a151a;
+}
+
+/* Coluna com drag-over */
+.kanban-column.dragging-over {
+  background-color: #e7f3ff;
+  border-radius: 8px;
+  transition: background-color 0.2s ease-out;
+}
+
+/* Ticket sendo arrastado */
+.ticket-card.dragging {
+  opacity: 0.5;
+  background-color: #f0f0f0;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  transform: rotate(2deg);
+  z-index: 100;
+}
+
+/* Feedback visual ao arrastar */
+.ticket-card {
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+
+.ticket-card:active {
+  cursor: grabbing;
+}
+
+/* ============================================================================ */
+/* TIMELINE TAB */
+/* ============================================================================ */
+
+.timeline-tab {
+  padding: 20px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.timeline-tab > * {
+  width: 100%;
+}
+
+/* ============================================================================ */
+/* BOTÕES CANCELAR E DELETAR (Create/Delete modals) */
+/* ============================================================================ */
+
+.btn-cancel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #fff;
+  color: #374151;
+  transition: background 0.2s;
+}
+.btn-cancel:hover {
+  background: #f3f4f6;
+}
+
+.btn-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #ef4444;
+  color: #fff;
+  transition: background 0.2s;
+}
+.btn-delete:hover {
+  background: #dc2626;
+}
+

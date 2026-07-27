@@ -1,0 +1,62 @@
+.sp-searchable-select {
+  position: relative;
+  width: 100%;
+}
+
+.sp-searchable-input {
+  width: 100%;
+}
+
+.sp-searchable-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.sp-searchable-results::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sp-searchable-results::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.sp-searchable-results::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.sp-searchable-results::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.sp-searchable-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #1e293b;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.15s;
+}
+
+.sp-searchable-item:hover {
+  background-color: #f3f4f6;
+}
+
+.sp-searchable-item--selected {
+  background-color: #dbeafe;
+  font-weight: 600;
+}
+
+.sp-searchable-item:last-child {
+  border-bottom: none;
+}

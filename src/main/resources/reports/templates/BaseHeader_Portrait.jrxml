@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+    name="BaseHeader_Portrait" pageWidth="595" pageHeight="842" orientation="Portrait" columnWidth="555" 
+    leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="0">
+
+    <style name="Title" fontSize="14" isBold="true"/>
+    <style name="SubTitle" fontSize="11" isBold="true"/>
+
+    <parameter name="EMPRESA_NOME" class="java.lang.String">
+        <defaultValueExpression><![CDATA["SPDealer - Sistema de Gestão Financeira"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="EMPRESA_CNPJ" class="java.lang.String">
+        <defaultValueExpression><![CDATA["00.000.000/0000-00"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="USUARIO" class="java.lang.String">
+        <defaultValueExpression><![CDATA["Administrator"]]></defaultValueExpression>
+    </parameter>
+
+    <title>
+        <band height="70">
+            <textField>
+                <reportElement style="Title" x="0" y="0" width="355" height="25" uuid="e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$P{EMPRESA_NOME}]]></textFieldExpression>
+            </textField>
+            <textField pattern="dd/MM/yyyy HH:mm">
+                <reportElement x="355" y="0" width="200" height="25" uuid="f2a3b4c5-d6e7-4f8a-9b0c-1d2e3f4a5b6c"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+            </textField>
+            
+            <textField>
+                <reportElement style="SubTitle" x="0" y="28" width="355" height="20" uuid="a3b4c5d6-e7f8-4a9b-0c1d-2e3f4a5b6c7d"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$P{EMPRESA_CNPJ}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="355" y="28" width="200" height="20" uuid="b4c5d6e7-f8a9-4b0c-1d2e-3f4a5b6c7d8e"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Usuário: " + $P{USUARIO}]]></textFieldExpression>
+            </textField>
+            
+            <line>
+                <reportElement x="0" y="65" width="555" height="1" uuid="c5d6e7f8-a9b0-4c1d-2e3f-4a5b6c7d8e9f"/>
+                <graphicElement>
+                    <pen lineWidth="1.0" lineStyle="Solid"/>
+                </graphicElement>
+            </line>
+        </band>
+    </title>
+</jasperReport>

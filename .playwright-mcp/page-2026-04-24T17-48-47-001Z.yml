@@ -1,0 +1,88 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e6]:
+      - button [ref=e7] [cursor=pointer]:
+        - img [ref=e8]
+      - img "L&S Logo" [ref=e10]
+      - generic [ref=e11]: MENU
+    - generic [ref=e13]:
+      - generic:
+        - img
+      - textbox "Buscar no menu..." [ref=e14]
+    - generic [ref=e16]: Nenhum item encontrado
+    - button "Sair" [ref=e18] [cursor=pointer]:
+      - img [ref=e19]
+      - generic [ref=e21]: Sair
+  - generic [ref=e22]:
+    - banner [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e26] [cursor=pointer]:
+          - img "SpDealer" [ref=e27]
+          - generic [ref=e28]:
+            - generic [ref=e29]: Sp
+            - generic [ref=e30]: Dealer
+        - generic [ref=e31]: SPDealer
+      - generic [ref=e33]:
+        - generic [ref=e34]: Boa tarde, Admin!
+        - generic [ref=e35]:
+          - generic [ref=e36]: sexta-feira, 24 de abril de 2026
+          - generic [ref=e37]: •
+          - generic [ref=e38]: 14:48
+      - generic [ref=e40]:
+        - button "Configurações" [ref=e42] [cursor=pointer]:
+          - img [ref=e43]
+        - button "3" [ref=e45] [cursor=pointer]:
+          - img [ref=e46]
+          - generic [ref=e48]: "3"
+        - button "Meu Perfil (admin)" [ref=e49] [cursor=pointer]:
+          - img [ref=e50]
+    - generic [ref=e53]:
+      - heading "Versão Original do ClienteForm (commit inicial)" [level=1] [ref=e54]
+      - paragraph [ref=e55]: Esta é a versão original do formulário de clientes, com componente híbrido (listagem + modal inline), campos definidos inline, sem tabs, sem design system, e apenas 1 campo no modal (nome).
+      - generic [ref=e56]:
+        - generic [ref=e57]:
+          - heading "Clientes" [level=2] [ref=e58]
+          - button "Novo Cliente" [ref=e59] [cursor=pointer]
+        - table [ref=e61]:
+          - rowgroup [ref=e62]:
+            - row "Código Nome Tipo Documento E-mail" [ref=e63]:
+              - columnheader [ref=e64]
+              - columnheader [ref=e65]
+              - columnheader "Código" [ref=e66]
+              - columnheader "Nome" [ref=e67]
+              - columnheader "Tipo" [ref=e68]
+              - columnheader "Documento" [ref=e69]
+              - columnheader "E-mail" [ref=e70]
+          - rowgroup [ref=e71]:
+            - row "✏️ 🗑️ 001 Cliente Exemplo F 123.456.789-00 cliente@email.com" [ref=e72]:
+              - cell "✏️" [ref=e73]:
+                - button "✏️" [ref=e74] [cursor=pointer]
+              - cell "🗑️" [ref=e75]:
+                - button "🗑️" [ref=e76] [cursor=pointer]
+              - cell "001" [ref=e77]
+              - cell "Cliente Exemplo" [ref=e78]
+              - cell "F" [ref=e79]
+              - cell "123.456.789-00" [ref=e80]
+              - cell "cliente@email.com" [ref=e81]
+            - row "✏️ 🗑️ 002 Empresa ABC Ltda J 12.345.678/0001-90 contato@abc.com" [ref=e82]:
+              - cell "✏️" [ref=e83]:
+                - button "✏️" [ref=e84] [cursor=pointer]
+              - cell "🗑️" [ref=e85]:
+                - button "🗑️" [ref=e86] [cursor=pointer]
+              - cell "002" [ref=e87]
+              - cell "Empresa ABC Ltda" [ref=e88]
+              - cell "J" [ref=e89]
+              - cell "12.345.678/0001-90" [ref=e90]
+              - cell "contato@abc.com" [ref=e91]
+            - row "✏️ 🗑️ 003 Maria Silva F 987.654.321-00 maria@email.com" [ref=e92]:
+              - cell "✏️" [ref=e93]:
+                - button "✏️" [ref=e94] [cursor=pointer]
+              - cell "🗑️" [ref=e95]:
+                - button "🗑️" [ref=e96] [cursor=pointer]
+              - cell "003" [ref=e97]
+              - cell "Maria Silva" [ref=e98]
+              - cell "F" [ref=e99]
+              - cell "987.654.321-00" [ref=e100]
+              - cell "maria@email.com" [ref=e101]
+  - button "Minimizar todas as janelas" [ref=e105] [cursor=pointer]:
+    - img [ref=e106]

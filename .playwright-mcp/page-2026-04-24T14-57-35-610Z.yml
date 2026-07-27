@@ -1,0 +1,51 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e6]:
+      - button [ref=e7] [cursor=pointer]:
+        - img [ref=e8]
+      - img "L&S Logo" [ref=e10]
+      - generic [ref=e11]: MENU
+    - generic [ref=e13]:
+      - generic:
+        - img
+      - textbox "Buscar no menu..." [ref=e14]
+    - generic [ref=e16]: Nenhum item encontrado
+    - button "Sair" [ref=e18] [cursor=pointer]:
+      - img [ref=e19]
+      - generic [ref=e21]: Sair
+  - generic [ref=e22]:
+    - banner [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e26] [cursor=pointer]:
+          - img "SpDealer" [ref=e27]
+          - generic [ref=e28]:
+            - generic [ref=e29]: Sp
+            - generic [ref=e30]: Dealer
+        - generic [ref=e31]: SPDealer
+      - generic [ref=e33]:
+        - generic [ref=e34]: Bom dia, Admin!
+        - generic [ref=e35]:
+          - generic [ref=e36]: sexta-feira, 24 de abril de 2026
+          - generic [ref=e37]: •
+          - generic [ref=e38]: 11:57
+      - generic [ref=e40]:
+        - button "Configurações" [ref=e42] [cursor=pointer]:
+          - img [ref=e43]
+        - button "3" [ref=e45] [cursor=pointer]:
+          - img [ref=e46]
+          - generic [ref=e48]: "3"
+        - button "Meu Perfil (admin)" [ref=e49] [cursor=pointer]:
+          - img [ref=e50]
+    - generic [ref=e53]:
+      - generic [ref=e54]:
+        - heading "Novo Cliente" [level=1] [ref=e62]
+        - generic [ref=e63]:
+          - button "Voltar" [ref=e64] [cursor=pointer]: Voltar
+          - button "Novo" [ref=e65] [cursor=pointer]: Novo
+          - button "Gravar" [ref=e66] [cursor=pointer]: Gravar
+      - paragraph [ref=e70]: Nenhum campo configurado no dictionary.
+      - paragraph [ref=e72]:
+        - strong [ref=e73]: "Atalhos:"
+        - text: ENTER = proximo campo | TAB = navegacao | ESC = voltar | CTRL+S = gravar | CTRL+DEL = deletar
+  - button "Minimizar todas as janelas" [ref=e59] [cursor=pointer]:
+    - img [ref=e60]

@@ -1,0 +1,2079 @@
+# SPDealer - Guia para Agentes de IA
+
+## � ÍNDICE RÁPIDO (Leia Primeiro!)
+
+Este arquivo está dividido em seções críticas. **Comece por aqui:**
+
+1. **🔐 REGRA DE OURO** (linhas 3-29): Dictionary-first para formulários/grids - OBRIGATÓRIO
+2. **📚 GESTÃO DOCUMENTAÇÃO** (NOVO): Regras de .md e .sql, Depreciados/, Copilot - CRÍTICO
+3. **⚠️ Problemas Recorrentes** (linhas 31-88): Frontend 404 e Endpoints 404 - LEIA ANTES DE BUILD
+4. **🏗️ Arquitetura** (linhas 90-135): Stack, estrutura, data flow
+5. **🚨 Endpoints 404 Após Compilação** (linhas 137-193): CRÍTICO - processo Java não reinicia
+6. **🔧 Build & Deployment** (linhas 195-252): Maven/npm, tasks VS Code, start_system.ps1
+7. **📋 API Endpoints** (linhas 254-278): GET/POST endpoints principais
+8. **🎯 Dashboard Dinâmico** (linhas 358-435): JSON-driven, sem inline styles
+9. **📊 Caixa & Bancos** (linhas 590-662): Estrutura de tabelas e queries
+10. **🎯 Task Manager** (linhas 743+): Sistema de rastreamento de tarefas
+11. **🔴 DOCUMENTOS EM ABERTO** (NOVO): vlrsal > 0 - AUDITADO 02 DEC 2025 - **CRÍTICO**
+
+**TL;DR - Checklists Críticos:**
+- **DOCUMENTAÇÃO**: Ler `REGRA-COPILOT-DOCUMENTACAO-SQL.md` ANTES de criar .md ou .sql
+- **PARÂMETROS**: Ler `REGRA-DICTIONARY-FIRST-PARAMETROS.md` ANTES de criar novo formulário
+- Antes de npm/mvn: Leia `.github/DIRETRIZ_CRITICA_NPM_BUILD.md`
+- Depois de compilar: SEMPRE parar Java e reiniciar
+- Widgets: NUNCA hardcode estilos - use JSON do banco
+- Parâmetros: NUNCA hardcode campos - use dictionary_columns do banco
+- Tarefas: SEM ACENTOS em `task_id`, `title`, `tags`
+- **SQL CRÍTICO**: NUNCA execute .sql de Depreciados/ sem revisar completamente
+- **SQL: TODA query DEVE ter filtro de filial** (ver seção novo abaixo)
+- **🔴 SQL: DOCUMENTOS EM ABERTO = status + vlrsal > 0** (AUDITADO 02 DEC 2025)
+- Backup no mega.nz , No PowerShell: mega-login seprocom@seprocom.com.br @pflk15720
+  mega-put "C:\Desenvolvimento\Seprocom\spdealer\backups\spdealer-backup-aaaammdd-hhmmss.zip" /Backups/spdealer/
+  mega-logout
+---
+
+## � GESTÃO DE DOCUMENTAÇÃO E SQL (CRÍTICO - 10 NOV 2025)
+
+
+Produção (frontend + backend juntos):
+
+REACT_APP_API_BASE_URL=http://192.168.10.70
+# SPDealer — Guia resumido para agentes de IA
+
+Objetivo: dar a um agente de IA o contexto mínimo, comandos e convenções para ser produtivo rapidamente neste repositório.
+
+1) Visão rápida
+- Arquitetura: React SPA (frontend) + Spring Boot (backend) + MariaDB. Frontend pode ser servido dentro do WAR em `/spdealer`.
+- Proxy/infra: NGINX + Cloudflare em produção; Tailscale usado para rede interna.
+
+2) Fluxos essenciais (onde olhar)
+- Frontend: `src/` — componentes dinâmicos e widgets (ex.: `src/components/Widget`, `src/setupProxy.js`).
+- Backend: `src/main/java/br/com/spdealer` — controllers e services (ex.: `DashboardApiController`, `DashboardService`).
+- SQL / docs: raiz e `Depreciados/` (não executar .sql sem revisar).
+
+3) Comandos de build e run (PowerShell examples)
+- Frontend (prod build):
+```powershell
+$env:PUBLIC_URL = '/spdealer'
+$env:REACT_APP_API_URL = '/spdealer/api'
+npm ci
+npm run build
+```
+- Backend (maven + restart manual do java):
+```powershell
+# Parar processos java antigos antes do build/run (Windows)
+```
+mvn clean package -DskipTests
+java -jar target\spdealer-1.0.0.jar --server.port=8080
+```
+- Nota crítica: se adicionar endpoints Java, pare o java antes de `mvn clean package` e inicie o novo JAR — endpoints 404 geralmente vêm de instância antiga rodando.
+
+4) Convenções de projeto (regras que importam agora)
+- Dictionary-first: todos os formulários/grids devem usar o dictionary (database-driven). Não hardcode labels ou inputs em componentes.
+- Dashboard/widgets: estilo e comportamento controlados por JSON vindo do DB (`visual_config`). Componentes devem usar fallback mínimos.
+- Task Manager: `task_management` — task_id/title/tags SEM ACENTOS. IDs em formato `TASK-XXX-DESCRICAO`.
+
+5) Regras SQL críticas (auditadas)
+- Toda query que retorna documentos "em aberto" precisa de `vlrsal_rec > 0` (ou `vlrsal_pag > 0`) e checar `status` (NULL/''), caso contrário KPIs estarão incorretos.
+- TODA query deve filtrar por filial; padrão: recuperar `id_fil` da sessão e passar como `?` em JDBC. Consulte `INSTRUCAO_COPILOT_FILTRO_FILIAL_QUERIES.md`.
+
+6) Integrações e pontos sensíveis
+- Widget SQL execution: `GET /api/v2/widget/{id}/data` → `DashboardService.executeWidgetQuery()` (apenas SELECTs autorizados). Evite injeção e revise queries armazenadas.
+- Build/pack: verificar que o build do frontend foi copiado para `src/main/resources/static` ou `target/...` antes de gerar WAR para Tomcat.
+- Ambiente: `start_system.ps1` orquestra dev (frontend+backend) — leia antes de executar.
+
+## .github/copilot-instructions.md — SPDealer (resumo para agentes de IA)
+
+Objetivo: entregar rapidamente o contexto mínimo e regras obrigatórias para agentes de IA trabalharem com o repositório.
+
+Principais regras (leia antes de agir)
+- **Dictionary-first** para formulários/grids: usar `dictionary_tables` / `dictionary_columns` e hooks (`useTableColumns`) — NUNCA hardcode labels/inputs.
+- **SQL crítico**: TODA query que retorna "documentos em aberto" deve ter `vlrsal_rec > 0` (ou `vlrsal_pag > 0`) e checar `status` (NULL/"").
+- **Filial obrigatório**: TODA query deve filtrar pela filial da sessão (`session.getAttribute("id_fil")`).
+- **Reiniciar Java após build**: sempre `taskkill /F /IM java.exe` antes de iniciar o novo `java -jar target/...jar` — endpoints 404 são causados por instância antiga.
+
+Comandos essenciais (PowerShell)
+```powershell
+# Frontend (produção)
+$env:PUBLIC_URL='/spdealer'
+$env:REACT_APP_API_URL='/spdealer/api'
+npm ci; npm run build
+
+# Backend (build + run)
+mvn clean package -DskipTests
+# antes de iniciar: taskkill /F /IM java.exe
+java -jar target\spdealer-1.0.0.jar --server.port=8080
+```
+
+Dev / proxy notes
+- `src/setupProxy.js` deve manter `pathRewrite: { '^': '/api' }` para evitar 404 no dev proxy.
+- use `start_system.ps1` (opção 2) para iniciar frontend dev com `REACT_APP_API_URL` apontando para `http://localhost:8080/api`.
+
+Arquitetura e pontos de integração rápidos
+- Frontend: `src/` (widgets dinâmicos em `src/components/Widget`), AG-Grid configurado via `visual_config` JSON.
+- Backend: `src/main/java/br/com/spdealer` — controllers e services. Query-execution: `DashboardApiController` → `DashboardService.executeWidgetQuery()` (aceita apenas SELECTs).
+- Lazy-load: frontend busca dashboard metadata e só executa SQL por widget via `GET /api/v2/widget/{id}/data`.
+
+Padrões de segurança e operação
+- NUNCA executar .sql encontrados em `Depreciados/.sql/` sem revisão completa e backup.
+- Não commitar segredos; usar GitHub Actions Secrets para CI/CD.
+- Remover acentos em `task_management` (`task_id`, `title`, `tags`) — banco tem problemas de encoding.
+
+Onde procurar informações detalhadas
+- Regras SQL: `REGRA-COPILOT-DOCUMENTACAO-SQL.md`
+- Checklist pre-build: `00_CHECKLIST_PRE_COMPILACAO_05DEZ.md`
+- Deploy & proxy: `00_INDICE_CENTRALIZADO_CLOUDFLARE.md` e `start_system.ps1`
+- Dashboard widgets: `dashboard_widgets` / `dashboard_queries` / `visual_config` (JSON)
+
+Como o agente deve agir (resumido)
+1. Consultar `INDICE-MASTER-DOCUMENTACAO.md` antes de criar docs ou SQL.
+2. Ao modificar Java controllers/endpoints: compilar, parar Java, iniciar novo JAR e testar endpoint (`Invoke-WebRequest`).
+3. Para queries financeiras: garantir `vlrsal_* > 0` + filtro de filial.
+4. Para mudanças em widgets: atualizar `visual_config` e validar no frontend (build + testar renderização).
+
+Se algo não estiver claro ou você quiser que eu incorpore seções específicas do arquivo completo original (por exemplo Task Manager ou regras de `caixacab`), diga qual seção priorizar e eu ajusto esta versão curta.
+```
+
+**TABELAS CRÍTICAS E SEUS CAMPOS DE FILIAL:**
+
+| Tabela | Campo Filial | Segunda Dimensão | Exemplo |
+|--------|------------|------------------|---------|
+| receber | filial_rec | - | WHERE filial_rec = ? |
+| pagar | filial_pag | - | WHERE filial_pag = ? |
+| caixa | filial_cai | - | WHERE filial_cai = ? |
+| caixacab | filial_cai | - | WHERE filial_cai = ? |
+| kardex | filial_kar | dep_kar | WHERE filial_kar = ? AND dep_kar = ? |
+| kardexm | filial_karm | dep_karm | WHERE filial_karm = ? AND dep_karm = ? |
+| masven | filial_xxx | empresa_xxx | WHERE empresa_xxx = '001' AND filial_xxx = ? |
+| masdep | filial_dep | empresa_xxx | WHERE filial_dep = ? AND empresa_xxx = '001' |
+| masfil | codigo_fil | empresa_xxx | WHERE codigo_fil = ? AND empresa_xxx = '001' |
+| mascai | filial_cai | - | WHERE filial_cai = ? |
+| masope | filial_xxx | - | WHERE filial_xxx = ? |
+| maspag | filial_xxx | - | WHERE filial_xxx = ? |
+
+**❌ NUNCA:**
+- ❌ Deixar query SEM filtro de filial
+- ❌ Hardcoding filial (ex: `WHERE filial_rec = '001'`)
+- ❌ Assumir que campo de filial chama `filial` (sempre é `filial_xxx`)
+- ❌ Esquecer segunda dimensão em estoque (kardex, kardexm)
+
+**✅ SEMPRE:**
+- ✅ Usar `session.getAttribute("id_fil")`
+- ✅ Parametrizar com `?` (evitar SQL injection)
+- ✅ Testar filtrando: `COUNT(*) WHERE filial_xxx = 1 vs filial_xxx = 2`
+- ✅ Verificar documentação: `INSTRUCAO_COPILOT_FILTRO_FILIAL_QUERIES.md`
+
+**📌 Consultar**: `INSTRUCAO_COPILOT_FILTRO_FILIAL_QUERIES.md` para mapeamento completo e exemplos detalhados.
+
+---
+
+## 🔴 **REGRA CRÍTICA: DOCUMENTOS EM ABERTO (vlrsal > 0) - DECISÃO AUDITADA**
+
+> **TODO query que busca "Documentos em Aberto" OBRIGATORIAMENTE precisa de vlrsal > 0**
+
+### ✅ DEFINIÇÃO: O que é um "Documento em Aberto"?
+
+Um documento é considerado **"EM ABERTO"** (ou "pendente") quando atende **AMBAS** as condições:
+
+1. **Status Ativo** (não cancelado/deletado):
+   - `status_rec IS NULL OR status_rec = ''` (receber)
+   - `status_pag IS NULL OR status_pag = ''` (pagar)
+
+2. **Saldo Pendente > 0** (tem valor a receber/pagar):
+   - `vlrsal_rec > 0` (receber) - **OBRIGATÓRIO**
+   - `vlrsal_pag > 0` (pagar) - **OBRIGATÓRIO**
+
+### 🔴 PROBLEMA AUDITOR: Queries sem vlrsal > 0
+
+**PROBLEMA DESCOBERTO** (Auditoria 02 DEC 2025):
+- KPIs do Dashboard contavam documentos com vlrsal = 0 (totalmente quitados)
+- Relatórios incluíam documentos com vlrsal = 0 (inflavam números)
+- Queries diretas em Controllers mostravam itens sem saldo pendente
+
+**IMPACTO**:
+- ❌ Dashboard exibia totais incorretos (inflados)
+- ❌ Relatórios de Contas a Receber/Pagar incluíam quitados
+- ❌ Análises financeiras baseadas em números errados
+- ✅ **CORRIGIDO**: 7 queries foram auditadas e corrigidas em 02 DEC 2025
+
+### ✅ PADRÃO OBRIGATÓRIO
+
+**TODA query que retorna receber/pagar DEVE incluir:**
+
+```java
+// 1️⃣ SELECT simples
+SELECT * FROM receber 
+WHERE status_rec IS NULL OR status_rec = '' 
+AND vlrsal_rec > 0;  // OBRIGATÓRIO!
+
+// 2️⃣ Com filtro de data
+SELECT * FROM receber 
+WHERE (status_rec IS NULL OR status_rec = '') 
+AND vlrsal_rec > 0  // OBRIGATÓRIO!
+AND dtvenci_rec BETWEEN ? AND ?;
+
+// 3️⃣ Com GROUP BY (agregações)
+SELECT condic_rec, SUM(vlrsal_rec) as total
+FROM receber 
+WHERE (status_rec IS NULL OR status_rec = '') 
+AND vlrsal_rec > 0  // OBRIGATÓRIO!
+GROUP BY condic_rec;
+
+// 4️⃣ Com JOIN (análise de clientes)
+SELECT c.nomfan_cli, SUM(r.vlrsal_rec) as total
+FROM receber r
+JOIN clientes c ON r.codigo_rec = c.codigo_cli
+WHERE r.vlrsal_rec > 0  // OBRIGATÓRIO!
+AND (r.status_rec IS NULL OR r.status_rec = '')
+GROUP BY c.nomfan_cli;
+
+// 5️⃣ Dashboard KPI (CRÍTICO)
+SELECT SUM(vlrsal_rec) as total_receber
+FROM receber 
+WHERE filial_rec = ?
+AND vlrsal_rec > 0  // OBRIGATÓRIO!
+AND (status_rec IS NULL OR status_rec = '');
+```
+
+### ❌ NUNCA FAZER
+
+```java
+// ❌ ERRADO: Falta vlrsal_rec > 0
+SELECT * FROM receber WHERE status_rec IS NULL;
+
+// ❌ ERRADO: Assume status = 'A' (não existe)
+SELECT * FROM receber WHERE status_rec = 'A' AND vlrsal_rec > 0;
+
+// ❌ ERRADO: Sem qualquer validação
+SELECT * FROM receber LIMIT 100;
+
+// ❌ ERRADO: KPI incluindo quitados
+SELECT SUM(vlrsal_rec) FROM receber WHERE filial_rec = ?;
+
+// ❌ ERRADO: Relatório sem vlrsal > 0
+SELECT * FROM receber WHERE dtvenci_rec < CURDATE();
+```
+
+### ✅ CHECKLIST DE CÓDIGO REVIEW
+
+Ao revisar queries em Java/JPA/Jasper Reports:
+
+- [ ] Query contém `vlrsal_rec > 0` ou `vlrsal_pag > 0`?
+- [ ] Query contém `status_rec IS NULL OR status_rec = ''` (ou equivalente)?
+- [ ] Ambas as condições estão no WHERE/AND (não em aplicação)?
+- [ ] Jasper Reports (<queryString>) tem vlrsal > 0?
+- [ ] GROUP BY/agregações incluem vlrsal > 0?
+- [ ] JPA @Query annotations respeitam o padrão?
+- [ ] Documentos com saldo > 0 são testados manualmente?
+
+### 📚 HISTÓRICO DE CORREÇÕES (Auditoria Completa)
+
+**Services Corrigidos** (DEC 02, 2025):
+- ✅ DashboardService.java (3 queries):
+  - kpiReceber: +AND vlrsal_rec > 0
+  - kpiPagar: +AND vlrsal_pag > 0
+  - listaAtrasos: +AND r.vlrsal_rec > 0
+
+**Controllers Corrigidos**:
+- ✅ ClienteController.java (1 query):
+  - getAnaliseFinanceira() sqlMov: +AND vlrsal_rec > 0
+
+**Jasper Reports Corrigidos**:
+- ✅ FluxoCaixaReport.jrxml: +WHERE vlrsal_rec > 0 AND vlrsal_pag > 0
+- ✅ ContasReceberReport_v2.jrxml: +AND vlrsal_rec > 0
+- ✅ FluxoCaixaReport_v2.jrxml: +AND vlrsal_rec > 0
+
+**Services Validados (sem correção necessária)**:
+- ✅ RelatorioFinanceiroService.java (4 queries: OK)
+- ✅ FluxoCaixaService.java (dynamic: OK)
+- ✅ FluxoCaixaProjetadoService.java (6 queries: OK)
+- ✅ CaixaService.java (consolidation: OK)
+- ✅ FluxoCaixaCalculoService.java (bruto: OK)
+
+**Controllers Validados** (7 controllers, todas OK):
+- ✅ DocumentosAbertosController
+- ✅ ContasReceberController
+- ✅ ContasPagarController
+- ✅ MovimentoCaixaController
+- ✅ ExemploDatasController
+- ✅ ClienteLastMovementController
+- ✅ BaixaDocumentosController
+
+### 📌 REFERÊNCIAS
+
+- **Documentação Completa**: `VALIDACAO-FINAL-QUERIES-CORRIGIDAS-2DEZ2025.md`
+- **Histórico de Auditoria**: `AUDITORIA-COMPLETA-QUERIES-2025-12-02.md`
+- **SQL Security Guidelines**: `.github/INSTRUCAO_COPILOT_FILTRO_FILIAL_QUERIES.md`
+
+---
+
+## ⚠️ COMANDOS POWERSHELL - NUNCA USE `tail` OU `grep`
+
+**IMPORTANTE:** Ao executar comandos em terminal PowerShell, NÃO use comandos Unix como `tail`, `grep`, `head`.
+
+### ❌ ERRADO (CommandNotFoundException)
+```powershell
+mvn clean package 2>&1 | tail -50
+java -jar target\spdealer-1.0.0.jar | tail -20
+grep -n "parameter" arquivo.xml
+```
+
+### ✅ CORRETO (Cmdlets PowerShell)
+```powershell
+# Para exibir últimas N linhas
+mvn clean package 2>&1 | Select-Object -Last 50
+java -jar target\spdealer-1.0.0.jar 2>&1 | Select-Object -Last 20
+
+# Para buscar strings em arquivos
+Get-Content arquivo.xml | Select-String "parameter"
+Select-String "parameter" arquivo.xml
+
+# Para contar ocorrências
+$content = Get-Content arquivo.xml -Raw
+([regex]::Matches($content, 'pattern')).Count
+
+# Para ler linhas específicas
+Get-Content arquivo.xml | Select-Object -First 30
+Get-Content arquivo.xml | Select-Object -Skip 10 -First 20
+```
+
+### 📋 Cmdlets PowerShell Equivalentes
+| Unix | PowerShell |
+|------|-----------|
+| `tail -n 50` | `Select-Object -Last 50` |
+| `head -n 20` | `Select-Object -First 20` |
+| `grep "pattern"` | `Select-String "pattern"` |
+| `wc -l` | `Measure-Object -Line` ou `@().Count` |
+| `cat arquivo` | `Get-Content arquivo` |
+| `ls` | `Get-ChildItem` ou `ls` (alias) |
+
+---
+
+## �🔐 **REGRA DE OURO: DICTIONARY-FIRST PARA FORMULÁRIOS E GRIDS**
+
+> **NÃO EXISTE FORMULÁRIO SEM DICIONÁRIO**
+
+**OBRIGATÓRIO antes de criar qualquer:**
+- ✅ Formulário de entrada (cadastro, edição, modal)
+- ✅ Formulário de localizar (search, filtro)
+- ✅ Grid AG-Grid (resultado, listagem)
+- ✅ Select/Dropdown (categoria, status)
+
+**PROCESSO OBRIGATÓRIO**:
+1. Verificar se tabela existe em `dictionary_tables`
+2. Verificar se campos existem em `dictionary_columns`
+3. Usar hook `useTableColumns(tableName, context)`
+4. Renderizar dinâmico com `DynamicForm` ou `DynamicAgGridTable`
+5. Filtrar por `form_visible_{context}` / `search_visible_{context}`
+6. Ordenar por `form_order_{context}` / `search_order_{context}`
+
+**PROIBIDO**:
+- ❌ Hardcoded labels em componentes React
+- ❌ Tipos de entrada fixos no código
+- ❌ Validações em regex no componente (usar `validation_pattern`)
+- ❌ Criar formulário sem schema no dictionary
+
+**Ver**: `REGRA-DICTIONARY-FIRST-FORMULARIOS-GRIDS.md` (documentação completa)
+
+---
+
+## 🚨 **LEITURA OBRIGATÓRIA ANTES DE QUALQUER COMANDO npm/mvn**
+
+**ANTES de executar QUALQUER comando de build ou deploy:**
+
+1. Leia: `.github/IA_INSTRUÇÕES_ANTES_DE_EXECUTAR.md` (5 minutos)
+2. Depois: `.github/DIRETRIZ_CRITICA_NPM_BUILD.md` (referência completa)
+
+**Nota**: Este mesmo aviso está em `🔴_LEIA_PRIMEIRO_ANTES_DE_QUALQUER_COMANDO.md` na raiz.
+
+---
+
+## ⚠️ PROBLEMA CRÍTICO RECORRENTE: Frontend 404 ao Carregar Dashboard
+
+**ESTE PROBLEMA JÁ OCORREU 3+ VEZES E DEVE SER EVITADO!**
+
+### 🔴 O Problema
+- Frontend retorna 404 ao tentar carregar `/api/v1/dashboards/1`
+- Backend em `http://localhost:8080/api/v1/dashboards/1` retorna 200 OK com dados completos
+- Requisições chegam no proxy como `/v1/dashboards/1` (SEM `/api`)
+
+### 🟢 Causa Raiz
+O `setupProxy.js` (proxy do react-scripts em desenvolvimento) usa `app.use('/api', middleware)` que **REMOVE `/api` do req.url**. Quando a requisição chega no middleware, ela contém apenas `/v1/dashboards/1`, não `/api/v1/dashboards/1`.
+
+### ✅ Solução PERMANENTE e CRÍTICA
+**NUNCA REMOVER OU MODIFICAR ESTES 3 ARQUIVOS:**
+
+1. **`src/setupProxy.js`** - DEVE conter `pathRewrite: { '^': '/api' }`
+   ```javascript
+   pathRewrite: {
+     '^': '/api'  // Reconstrui o caminho completo /api/v1/dashboards/1
+   }
+   ```
+
+2. **`start_system.ps1`** - Opção 2 (Desenvolvimento) DEVE passar variáveis de ambiente pro frontend:
+   ```powershell
+   $frontendDevCmd = @"
+   `$env:REACT_APP_API_BASE_URL='http://localhost:$srvPort'
+   `$env:REACT_APP_API_URL='http://localhost:$srvPort/api'
+   `$env:PORT=3000
+   cd '$scriptDir'
+   npm start
+   "@
+   ```
+
+3. **`.env`** - Deve ter variáveis corretas:
+   ```properties
+   REACT_APP_API_BASE_URL=http://localhost:8080
+   REACT_APP_API_URL=http://localhost:8080/api
+   PORT=3000
+   ```
+
+### 📋 Checklist de Inicialização
+- [ ] `src/setupProxy.js` tem `pathRewrite: { '^': '/api' }`
+- [ ] `start_system.ps1` opção 2 seta variáveis REACT_APP_*
+- [ ] Backend em `http://localhost:8080/api/v1/dashboards/1` retorna 200
+- [ ] Frontend em `http://localhost:3000/api/v1/dashboards/1` retorna 200 (via proxy)
+- [ ] Dashboard renderiza com dados na página
+
+### 🔧 Teste Rápido de Verificação
+```powershell
+# Terminal 1: Verificar backend direto
+Invoke-WebRequest -Uri "http://localhost:8080/api/v1/dashboards/1"
+
+# Terminal 2: Verificar proxy
+Invoke-WebRequest -Uri "http://localhost:3000/api/v1/dashboards/1"
+
+# Ambos devem retornar 200 com dados JSON
+```
+
+---
+
+## 🔐 REGRA DE OURO: HTTPS + NGINX + CLOUDFLARE (PRODUÇÃO)
+
+> **CRIADO 05 DEZ 2025 - Documentado após sucesso de deployment**
+
+### 🔴 O Problema (Descoberto em Produção)
+
+**Cenário**: WAR compilado com API URLs apontando para IP interno + porta
+```env
+❌ ERRADO - WAR compilado com isso:
+REACT_APP_API_URL=http://192.168.10.70:8080/spdealer/api
+```
+
+**Sintoma**: Frontend em navegador via HTTPS carrega, mas dropdowns ficam com erro:
+- `❌ Erro ao conectar ao servidor` (2 vezes)
+- `Carregando empresas...` (nunca carrega)
+- Chamadas API falham silenciosamente
+
+**Causa**: 
+1. Frontend roda em `https://spdealer.seprocom.com.br/` (HTTPS, domain)
+2. Backend está em `http://192.168.10.70:8080/` (HTTP, IP interno)
+3. Browser bloqueia requisições de HTTPS → HTTP (mixed content)
+4. CORS também falha (domínios diferentes)
+5. Frontend não consegue chamar API
+
+### ✅ Solução Definitiva (HTTPS via NGINX + Cloudflare)
+
+**Estrutura Correta:**
+
+```
+┌─────────────────────────────────────┐
+│   Browser do Usuário (HTTPS)        │
+│  https://spdealer.seprocom.com.br   │
+└──────────────┬──────────────────────┘
+               │ HTTPS (público)
+               ↓
+┌──────────────────────────────────────────────┐
+│  Cloudflare (Reverse Proxy + SSL/TLS)        │
+│  Redirect: / → /spdealer/                    │
+└──────────────┬───────────────────────────────┘
+               │ HTTPS (interno tailnet)
+               ↓
+┌──────────────────────────────────────────────┐
+│  NGINX (192.168.10.70)                       │
+│  Escuta: https://spdealer.seprocom.com.br    │
+│  Proxy: → http://localhost:8080/spdealer/    │
+└──────────────┬───────────────────────────────┘
+               │ HTTP (localhost)
+               ↓
+┌──────────────────────────────────────────────┐
+│  Spring Boot Tomcat (localhost:8080)         │
+│  Servidor de aplicação                       │
+│  Database: 192.168.10.70:3306                │
+└──────────────────────────────────────────────┘
+```
+
+**Configuração Correta no `.env` (PRODUÇÃO):**
+
+```env
+# ✅ CORRETO - Frontend acessa via domínio público
+REACT_APP_API_BASE_URL=https://spdealer.seprocom.com.br
+REACT_APP_API_URL=https://spdealer.seprocom.com.br/api
+PUBLIC_URL=/spdealer/
+
+# Explicação:
+# - Frontend está rodando em https://spdealer.seprocom.com.br/spdealer/
+# - Precisa chamar API no mesmo domínio e protocolo
+# - NGINX reverse proxy na origem (192.168.10.70) redireciona para localhost:8080
+# - Browser não vê nada de HTTP interno - tudo é HTTPS por fora
+```
+
+**Configuração Correta em `package.json`:**
+
+```json
+{
+  "homepage": "/spdealer/",
+  "proxy": "http://localhost:8080"  // Irrelevante em produção
+}
+```
+
+### 🔧 Checklist de Build + Deploy
+
+**1️⃣ Antes de fazer npm build (LOCAL):**
+```powershell
+# Limpar variáveis antigas
+if ($env:REACT_APP_API_BASE_URL) { Remove-Item env:REACT_APP_API_BASE_URL }
+if ($env:REACT_APP_API_URL) { Remove-Item env:REACT_APP_API_URL }
+
+# Setar APENAS as variáveis de PRODUÇÃO
+$env:PUBLIC_URL = '/spdealer/'
+$env:REACT_APP_API_BASE_URL = 'https://spdealer.seprocom.com.br'
+$env:REACT_APP_API_URL = 'https://spdealer.seprocom.com.br/api'
+
+# Verificar
+Write-Host "PUBLIC_URL=$env:PUBLIC_URL"
+Write-Host "REACT_APP_API_BASE_URL=$env:REACT_APP_API_BASE_URL"
+Write-Host "REACT_APP_API_URL=$env:REACT_APP_API_URL"
+
+# Build
+npm run build
+```
+
+**2️⃣ Depois de mvn build:**
+```powershell
+# Verificar WAR foi gerado
+$warSize = (Get-Item "c:\Desenvolvimento\Seprocom\spdealer\target\spdealer-1.0.0.war").Length / 1MB
+Write-Host "✅ WAR gerado: $warSize MB"
+```
+
+**3️⃣ Deploy via SCP:**
+```powershell
+# SCP copy WAR
+scp -o StrictHostKeyChecking=no `
+  "c:\Desenvolvimento\Seprocom\spdealer\target\spdealer-1.0.0.war" `
+  "root@192.168.10.70:/usr/local/tomcat10/webapps/spdealer.war"
+
+# Stop + Start serviço
+ssh root@192.168.10.70 "systemctl stop spdealer.service && sleep 2 && systemctl start spdealer.service && sleep 15"
+```
+
+**4️⃣ Verificação Pós-Deploy:**
+```powershell
+# Teste HTTPS (público)
+$response = Invoke-WebRequest -Uri "https://spdealer.seprocom.com.br/" -UseBasicParsing
+Write-Host "Status: $($response.StatusCode)"
+
+# Teste APIs (HTTPS via Cloudflare)
+(Invoke-WebRequest -Uri "https://spdealer.seprocom.com.br/spdealer/api/tabelas-auxiliares/empresas" -UseBasicParsing).Content | ConvertFrom-Json
+
+(Invoke-WebRequest -Uri "https://spdealer.seprocom.com.br/spdealer/api/tabelas-auxiliares/filiais" -UseBasicParsing).Content | ConvertFrom-Json
+```
+
+### ⚠️ ERROS COMUNS (O que NÃO fazer)
+
+```env
+❌ NUNCA:
+REACT_APP_API_URL=http://192.168.10.70:8080/spdealer/api  (IP interno + HTTP)
+REACT_APP_API_URL=http://localhost:8080/spdealer/api       (localhost em produção)
+REACT_APP_API_URL=/api                                      (path relativo vago)
+REACT_APP_API_URL=http://spdealer.seprocom.com.br/api      (HTTP em vez de HTTPS)
+```
+
+### 📝 Git Commit + Tag
+
+```powershell
+git add .env package.json
+git commit -m "fix: API URLs para HTTPS via Cloudflare + NGINX 05DEZ"
+git tag -a "deployment/20251205-api-https-fixed" -m "Dropdowns e empresas carregando"
+```
+
+### ✅ Validação de Sucesso
+
+| Critério | Status | Teste |
+|----------|--------|-------|
+| Frontend carrega | ✅ | `https://spdealer.seprocom.com.br/` → 200 OK |
+| Dropdown Empresa | ✅ | `https://spdealer.seprocom.com.br/spdealer/api/tabelas-auxiliares/empresas` → JSON |
+| Dropdown Filial | ✅ | `https://spdealer.seprocom.com.br/spdealer/api/tabelas-auxiliares/filiais` → JSON |
+| Login funciona | ✅ | Selecionar empresa + filial + login |
+| Dashboard carrega | ✅ | Após login, dashboard financeiro renderiza |
+
+---
+## 🏗️ Visão Geral da Arquitetura do SPDealer
+
+### Arquitetura Híbrida: React SPA + Spring Boot Backend
+
+SPDealer é um **sistema CRM/ERP híbrido** com dois frontends convivendo:
+- **SPA React moderno** (em desenvolvimento ativo) - porta 3000
+- **Sistema Thymeleaf + Spring Boot** (funcional, produção) - porta 8080
+
+Ambos acessam o mesmo banco MariaDB em `100.126.166.63`. Não remova ou substitua um pelo outro.
+
+### Stack Técnico Atual
+- **Frontend**: React 18 + TypeScript + Bootstrap 5.3 + AG-Grid v34+ + Chart.js
+- **Backend**: Spring Boot 3.1.4 + Java 17 + MariaDB
+- **Arquitetura Dashboard**: 5 tabelas (dashboards, dashboard_widgets, dashboard_queries, widget_templates, dashboard_audit_log)
+- **Autenticação Híbrida**: HttpSession (Spring) + AuthContext (React)
+
+### 🔴 DESCOBERTA CRÍTICA - Endpoints de Query Execution
+
+**GET `/api/v2/widget/{widgetId}/data`** - Executa query SQL de um widget
+- Localização: `br.com.spdealer.controller.DashboardApiController` (linha 58)
+- Service: `br.com.spdealer.service.DashboardService.executeWidgetQuery()`
+- Status: Implementado no código, mas requer **recompilação e restart do backend** para funcionar
+- Validação: Apenas queries SELECT são permitidas (segurança)
+- Retorno: Lista de dados ou mapa (conforme widget_type: aggrid, chart, kpi)
+
+### Data Flow: Dashboard Renderization
+```
+Frontend (React)
+  ↓ GET /api/v2/dashboards/{userId}
+Backend DashboardService.getDashboardByUserId()
+  ↓ Busca: dashboards (ID, layout configs)
+  ↓ Busca: dashboard_widgets (posição, tipo, query_id)
+  ↓ Busca: dashboard_queries (sql_query)
+  ↓ (sem executar queries aqui)
+Response: { widgets: [...], theme_config, canvas_config }
+  ↓
+Frontend renderiza widgets com layout JSON
+  ↓ (LAZY) GET /api/v2/widget/{id}/data
+Backend DashboardService.executeWidgetQuery()
+  ↓ Executa SQL da query
+  ↓ Valida segurança (SELECT only)
+Response: { data: [...] }
+  ↓
+Widget renderiza com dados
+```
+
+---
+
+## 🚨 PROBLEMA CRÍTICO RECORRENTE: Endpoints 404 Após Código Compilado
+
+**ESTE PROBLEMA JÁ OCORREU 3+ VEZES - SIGA O CHECKLIST!**
+
+### 🔴 Sintoma
+- Novo endpoint adicionado ao código compila sem erros
+- Endpoint retorna 404 ao testar via `Invoke-WebRequest`
+- Backend está rodando, mas rota não é reconhecida
+
+### 🟢 Causa Raiz
+- Código foi compilado (`mvn clean package`) ✅
+- Novo JAR foi gerado (`target/spdealer-1.0.0.jar`) ✅
+- **MAS**: Processo Java anterior ainda está rodando com código antigo ❌
+
+### ✅ Solução OBRIGATÓRIA
+
+**PASSO 1: Parar processo Java anterior**
+```powershell
+taskkill /F /IM java.exe                # Forçar parada de TODOS
+Start-Sleep -Seconds 2
+```
+
+**PASSO 2: Compilar código novo**
+```powershell
+mvn clean package -DskipTests           # Build completo
+# Verificar output: BUILD SUCCESS
+```
+
+**PASSO 3: Iniciar novo processo**
+```powershell
+java -jar target\spdealer-1.0.0.jar --server.port=8080
+# Aguarde: "Started DashboardApplication in X.XXX seconds"
+```
+
+**PASSO 4: Testar novo endpoint**
+```powershell
+Start-Sleep -Seconds 3
+$response = Invoke-WebRequest -Uri "http://localhost:8080/api/v2/widget/6/data" -Method Get
+# Esperado: Status 200 ou erro específico (NÃO 404)
+```
+
+### 📋 Checklist de Verificação
+- [ ] ✅ Processo Java anterior foi parado (`taskkill /F /IM java.exe`)
+- [ ] ✅ Código compilado com sucesso (`mvn clean package -DskipTests`)
+- [ ] ✅ JAR file criado (`ls target/*.jar`)
+- [ ] ✅ Novo processo iniciado (`java -jar target\spdealer-1.0.0.jar`)
+- [ ] ✅ Backend respondendo a endpoints conhecidos (ex: `/api/v2/dashboards`)
+- [ ] ✅ Novo endpoint testado e retorna resposta (não 404)
+
+---
+
+### 1. Proibição de Código Inline
+- Nenhum componente React, container ou widget pode conter estilos, propriedades, ícones, tooltips ou cores definidos inline ou hardcoded.
+- Exceção: Apenas valores mínimos de fallback para evitar erros de renderização (ex: cor padrão, texto vazio).
+
+### 2. Configuração 100% Dinâmica via JSON
+- Todos os estilos, propriedades visuais, ícones, tooltips, cores, fontes, paddings, bordas, labels, títulos, botões e parâmetros de dados devem ser aplicados exclusivamente via JSON, proveniente do banco de dados (campos visual_config, data_config, etc).
+- Nunca definir valores fixos em componentes, containers ou widgets.
+
+### 3. Estrutura dos Componentes
+- KpiWidget, ChartWidget, AgGridWidget e demais widgets devem:
+  - Renderizar todos os elementos (container, título, ícone, botões, grid, canvas, labels) com estilos e propriedades vindos do JSON.
+  - Gerar colunas, labels, tooltips e botões dinamicamente conforme o JSON.
+  - Usar fallback mínimo apenas para evitar erro de renderização (ex: card_bg default se ausente).
+
+### 4. Fallbacks e Robustez
+- Se o JSON estiver incompleto ou ausente:
+  - Renderizar com valores mínimos padrão (ex: cor branca, texto vazio, sem ícone).
+  - Nunca quebrar a renderização por falta de parâmetro.
+
+### 5. Fidelidade Visual
+- Todos os widgets devem seguir o padrão visual do Objetivo.html e das diretrizes do SPDealer.
+- Ajustes visuais, responsividade e layout devem ser controlados via JSON, nunca por código fixo.
+
+### 6. Dinamismo de Dados
+- AG Grid:
+  - Colunas e dados devem ser gerados dinamicamente conforme o JSON e dados do backend.
+  - Nunca definir colunas fixas no componente.
+- ChartWidget:
+  - Configuração de gráficos, cores, labels e legendas via JSON.
+
+### 7. Tipagem e Validação
+- TypeScript:
+  - Tipar todos os props e configs.
+  - Validar presença dos parâmetros do JSON antes de renderizar.
+
+### 8. Build e Testes
+- Após qualquer alteração:
+  - Executar build do frontend (npm run build).
+  - Validar se todos os widgets renderizam corretamente e sem erros.
+
+### 9. Documentação e Manutenção
+- Esta regra deve ser seguida em todo novo desenvolvimento, refatoração ou manutenção de dashboards e widgets.
+- Qualquer exceção deve ser documentada e aprovada pelo responsável técnico.
+
+---
+**Resumo:**
+> Todos os widgets e dashboards do SPDealer devem ser 100% dinâmicos, com estilos e propriedades controlados exclusivamente via JSON do banco, sem nenhum código inline ou valor hardcoded, exceto fallback mínimo para evitar erro de renderização. Fidelidade visual e robustez são obrigatórias.
+SPDealer é um sistema CRM/ERP híbrido com **frontend React + backend Spring Boot** conectado a MariaDB. O projeto combina duas arquiteturas: um SPA React moderno em desenvolvimento e um sistema Spring Boot com Thymeleaf já funcional.
+
+### Stack Principal
+- **Frontend**: React 18 + TypeScript + Bootstrap 5.3 + AG-Grid + Chart.js
+- **Backend**: Spring Boot 3.1.4 + Java 17 + MariaDB + Thymeleaf
+- **Build**: Maven (backend) + npm/React Scripts (frontend)
+
+## Estrutura Crítica do Projeto
+
+### Frontend React (`/src`)
+```
+src/
+├── components/          # Componentes reutilizáveis (AgGridTable, DashboardCard, etc.)
+├── pages/              # Páginas principais (Dashboard, Usuarios, DashboardBuilder)
+├── services/           # APIs e integrações (MenuService.ts)
+├── contexts/           # Context API (AuthContext, NavigationContext)
+├── types/              # Definições TypeScript
+└── Router.tsx          # Roteamento com React Router v7
+```
+
+### Backend Spring Boot (`/src/main/java`)
+- Controllers já implementados: `SimpleAuthController`, `DashboardController`, `CrmController`
+- Autenticação via HttpSession (Spring Security **desabilitado**)
+- Templates Thymeleaf funcionais em `/resources/templates`
+
+## Padrões de Desenvolvimento Específicos
+
+### 0. ⚡ PADRÃO ARQUITETURAL UNIVERSAL - Datas Duplicadas
+**REGRA CRÍTICA APLICADA EM TODAS AS TABELAS:**
+```sql
+campo_xxx  (decimal 9,0)  -- Formato DDMMAAAA - APENAS compatibilidade legado
+campo_xxxi (date)         -- Formato YYYY-MM-DD - Campo PRINCIPAL do SPDealer
+```
+- ✅ **Campos com "i"**: SEMPRE usar (dtmovi_rec, dtemissi_rec, dtvenci_rec, etc.)
+- 🔄 **Campos sem "i"**: APENAS para compatibilidade (dtmov_rec, dtemiss_rec, dtvenc_rec, etc.)
+- 📋 **Gravação**: SEMPRE gravar em ambos os campos
+- 🎯 **Consultas**: SEMPRE usar campos com "i"
+- 📖 **Docs**: `docs/DIRETRIZES_PADRAO_DATAS_UNIVERSAL.md`
+
+### 1. Sistema de Autenticação Híbrido
+- **Spring Boot**: HttpSession com templates Thymeleaf (`/auth` → `/dashboard`)
+- **React**: AuthContext com navegação protegida via React Router
+- **Importante**: Ambos os sistemas coexistem - não remover um pelo outro
+
+### 2. Convenções de Componentes React
+```typescript
+// Componentes seguem padrão de props tipadas
+interface DashboardCardProps {
+  title: string;
+  value: string | number;
+  icon?: string;
+  color?: string;
+}
+
+// Services usam classe estática
+export class MenuService {
+  static async getMenuGroupsByUser(userId: number): Promise<MenuGroup[]>
+}
+```
+
+### 3. Integração com AG-Grid
+- Usar `ag-grid-react` v34+ para tabelas de dados
+- Componentes customizados em `/src/components/AgGridTable/`
+- Configuração responsiva padrão com Bootstrap
+
+### 🎯 AG-Grid: Configuração Dinâmica de Colunas
+
+#### Onde Definir Largura de Colunas
+
+**NUNCA hardcode largura de colunas no componente!**
+
+1. **Via JSON - `visual_config` no banco (RECOMENDADO)**:
+   ```json
+   {
+     "grid_columns": [
+       {
+         "field": "cliente_rec",
+         "headerName": "Cliente",
+         "width": 250,
+         "pinned": "left",
+         "filter": true,
+         "sortable": true
+       },
+       {
+         "field": "vlrsal_rec",
+         "headerName": "Saldo R$",
+         "width": 150,
+         "valueFormatter": "params.value.toLocaleString('pt-BR', {minimumFractionDigits: 2})",
+         "cellStyle": { "textAlign": "right" }
+       }
+     ],
+     "grid_height": "600px",
+     "enableExcelExport": true,
+     "enableColumnResize": true
+   }
+   ```
+
+2. **Onde armazenar**:
+   - Tabela: `dashboard_widgets`
+   - Coluna: `visual_config` (JSON text)
+   - Para cada widget AG Grid, incluir array `grid_columns` com config
+
+#### Componente AgGridWidget.tsx - Renderização Dinâmica
+
+```typescript
+// src/components/Widget/AgGridWidget.tsx
+const AgGridWidget = ({ widget }: AgGridWidgetProps) => {
+  const visualConfig = widget.visual_config as VisualConfig;
+  const gridColumns = visualConfig?.grid_columns || [];
+  
+  // Gerar colunas dinamicamente
+  const columnDefs = gridColumns.map(col => ({
+    field: col.field,
+    headerName: col.headerName,
+    width: col.width || 100,  // Fallback: 100px
+    pinned: col.pinned || undefined,
+    filter: col.filter !== false,
+    sortable: col.sortable !== false,
+    valueFormatter: col.valueFormatter ? 
+      new Function('params', `return ${col.valueFormatter}`) : undefined,
+    cellStyle: col.cellStyle
+  }));
+
+  return (
+    <AgGridReact
+      columnDefs={columnDefs}
+      rowData={data}
+      defaultColDef={{
+        flex: 1,
+        minWidth: 100,
+        resizable: visualConfig?.enableColumnResize !== false
+      }}
+    />
+  );
+};
+```
+
+---
+
+## 💾 NOVO: Sistema de Preferências do Usuário - AG Grid
+
+### Objetivo
+Armazenar preferências do usuário por dashboard/widget:
+- Ordem das colunas
+- Largura das colunas
+- Colunas visíveis/ocultas
+- Filtros aplicados
+
+### Estrutura da Tabela `user_grid_preferences`
+
+```sql
+CREATE TABLE user_grid_preferences (
+  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  user_id INT UNSIGNED NOT NULL,
+  dashboard_id INT UNSIGNED NOT NULL,
+  widget_id INT UNSIGNED NOT NULL,
+  
+  -- Configuração das colunas
+  column_config JSON NOT NULL,
+  -- Exemplo: [
+  --   {"field": "cliente_rec", "width": 300, "order": 1, "visible": true},
+  --   {"field": "vlrsal_rec", "width": 120, "order": 2, "visible": true},
+  --   {"field": "dtvenci_rec", "width": 100, "order": 3, "visible": false}
+  -- ]
+  
+  -- Filtros aplicados
+  filters JSON,
+  -- Exemplo: {"cliente_rec": "ABC", "status_rec": "vencido"}
+  
+  -- Ordenação
+  sort_config JSON,
+  -- Exemplo: {"field": "dtvenci_rec", "direction": "asc"}
+  
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  
+  UNIQUE KEY uk_user_dashboard_widget (user_id, dashboard_id, widget_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (dashboard_id) REFERENCES dashboard(id) ON DELETE CASCADE,
+  FOREIGN KEY (widget_id) REFERENCES dashboard_widgets(id) ON DELETE CASCADE
+);
+```
+
+### Endpoints Backend (Spring Boot)
+
+```java
+// GET /api/v1/user-preferences/dashboard/{dashboardId}/widget/{widgetId}
+@GetMapping("/user-preferences/dashboard/{dashboardId}/widget/{widgetId}")
+public UserGridPreference getPreference(@PathVariable Long dashboardId, 
+                                        @PathVariable Long widgetId,
+                                        @AuthenticationPrincipal User user) {
+  return userPreferenceService.getPreference(user.getId(), dashboardId, widgetId);
+}
+
+// POST /api/v1/user-preferences/dashboard/{dashboardId}/widget/{widgetId}
+@PostMapping("/user-preferences/dashboard/{dashboardId}/widget/{widgetId}")
+public UserGridPreference savePreference(@PathVariable Long dashboardId,
+                                          @PathVariable Long widgetId,
+                                          @RequestBody UserGridPreference pref,
+                                          @AuthenticationPrincipal User user) {
+  pref.setUserId(user.getId());
+  return userPreferenceService.save(pref);
+}
+```
+
+### Integração Frontend - AgGridWidget.tsx
+
+```typescript
+const AgGridWidget = ({ widget, userId, dashboardId }: Props) => {
+  const [columnConfig, setColumnConfig] = useState<ColumnConfig[]>([]);
+  
+  // 1. Carregar preferências do usuário ao inicializar
+  useEffect(() => {
+    if (!userId) return;
+    
+    fetch(`/api/v1/user-preferences/dashboard/${dashboardId}/widget/${widget.id}`)
+      .then(r => r.json())
+      .then(pref => {
+        if (pref?.column_config) {
+          setColumnConfig(pref.column_config);
+        } else {
+          // Usar config padrão do visual_config
+          setColumnConfig(widget.visual_config?.grid_columns || []);
+        }
+      })
+      .catch(() => setColumnConfig(widget.visual_config?.grid_columns || []));
+  }, [userId, dashboardId, widget.id]);
+  
+  // 2. Salvar mudanças de colunas quando usuário redimensiona/reordena
+  const onColumnUpdated = (event: ColumnEvent) => {
+    const newConfig = event.api.getColumnDefs().map((col, idx) => ({
+      field: col.field,
+      width: col.actualWidth,
+      order: idx,
+      visible: col.visible !== false
+    }));
+    
+    // Salvar no backend
+    fetch(`/api/v1/user-preferences/dashboard/${dashboardId}/widget/${widget.id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ column_config: newConfig })
+    });
+  };
+  
+  return (
+    <AgGridReact
+      columnDefs={generateColumnDefs(columnConfig)}
+      onColumnResized={onColumnUpdated}
+      onColumnMoved={onColumnUpdated}
+      // ... outras props
+    />
+  );
+};
+```
+
+### Workflow de Uso
+
+1. **Primeira Vez**: Usuário acessa dashboard → carrega `visual_config` padrão → renderiza AG Grid
+2. **Durante Sessão**: Usuário redimensiona/reordena colunas → salva em `user_grid_preferences`
+3. **Próxima Sessão**: Usuário acessa dashboard → carrega preferências salvas → renderiza com layout customizado
+4. **Sem Preferência Salva**: Renderiza com `visual_config` padrão
+
+### Fallback & Robustez
+
+```typescript
+// Se nenhuma preferência: usar visual_config padrão
+// Se preferência incompleta: mesclar com padrão
+const finalConfig = { 
+  ...visualConfigDefault,
+  ...userPreference
+};
+```
+
+---
+
+## 🔧 Workflows de Build e Deployment
+
+### ⚠️ CRÍTICO: Fluxo de Atualização de Código
+
+Quando modificar arquivos Java no backend que expõem novos endpoints (ex: DashboardApiController.java):
+
+**1️⃣ Compilar Backend (Maven)**
+```powershell
+mvn clean package -DskipTests
+# Gera: target/spdealer-1.0.0.jar
+```
+
+**2️⃣ Reiniciar Processo Java**
+```powershell
+taskkill /F /IM java.exe  # Parar instância anterior
+```
+
+**3️⃣ Iniciar Backend**
+```powershell
+java -jar target\spdealer-1.0.0.jar --server.port=8080
+# Ou usar: .\start_system.ps1 (inicia ambos frontend + backend)
+```
+
+**4️⃣ Testar Novo Endpoint**
+```powershell
+$response = Invoke-WebRequest -Uri "http://localhost:8080/api/v2/widget/6/data" -Method Get
+$response.Content | ConvertFrom-Json
+```
+
+### Frontend React Build (npm)
+```powershell
+# Dev server (hot reload, proxy em setupProxy.js)
+npm start                       # http://localhost:3000
+
+# Build otimizado para produção
+npm run build                   # Cria /build
+```
+
+### Tasks Automatizadas VS Code
+- "Build Frontend": `npm run build`
+- "Build backend (Maven)": `mvn clean package -DskipTests`
+- "Recompilar frontend AG Grid theme fix": `npm run build`
+
+### Script Unificado (Recomendado)
+```powershell
+# Inicia TUDO automaticamente (Maven + npm, ambas portas)
+.\start_system.ps1
+
+# Escolha opção 2 (Desenvolvimento) para:
+# - Build Maven + inicia backend (8080)
+# - Inicia frontend dev server (3000)
+# - Configura variáveis de ambiente corretas
+```
+
+## 🔧 Workflows de Build e Deployment
+
+### ⚠️ CRÍTICO: Fluxo de Atualização de Código
+
+Quando modificar arquivos Java no backend que expõem novos endpoints (ex: DashboardApiController.java):
+
+**1️⃣ Compilar Backend (Maven)**
+```powershell
+mvn clean package -DskipTests
+# Gera: target/spdealer-1.0.0.jar
+```
+
+**2️⃣ Reiniciar Processo Java**
+```powershell
+taskkill /F /IM java.exe  # Parar instância anterior
+```
+
+**3️⃣ Iniciar Backend**
+```powershell
+java -jar target\spdealer-1.0.0.jar --server.port=8080
+# Ou usar: .\start_system.ps1 (inicia ambos frontend + backend)
+```
+
+**4️⃣ Testar Novo Endpoint**
+```powershell
+$response = Invoke-WebRequest -Uri "http://localhost:8080/api/v2/widget/6/data" -Method Get
+$response.Content | ConvertFrom-Json
+```
+
+### Frontend React Build (npm)
+```powershell
+# Dev server (hot reload, proxy em setupProxy.js)
+npm start                       # http://localhost:3000
+
+# Build otimizado para produção
+npm run build                   # Cria /build
+```
+
+### Tasks Automatizadas VS Code
+- "Build Frontend": `npm run build`
+- "Build backend (Maven)": `mvn clean package -DskipTests`
+
+### Script Unificado (Recomendado)
+```powershell
+# Inicia TUDO automaticamente (Maven + npm, ambas portas)
+.\start_system.ps1
+
+# Escolha opção 2 (Desenvolvimento) para:
+# - Build Maven + inicia backend (8080)
+# - Inicia frontend dev server (3000)
+# - Configura variáveis de ambiente corretas
+```
+
+---
+
+## 📋 API Endpoints Principais
+
+### Dashboard API (`/api/v2`)
+```
+GET  /api/v2/dashboards/{userId}          → Busca dashboard do usuário (com widgets)
+GET  /api/v2/dashboard/{dashboardId}      → Busca dashboard por ID
+POST /api/v2/dashboard                    → Cria novo dashboard
+GET  /api/v2/widget/{widgetId}/data       → EXECUTA query do widget (LAZY LOAD)
+GET  /api/v2/dashboards/{id}/widgets      → Lista widgets de um dashboard
+POST /api/v2/dashboards/{id}/widgets      → Cria novo widget
+```
+
+### Menu API (Legacy)
+```
+GET  /api/menu-groups/{userId}            → Menus do usuário
+GET  /api/menu-items/{groupId}            → Itens de um menu
+```
+
+### Autenticação
+```
+POST /auth/login                           → Login (ambos frontend/backend)
+POST /auth/logout                          → Logout
+GET  /api/user/profile                    → Perfil usuário atual
+```
+
+---
+- Host: `100.126.166.63:3306/erp`
+- Tabelas principais: `users`, `menu_groups`, `clientes`, `receber`, `pagar`, `caixa`, `caixacab`
+- Conexão via JPA/Hibernate no backend
+- mysql -h 100.126.166.63 -u root -pk15720 erp -e "..."
+
+### APIs e Endpoints
+```typescript
+const API_URL = 'http://localhost:8080/api';
+// MenuService.getMenuGroupsByUser() → GET /api/menu-groups/{userId}
+// Autenticação → POST /auth/login
+```
+
+### Formatação de Dados
+- **Datas**: DD/MM/YYYY (exibição) / YYYY-MM-DD (banco)
+- **Monetário**: #.###,## (BRL) / DECIMAL(15,2) (banco)
+- **Documentos**: CNPJ/CPF formatados na exibição, limpos no banco
+
+## 📊 PADRÃO DE DADOS: CAIXA vs CAIXACAB
+
+### Estrutura das Tabelas
+
+#### 1️⃣ **Tabela `caixa`** (Movimentações Diárias)
+```sql
+-- Registra TODAS as operações no caixa dia-a-dia
+Colunas principais:
+- dtmovi_cai (date)       -- Data do movimento
+- dc_cai (char)           -- Tipo: 'C' (Crédito), 'D' (Débito)
+- valor_cai (decimal)     -- Valor movimentado
+- filial_cai (char(3))    -- Filial ('001')
+- tipocai_cai (char(3))   -- Tipo de registro (001=Caixa/Bancos, 002=Viagem, 003=Funcionários)
+- codbanco_cai (char(5))  -- Código do banco/caixa (usado para JOIN com bancos.codigo_bco)
+```
+
+#### 2️⃣ **Tabela `caixacab`** (Resumo Consolidado - ÚLTIMA LINHA = SALDO ATUAL)
+```sql
+Chave Primária Composta:
+-- Consolidação DIÁRIA, UMA LINHA por banco
+-- IMPORTANTE: O ÚLTIMO REGISTRO (MAX(dtmovi_cai)) SEMPRE CONTÉM O SALDO ATUAL
+Chave Primária Composta:
+- filial_cai (char(3))    -- Sempre '001'
+- tipocai_cai (char(3))   -- Tipo do registro: '001'=Caixa/Bancos, '002'=Viagem, '003'=Funcionários
+- codbanco_cai (char(5))  -- JOIN com bancos.codigo_bco para buscar nomefan_bco
+- dtmovi_cai (date)       -- Data do movimento
+
+Colunas principais:
+- saldoant_cai (decimal)  -- Saldo anterior (dia anterior)
+- debito_cai (decimal)    -- Total de débitos do dia
+- credito_cai (decimal)   -- Total de créditos do dia
+- saldo_cai (decimal)     -- SALDO CONSOLIDADO = saldoant + credito - debito
+```
+
+#### 3️⃣ **Tabela `bancos`** (Catálogo de Bancos)
+```sql
+Chave Primária Composta:
+- empresa_ger (char(3))   -- Empresa
+- codigo_bco (char(3))    -- Código do banco (match com caixacab.cliente_cai)
+
+Colunas principais:
+- nomefan_bco (char(30))  -- Nome fantasia (para exibição em dashboards)
+- nome_bco (char(50))     -- Nome completo
+- saldo_bco (decimal)     -- Saldo atual do banco (opcional, usar caixacab.saldo_cai)
+```
+
+### 📋 Mapeamento: CAIXA → CAIXACAB → BANCOS
+
+```sql
+-- QUERY SIMPLIFICADA PARA SALDO CONSOLIDADO:
+SELECT 
+  c.tipocai_cai,
+  b.nomefan_bco,
+  c.saldo_cai,
+  c.dtmovi_cai
+FROM caixacab c
+LEFT JOIN bancos b ON c.codbanco_cai = b.codigo_bco
+WHERE c.filial_cai = '001'
+  AND c.tipocai_cai = '001'
+  AND c.dtmovi_cai = (SELECT MAX(dtmovi_cai) FROM caixacab 
+                       WHERE filial_cai = '001' AND tipocai_cai = '001')
+GROUP BY c.codbanco_cai
+ORDER BY b.nomefan_bco;
+```
+
+### 🔑 Regras Críticas para Queries
+
+1. **Sempre usar filial_cai = '001'** (fixo)
+2. **Sempre usar tipocai_cai = '001'** (fixo - para separar Caixa/Bancos de Viagem/Funcionários)
+3. **Para saldo ATUAL: usar MAX(dtmovi_cai)** em caixacab (é sempre o último consolidado do dia)
+4. **Para JOIN com bancos: usar codbanco_cai = bancos.codigo_bco**
+5. **Para histórico de movimentos: usar caixa table (todas as operações)**
+6. **Para saldo consolidado: usar caixacab table (últimas linhas por data)**
+
+---
+
+## Convenções Específicas do Projeto
+
+### 1. Menu Dinâmico
+Sistema carrega menus automaticamente do banco via `MenuService`. Não hardcode menus - sempre buscar via API.
+
+### 2. Dashboard Personalizado - Alinhamento e Posicionamento Dinâmico
+- Componente `DynamicDashboard.tsx` para dashboards configuráveis com posicionamento via JSON
+- Widgets em `/src/components/Widget/` - todos respeitam `position_x`, `position_y`, `width`, `height` do banco
+- Persistência de layout via backend + posição absoluta (CSS `position: absolute`)
+- **Dashboard 100% dinâmico**: sem nenhum estilo ou parâmetro hardcoded; tudo via `visual_config` do JSON
+- **Posicionamento via JSON obrigatório**: Cada widget segue `position_x` e `position_y` exatos do banco, NUNCA centralizar ou usar `justifyContent: center`
+- **Container KPIs (group_id: dashboard_kpis)**:
+  - Renderizar esquerda-para-direita (flex-direction: row, justifyContent: flex-start)
+  - Respeitar padding/gap do `visual_config` do container
+  - KPIs dentro devem ficar lado-a-lado horizontalmente, SEM centralização
+- **Alinhamento do Dashboard Financeiro Principal**:
+  - Todos os widgets (Charts, AG-Grids, KPIs) alinhados à esquerda (não centrados)
+  - Container KPIs renderizado com distribuição horizontal (flex-wrap: wrap recomendado)
+  - Respeitar exatamente `visual_config.justifyContent` e `visual_config.flexDirection` do JSON
+- Componente `src\pages\DashboardBuilder.tsx` para dashboards configuráveis, seu preview **DEVE SER 100% compatível** com renderização de `DynamicDashboard.tsx`
+- **Regra crítica de renderização**: Validar em tempo de desenvolvimento que:
+  - ✅ `position_x` e `position_y` estão sendo aplicados (posição absoluta CSS)
+  - ✅ `visual_config.justifyContent` está sendo respeitado (flex-start, flex-end, center, space-between, etc)
+  - ✅ `visual_config.flexDirection` está correto (row para horizontal, column para vertical)
+  - ✅ Container KPIs renderiza KPIs lado-a-lado sem centralização
+  - ✅ Nenhum estilo inline ou hardcoded que sobrescreva o JSON### 3. Tratamento de Erros
+- Frontend: Context de notificações + toast do Bootstrap
+- Backend: `@ControllerAdvice` global para exceções
+
+## Arquivos de Configuração Importantes
+
+- `package.json`: Dependências React + scripts npm
+- `pom.xml`: Dependências Spring Boot + build Maven  
+- `tsconfig.json`: TypeScript strict mode habilitado
+- `docs/ARQUITETURA.md`: Documentação técnica detalhada (646 linhas)
+- `docs/PROGRESS.md`: Status atual e funcionalidades (383 linhas)
+
+## Avisos Importantes
+
+1. **Não remover Lombok**: Entidades usam getters/setters manuais para compatibilidade
+2. **Coexistência**: React SPA + Thymeleaf convivem - não substituir um pelo outro
+3. **Porta 8080**: Backend sempre roda na 8080, configurado em múltiplos locais
+4. **MariaDB**: Dependência crítica - sistema não funciona sem conexão
+
+---
+### Segurança: uso de tokens e segredos
+
+- NÃO armazene tokens, senhas ou segredos em arquivos do repositório (incluindo `*.md`, `*.env`, `.github/*` ou qualquer outro arquivo de texto versionado).
+- Use o GitHub Actions Secrets (`Settings` → `Secrets and variables` → `Actions`) para fluxos CI/CD e automatizações. No ambiente local, use variáveis de ambiente e gerenciadores de segredos (ex: Windows Credential Manager, keychain, pass, Vault).
+- Se precisar criar PRs ou interagir com a API pelo terminal, gere um Personal Access Token (PAT) em https://github.com/settings/tokens com o escopo mínimo necessário (por exemplo `repo`, `workflow`).
+
+Exemplo de uso seguro local (PowerShell):
+```
+$env:GITHUB_TOKEN = Read-Host -AsSecureString "Cole seu PAT (não armazene em arquivos)" | ConvertFrom-SecureString
+# ou use: $env:GITHUB_TOKEN = 'seu_token_aqui'  (somente temporariamente na sessão)
+Invoke-RestMethod -Method Post -Uri "https://api.github.com/repos/OWNER/REPO/pulls" -Headers @{ Authorization = "token $env:GITHUB_TOKEN" } -Body $jsonPayload
+Remove-Variable -Name GITHUB_TOKEN -ErrorAction SilentlyContinue
+```
+
+Se você já inseriu um token em um arquivo versionado por engano, revogue o token imediatamente em https://github.com/settings/tokens e substitua-o por um token novo, e depois remova o token do histórico com ferramentas como `git filter-repo` ou `git filter-branch`.
+
+Em resumo: nunca persista segredos em repositórios. Sempre use mecanismos seguros e rotacione tokens quando necessário.
+
+---
+
+## 🎯 QUICK REFERENCE - Padrões e Anti-Patterns
+
+### ✅ FAZER (Padrões Aprovados)
+```typescript
+// Backend: Service com JdbcTemplate
+@Service
+public class DashboardService {
+    @Autowired private JdbcTemplate jdbcTemplate;
+    
+    public Object executeWidgetQuery(Long widgetId) {
+        // 1. Buscar SQL da query
+        // 2. Validar segurança (SELECT only)
+        // 3. Executar via JdbcTemplate
+        // 4. Retornar dados tipados
+    }
+}
+
+// Frontend: Componentes dinâmicos
+const AgGridWidget = ({ widget, userId, dashboardId }) => {
+  // 1. Carregar visual_config do banco
+  // 2. Aplicar estilos 100% via JSON
+  // 3. Lazy load: GET /api/v2/widget/{id}/data
+  // 4. Render com fallbacks
+};
+```
+
+### ❌ NUNCA FAZER (Anti-patterns)
+```typescript
+// ❌ Hardcoded styles
+const AgGridWidget = styled.div`color: #2563eb;`; // PROIBIDO
+
+// ❌ Inline props
+<div style={{ width: "300px", color: "#blue" }}>  // PROIBIDO
+
+// ❌ Tipos de input fixos
+<input type="text" maxLength={10} />  // Use dictionary
+
+// ❌ Queries sem validação
+executeWidgetQuery(sql) {
+  return jdbcTemplate.queryForList(sql);  // PROIBIDO - sem SELECT check
+}
+```
+
+---
+
+## 🚀 WORKFLOW RECOMENDADO: Começar Nova Feature
+
+**1. Planejamento** (30 min)
+- [ ] Ler `ROTEIRO_MODULOS_TAREFAS.md`
+- [ ] Identificar padrão existente (Client, Grid, Widget, etc)
+- [ ] Criar Issue no GitHub
+
+**2. Dictionary-First** (1 hora)
+- [ ] Criar entradas em `dictionary_tables`
+- [ ] Criar colunas em `dictionary_columns`
+- [ ] Definir `form_visible_*`, `search_visible_*`, `form_order_*`
+
+**3. Backend** (2-4 horas)
+- [ ] Criar/atualizar `@Service`
+- [ ] Criar `@Repository` (JPA) ou use `JdbcTemplate`
+- [ ] Criar `@RestController` endpoint com validação
+- [ ] Testar com Postman/curl
+
+**4. Frontend** (2-4 horas)
+- [ ] Usar hook `useTableColumns()` para ler dictionary
+- [ ] Render dinâmico com `DynamicForm` ou `DynamicAgGridTable`
+- [ ] Lazy load com `GET /api/v2/widget/{id}/data`
+- [ ] Testar em 3 breakpoints (320px, 768px, 1920px)
+
+**5. Build & Test** (1 hora)
+- [ ] `mvn clean package -DskipTests`
+- [ ] Parar java + reiniciar
+- [ ] Testar novo endpoint
+- [ ] `npm run build`
+- [ ] Verificar sem console errors
+
+**6. Git & Commit** (30 min)
+- [ ] 3+ commits estruturados
+- [ ] PR review
+- [ ] Merge to main
+
+---
+
+**Documento Atualizado**: 4 de novembro de 2025  
+**Última Descoberta**: Endpoints 404 após compilação - SEMPRE parar Java antes  
+**Status**: ✅ Pronto para agentes de IA
+
+---
+
+## 🎯 SISTEMA DE GERENCIAMENTO DE TAREFAS - TASK MANAGER
+
+### 🔴 REGRA CRÍTICA: TODA TAREFA DEVE SER REGISTRADA NO TASK MANAGER
+
+**Palavra-chave para ativar**: "**Criar Tarefa**" ou "**Nova Tarefa**" ou "**Task Management**"
+
+Quando detectar essas palavras-chave, VOCÊ DEVE:
+1. ✅ Registrar a tarefa no banco de dados (`task_management`)
+2. ✅ Atribuir task_id automático (formato: TASK-NNN-DESCRICAO)
+3. ✅ Popular todas as colunas obrigatórias
+4. ✅ Criar checklists de validação
+5. ✅ Documentar tempo início/fim
+6. ✅ Acompanhar progresso no Kanban Board
+
+---
+
+### 📋 ESTRUTURA REAL DA TABELA `task_management` (Atualizada 01 NOV 2025)
+
+```sql
+-- Estrutura real do banco de dados MariaDB (VERIFICADA)
+-- Execute no terminal: DESC task_management;
+CREATE TABLE task_management (
+  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  
+  -- Identificação da Tarefa
+  task_id VARCHAR(50) UNIQUE NOT NULL,              -- Ex: TASK-101-CADASTRO-CLIENTES (SEM ACENTOS)
+  title VARCHAR(200) NOT NULL,                      -- Título resumido (SEM ACENTOS!)
+  description TEXT,                                 -- Descrição completa (SEM ACENTOS!)
+  
+  -- Atribuição
+  assigned_to_user_id INT,                          -- Usuário atribuído (NULL = sem atribuição)
+  created_by_user_id INT NOT NULL,                  -- Criador (user_id, sempre 1 para admin)
+  
+  -- Classificação (COLUNAS REAIS)
+  category_key VARCHAR(50),                         -- Categoria: Feature, Bug Fix, Refactor, etc
+  priority_key VARCHAR(50) DEFAULT 'normal',        -- HIGH, MEDIUM, LOW, normal
+  
+  -- Status
+  current_stage_id INT UNSIGNED NOT NULL,           -- Estágio: 2=To Do, 3=In Progress, 4=Review, 5=Done
+  
+  -- Acompanhamento de Tempo
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  due_date DATE,                                    -- Data de vencimento (YYYY-MM-DD)
+  started_at DATETIME,                              -- Quando iniciou
+  completed_at DATETIME,                            -- Quando completou
+  estimated_hours DECIMAL(5,2),                     -- Tempo estimado em horas (ex: 8.0)
+  actual_hours DECIMAL(5,2),                        -- Tempo real gasto
+  
+  -- Classificação Avançada
+  tags VARCHAR(255),                                -- Tags separadas por virgula (SEM ACENTOS!)
+  module_key VARCHAR(50),                           -- Modulo (clientes, fornecedores, receber, pagar, caixa)
+  
+  -- Bloqueadores
+  is_blocked TINYINT(1) DEFAULT 0,                  -- Se esta bloqueada
+  blocked_reason TEXT,                              -- Motivo do bloqueio
+  
+  -- Arquivo/Status
+  is_archived TINYINT(1) DEFAULT 0,                 -- Se esta arquivada
+  ticket_number BIGINT UNIQUE,                      -- Numero de ticket (opcional)
+  
+  FOREIGN KEY (assigned_to_user_id) REFERENCES users(id),
+  FOREIGN KEY (created_by_user_id) REFERENCES users(id),
+  INDEX idx_task_id (task_id),
+  INDEX idx_stage (current_stage_id),
+  INDEX idx_priority (priority_key),
+  INDEX idx_due_date (due_date),
+  INDEX idx_tags (tags),
+  INDEX idx_module (module_key),
+  INDEX idx_archived (is_archived)
+);
+```
+
+**Colunas Obrigatórias para INSERT:**
+- `task_id` - Identificador único (ex: TASK-101-CADASTRO-CLIENTES) **SEM ACENTOS**
+- `title` - Título da tarefa **SEM ACENTOS**
+- `current_stage_id` - Estágio (2=To Do, 3=In Progress, 4=Review, 5=Done)
+- `priority_key` - Prioridade (HIGH, MEDIUM, LOW, normal)
+- `created_by_user_id` - Quem criou (sempre 1 para admin)
+- `due_date` - Data de vencimento (formato: YYYY-MM-DD)
+
+**Colunas Opcionais mas Recomendadas:**
+- `description` - Descrição detalhada **SEM ACENTOS**
+- `assigned_to_user_id` - Atribuído a quem (NULL = não atribuída)
+- `category_key` - Tipo (Feature, Bug Fix, Refactor)
+- `tags` - Tags de rastreamento **SEM ACENTOS, separadas por vírgula**
+- `estimated_hours` - Estimativa em horas (tipo: DECIMAL 5,2 → ex: 8.0)
+
+---
+
+### ✅ WORKFLOW: CRIANDO UMA NOVA TAREFA
+
+#### **PASSO 1: Reconhecer o Pedido**
+```
+Usuário: "Criar Tarefa: Corrigir bug do header CSS"
+↓
+Copilot: Detecta "Criar Tarefa" → ATIVA modo Task Manager
+```
+
+#### **PASSO 2: Gerar Task ID Automático**
+```
+Formato: TASK-[NNN]-[DESCRICAO-ABREVIADA]
+
+Exemplos:
+✅ TASK-001-HEADER-BLUE      (Corrigir header azul)
+✅ TASK-002-SIDEBAR-ICONS    (Ícones visíveis no collapse)
+✅ TASK-003-DASHBOARD-PAD    (Reduzir padding dashboard)
+✅ TASK-004-HEADER-CSS-FIX   (Resolver conflito CSS header)
+
+Regra: Usar sequência numérica + descrição = 3-5 palavras máximo
+```
+
+#### **PASSO 3: Preencher Tabela de Registro**
+
+```markdown
+| Campo | Valor | Notas |
+|-------|-------|-------|
+| task_id | TASK-101-CADASTRO-CLIENTES | Gerado automaticamente |
+| title | Revisão Cadastro de Clientes | Resumido |
+| description | [Ver PASSO 4 abaixo] | Detalhado com checklists |
+| current_stage_id | 2 | To Do (não iniciado) |
+| priority_key | HIGH | Baseado em bloqueadores |
+| category_key | Feature | Tipo de trabalho (Feature, Bug Fix, Refactor) |
+| created_by_user_id | 1 | Quem criou (admin) |
+| assigned_to_user_id | NULL | Será atribuído depois |
+| estimated_hours | 8.0 | Estimativa do esforço |
+| actual_hours | NULL | Preenchido ao terminar |
+| due_date | 2025-11-08 | Data alvo |
+| tags | cadastro,clientes,formulario,manutencao | Tags de rastreamento |
+| module_key | clientes | Módulo principal |
+| is_blocked | 0 | Não bloqueada (inicialmente) |
+| created_at | NOW() | Timestamp automático |
+| updated_at | NOW() | Timestamp automático |
+| started_at | NULL | Preenchido quando começar |
+| completed_at | NULL | Preenchido quando terminar |
+| is_archived | 0 | Não arquivada |
+| blocked_reason | NULL | Nenhum bloqueador |
+```
+
+#### **PASSO 4: Estrutura Detalhada da Description (OBRIGATÓRIO)**
+
+```markdown
+## Descrição Completa da Tarefa
+
+### 📌 Resumo Executivo
+[1-2 frases sobre o que precisa ser feito]
+
+### 🎯 Objetivo
+- Objetivo principal
+- Resultado esperado
+- Critério de sucesso
+
+### 📚 Contexto
+- Por que é importante
+- Impacto no sistema
+- Relacionamentos (outras tasks)
+
+### 🔧 Arquivos Afetados
+- `src/components/Header/Header.css`
+- `src/components/AppHeader/AppHeader.css`
+- `src/App.css`
+
+### ✅ Checklist de Implementação
+- [ ] Subitem 1 com ação específica
+- [ ] Subitem 2
+- [ ] Subitem 3 (build + teste)
+
+### 🧪 Checklist de Validação
+- [ ] Item visual 1 (ex: header em azul)
+- [ ] Item funcional 1 (ex: sem console errors)
+- [ ] Item de performance 1
+
+### ⏱️ Acompanhamento de Tempo
+- Estimado: 2.5 horas
+- Início: [Preenchido ao começar]
+- Fim: [Preenchido ao terminar]
+- Real: [Calculado automaticamente]
+
+### 📝 Observações
+[Notas relevantes, problemas encontrados, decisões tomadas]
+```
+
+---
+
+### 🔄 ESTADOS DA TAREFA (Kanban Board)
+
+```
+┌─────────────────────────────────────────────────┐
+│         PIPELINE DE ESTADOS - 4 COLUNAS         │
+└─────────────────────────────────────────────────┘
+
+[Stage 2]           [Stage 3]          [Stage 4]        [Stage 5]
+📝 TO DO        →   🔄 IN PROGRESS  →  ✏️ REVIEW    →   ✅ DONE
+(current_stage_id: 2)  (3)              (4)              (5)
+
+TRANSIÇÕES:
+┌──────────────────────────────────────────────────┐
+│ TO DO (2)                                        │
+│ └─ Quando: Task criada                          │
+│ └─ Ação: Clicar "Iniciar" ou puxar para próxima │
+│ └─ Próximo: IN PROGRESS                         │
+├──────────────────────────────────────────────────┤
+│ IN PROGRESS (3)                                  │
+│ └─ Quando: Trabalho começou                     │
+│ └─ Ação: Atualizar progresso, notas             │
+│ └─ Campo atualizado: started_at                 │
+│ └─ Próximo: REVIEW                              │
+├──────────────────────────────────────────────────┤
+│ REVIEW (4) [OPCIONAL]                           │
+│ └─ Quando: Implementação complete               │
+│ └─ Ação: Validar checklist                      │
+│ └─ Próximo: DONE                                │
+├──────────────────────────────────────────────────┤
+│ DONE (5)                                         │
+│ └─ Quando: Concluído e validado                 │
+│ └─ Ação: Atualizar completed_at                 │
+│ └─ Campo atualizado: completed_at               │
+│ └─ Status final                                 │
+└──────────────────────────────────────────────────┘
+```
+
+---
+
+### 📊 COMO ATUALIZAR STATUS (4 MÉTODOS)
+
+#### **Método 1: Via Interface Kanban (Recomendado)**
+```
+1. Abrir: http://localhost:3000/tarefas
+2. Localizar card da tarefa
+3. Arrastar entre colunas
+4. Sistema atualiza automaticamente current_stage_id
+```
+
+#### **Método 2: SQL Direto (Rápido)**
+```sql
+-- Atualizar stage
+UPDATE task_management 
+SET current_stage_id = 3,  -- 3 = In Progress
+    started_at = NOW()
+WHERE task_id = 'TASK-004-HEADER-CSS-FIX';
+
+-- Atualizar para Done com tempo real
+UPDATE task_management 
+SET current_stage_id = 5,  -- 5 = Done
+    completed_at = NOW(),
+    actual_hours = TIMESTAMPDIFF(MINUTE, started_at, NOW()) / 60
+WHERE task_id = 'TASK-004-HEADER-CSS-FIX';
+```
+
+#### **Método 3: Via API (Backend)**
+```javascript
+// POST /api/v1/tasks/{taskId}/stage
+{
+  "stage_id": 3,  // To Do=2, In Progress=3, Review=4, Done=5
+  "notes": "Iniciado trabalho no header.css"
+}
+```
+
+#### **Método 4: Atualizar com Notas (SQL + Notas)**
+```sql
+UPDATE task_management 
+SET 
+  current_stage_id = 3,
+  started_at = NOW(),
+  notes = CONCAT(notes, '\n[2025-11-01 14:30] Iniciado - Investigando conflito Header.css vs AppHeader.css')
+WHERE task_id = 'TASK-004-HEADER-CSS-FIX';
+```
+
+---
+
+### 🚀 EXEMPLO COMPLETO: Criando TASK-101
+
+#### **Entrada do Usuário:**
+```
+"Criar Tarefa: Revisar e ajustar Cadastro de Clientes conforme padrão SPDealer. 
+Formulário de Localizar com AG-Grid, duplo clique abre edição, botão + abre inclusão. 
+Validar CPF/CNPJ/Email. Testar em 3 breakpoints. Time: ~8 horas, vence 08 NOV."
+```
+
+#### **Saída do Copilot (SQL de Inserção - CORRETO):**
+```sql
+INSERT INTO task_management (
+  task_id,
+  title,
+  description,
+  current_stage_id,
+  priority_key,
+  due_date,
+  tags,
+  category_key,
+  assigned_to_user_id,
+  created_by_user_id,
+  estimated_hours
+) VALUES (
+  'TASK-101-CADASTRO-CLIENTES',
+  'Revisão e Ajuste - Cadastro de Clientes conforme Padrão SPDealer',
+  '## Descrição da Tarefa\n\n### 📌 Resumo\nRevisar, corrigir e validar módulo de Cadastro de Clientes para conformidade com padrões visuais e arquiteturais do SPDealer.\n\n### 🎯 Objetivos\n- Revisar ClienteForm.tsx e ClienteController.java existentes\n- Implementar Formulário de Localizar com AG-Grid\n- Adicionar funcionalidade duplo-clique para edição\n- Implementar botão + para inclusão\n- Validações CPF/CNPJ/Email/Telefone\n- Testar em 3 breakpoints (320px, 768px, 1920px)\n\n### ✅ Checklist\n- [ ] FASE 1: Revisar estrutura\n- [ ] FASE 2: Corrigir/Implementar\n- [ ] FASE 3: Validar visual\n- [ ] FASE 4: Validar backend\n- [ ] FASE 5: Git commits',
+  2,
+  'HIGH',
+  '2025-11-08',
+  'cadastro,clientes,formulario,manutencao,padrão',
+  NULL,
+  1,
+  8.0
+);
+```
+
+#### **Via PowerShell (Comando Correto):**
+```powershell
+# Usar Get-Content para pipar o arquivo SQL
+Get-Content "H:\DISCO_D\Desenvolvimento\Seprocom\spdealer\CRIAR_TAREFAS_SIMPLES.sql" | `
+  mysql -h 100.126.166.63 -u root -pk15720 erp
+
+# OU executar SQL direto
+mysql -h 100.126.166.63 -u root -pk15720 erp -e `
+"INSERT INTO task_management (task_id, title, description, current_stage_id, priority_key, due_date, tags, category_key, created_by_user_id, estimated_hours) VALUES ('TASK-101-CADASTRO-CLIENTES', 'Revisão Cadastro de Clientes', 'Descrição...', 2, 'HIGH', '2025-11-08', 'cadastro,clientes', 'Feature', 1, 8.0);"
+
+# Verificar tarefas criadas
+mysql -h 100.126.166.63 -u root -pk15720 erp -e `
+"SELECT task_id, title, priority_key, estimated_hours, due_date FROM task_management WHERE task_id LIKE 'TASK-10%' ORDER BY task_id;"
+```
+
+---
+
+### 🔄 EXEMPLO ANTIGO (DEPRECIADO)
+
+### 🔗 Bloqueadores e Dependências
+- BLOQUEADA POR: TASK-002 (Header azul), TASK-003 (Sidebar)
+- BLOQUEIA: TASK-005 (Validação visual)
+- RELACIONADA: TASK-006, TASK-007
+',
+  2,
+  'HIGH',
+  '2025-11-02',
+  'header,css,conflict,consolidation,visual,TASK-002,TASK-003,TASK-005',
+  'Bug Fix',
+  1,
+  1,
+  2.5,
+  '[2025-11-01 23:55] Tarefa criada - Conflito detectado entre Header.css e AppHeader.css',
+  0,
+  NULL
+);
+```
+
+#### **Confirmação no Painel:**
+```
+✅ TASK-004-HEADER-CSS-FIX criada com sucesso!
+
+Status: 📝 TO DO
+Coluna: [______] To Do (1 task)
+Prioridade: 🔴 HIGH
+Vencimento: 02 NOV 2025
+Tempo Estimado: 2.5 horas
+Bloqueadores: Nenhum (pode começar)
+Bloqueia: TASK-005, TASK-006, TASK-007
+
+➡️ PRÓXIMO PASSO: Mover para "In Progress" quando começar trabalho
+```
+
+---
+
+### 📌 CAMPOS OBRIGATÓRIOS vs OPCIONAIS
+
+```markdown
+🔴 OBRIGATÓRIOS (não pode deixar NULL/vazio):
+├─ task_id
+├─ title
+├─ description (com checklists)
+├─ current_stage_id
+├─ priority_key
+├─ due_date
+├─ category_key
+├─ module_key
+└─ tags (mínimo: categoria principal - SEM ACENTOS!)
+
+🟡 RECOMENDADOS (preencher sempre que possível):
+├─ estimated_hours
+├─ assigned_to_user_id (quem vai fazer)
+├─ is_blocked (se estiver bloqueada)
+├─ blocked_reason (motivo do bloqueio)
+└─ description (detalhes da tarefa)
+
+🟢 OPCIONAIS (preenchidos automaticamente):
+├─ created_at (timestamp)
+├─ updated_at (timestamp)
+├─ started_at (ao passar para In Progress)
+├─ completed_at (ao terminar)
+└─ actual_hours (preenchido ao terminar)
+```
+
+---
+
+### 📈 MÉTRICAS E ACOMPANHAMENTO
+
+```sql
+-- Dashboard de Tarefas Pendentes
+SELECT 
+  COUNT(*) as total_tasks,
+  SUM(CASE WHEN current_stage_id = 2 THEN 1 ELSE 0 END) as to_do,
+  SUM(CASE WHEN current_stage_id = 3 THEN 1 ELSE 0 END) as in_progress,
+  SUM(CASE WHEN current_stage_id = 5 THEN 1 ELSE 0 END) as done,
+  ROUND(SUM(estimated_hours), 1) as total_estimated_hours,
+  ROUND(SUM(actual_hours), 1) as total_actual_hours,
+  ROUND(SUM(CASE WHEN completed_at IS NOT NULL THEN 1 ELSE 0 END) / COUNT(*) * 100, 1) as completion_rate
+FROM task_management
+WHERE is_archived = 0;  -- Apenas tarefas ativas
+
+-- Tasks Atrasadas
+SELECT task_id, title, due_date, DATEDIFF(CURDATE(), due_date) as dias_atraso
+FROM task_management
+WHERE due_date < CURDATE() AND current_stage_id != 5;
+
+-- Eficiência (Real vs Estimado)
+SELECT task_id, title, estimated_hours, actual_hours, 
+       ROUND((actual_hours - estimated_hours) / estimated_hours * 100, 1) as variacao_percent
+FROM task_management
+WHERE actual_hours IS NOT NULL
+ORDER BY variacao_percent DESC;
+```
+
+---
+
+### 🔗 INTEGRAÇÃO COM KANBAN BOARD
+
+```
+URL: http://localhost:3000/tarefas
+
+Componente: TaskManagementBoard.tsx
+├─ Estado: Redux (task_management table como source)
+├─ Colunas: 4 (To Do, In Progress, Review, Done)
+├─ Funcionalidades:
+│  ├─ Drag & Drop entre colunas
+│  ├─ Clique para abrir detalhes
+│  ├─ Adicionar comentários/notas
+│  ├─ Filtrar por prioridade/tags
+│  └─ Sincronizar com banco em tempo real
+├─ Atualizar task_management.current_stage_id ao arrastar
+└─ Registrar timestamp em started_at/completed_at
+```
+
+---
+
+### ⚠️ CRITICO: ACENTUACAO EM DADOS DO BANCO
+
+**PROBLEMA RECORRENTE**: Acentuacao em nomes de tarefas, descricoes e textos no banco gera caracteres corrompidos (Revis??o em vez de Revisao).
+
+**EVIDENCIA DO PROBLEMA** (resultado real de INSERT):
+```
+TASK-101-CADASTRO-CLIENTES      Revis??o e Ajuste - Cadastro de Clientes
+TASK-102-CADASTRO-FORNECEDORES  Revis??o e Ajuste - Cadastro de Fornecedores
+TASK-103-CONTAS-RECEBER         Revis??o e Ajuste - Contas a Receber
+TASK-104-CONTAS-PAGAR           Revis??o e Ajuste - Contas a Pagar
+TASK-105-CAIXA-BANCOS           Implementa????o Completa - Caixa e Bancos (NOVO)
+```
+
+**CAUSA**: MariaDB com encoding issues ao receber dados com acentos via pipeline PowerShell
+
+**REGRA ABSOLUTA - NUNCA FAZER:**
+- ❌ task_id com acentos: TASK-101-REVISAO
+- ❌ title com acentos: "Revisao e Ajuste"
+- ❌ description com acentos (qualquer campo de texto)
+- ❌ tags com acentos
+- ❌ Qualquer campo VARCHAR/TEXT com acentos
+
+**REGRA ABSOLUTA - SEMPRE FAZER:**
+- ✅ Remover TODOS acentos ANTES de inserir no banco
+- ✅ Usar ASCII puro: a, e, i, o, u (sem til, sem acento)
+- ✅ Converter: á→a, é→e, í→i, ó→o, ú→u, ã→a, õ→o, ç→c
+- ✅ Testar com SELECT apos INSERT para verificar corrupcao
+- ✅ Se aparecer "??", DELETAR e REINSERT sem acentos
+
+**CONVERSOES OBRIGATORIAS:**
+```
+á, à, ã, â → a
+é, è, ê → e
+í, ì, î → i
+ó, ò, õ, ô → o
+ú, ù, û → u
+ç → c
+~ (til) → remove ou substitui
+
+EXEMPLOS:
+- "Revisão" → "Revisao"
+- "Cadastro" → "Cadastro" (OK, sem acento)
+- "Implementação" → "Implementacao"
+- "Contas a Pagar" → "Contas a Pagar" (OK, sem acento)
+- "Valida" → "Valida" (OK)
+```
+
+**EM CADA CAMPO DE INSERT:**
+
+1. **task_id**: Apenas maiusculas, numeros, hifens → "TASK-101-CADASTRO-CLIENTES"
+2. **title**: Remover acentos → "Revisao e Ajuste - Cadastro de Clientes"
+3. **description**: Remover acentos (pode ser texto longo) → "Revisar e ajustar modulo de Cadastro..."
+4. **tags**: Separadas por virgula, sem acentos → "cadastro,clientes,formulario,manutencao,padrao"
+5. **category_key**: Sem acentos → "Feature", "Bug Fix", "Refactor"
+6. **priority_key**: Sempre maiuscula → "HIGH", "MEDIUM", "LOW", "CRITICAL", "normal"
+7. **module_key**: Sem acentos → "clientes", "fornecedores", "receber", "pagar", "caixa"
+8. **blocked_reason**: Se houver, sem acentos
+
+**VALIDACAO APOS INSERT:**
+```sql
+-- Verificar se ha ?? nos registros criados (=corrupcao)
+SELECT task_id, title FROM task_management WHERE task_id LIKE 'TASK-%';
+
+-- Se houver "??", CORRIGIR com UPDATE
+UPDATE task_management 
+SET title = 'Revisao e Ajuste - Cadastro de Clientes' 
+WHERE task_id = 'TASK-101-CADASTRO-CLIENTES';
+```
+
+**COMANDOS POWERSHELL COM ENCODING:**
+```powershell
+# Se necessario especificar encoding
+$sqlContent = Get-Content -Path "arquivo.sql" -Encoding UTF8
+$sqlContent | mysql -h 100.126.166.63 -u root -pk15720 erp
+
+# OU usar arquivo sem BOM
+Get-Content "arquivo.sql" | mysql -h 100.126.166.63 -u root -pk15720 erp
+```
+
+---
+
+### 💡 DICAS E BOAS PRATICAS
+
+```markdown
+✅ FAZER:
+- Usar task_id consistentemente em toda documentacao
+- Atualizar notes com progresso incremental
+- Preencher estimated_hours ANTES de comecar
+- Usar tags para rastreabilidade
+- Registrar blocked_by se houver dependencias
+- Hard commit no banco ao completar
+- REMOVER TODOS ACENTOS de dados inseridos no banco
+- Testar dados apos INSERT para verificar corrupcao
+
+❌ NAO FAZER:
+- Deixar campos obrigatorios em branco
+- Criar task_ids duplicadas
+- Misturar tarefas (uma tarefa = um objetivo)
+- Esquecer de atualizar completed_at ao terminar
+- Nao documentar bloqueadores
+- Deixar description sem checklists
+- USAR ACENTOS EM DADOS DO BANCO (causa corrupcao)
+```
+
+---
+
+### 📞 SUPORTE RÁPIDO
+
+**Pergunta**: Como criar uma nova tarefa?
+**Resposta**: Diga "Criar Tarefa: [descrição]" e o Copilot fará tudo automaticamente.
+
+**Pergunta**: Como atualizar status?
+**Resposta**: Via Kanban (arrastar), SQL (UPDATE), ou API (POST /tasks/{id}/stage).
+
+**Pergunta**: Como ver todas as tarefas?
+**Resposta**: http://localhost:3000/tarefas ou `SELECT * FROM task_management;`
+
+**Pergunta**: Como rastrear progresso?
+**Resposta**: Ver `estimated_hours` vs `actual_hours` + `notes` com timestamps.
+
+**Pergunta**: Como bloquear uma tarefa?
+**Resposta**: Atualizar `is_blocked = 1` e `blocked_by = 'TASK-XXX'`.
+
+---
+
+### 🛠️ COMANDOS POWERSHELL CORRETOS PARA TASK MANAGER
+
+**ATENCAO CRITICA**: 
+- Em PowerShell, redirecionamento de arquivo com `<` NAO funciona (ParseError)
+- Use OBRIGATORIEDADE: `Get-Content` + pipe (`|`)
+- Arquivos SQL DEVEM estar SEM ACENTOS (remover antes de salvar)
+
+#### Executar arquivo SQL (CORRETO - OBRIGATORIO):
+```powershell
+# ✅ METODO 1: RECOMENDADO (Get-Content + pipe)
+Get-Content "H:\DISCO_D\Desenvolvimento\Seprocom\spdealer\CRIAR_TAREFAS_SIMPLES.sql" | mysql -h 100.126.166.63 -u root -pk15720 erp
+
+# ✅ METODO 2: Piping com cat
+cat "H:\DISCO_D\Desenvolvimento\Seprocom\spdealer\CRIAR_TAREFAS_SIMPLES.sql" | mysql -h 100.126.166.63 -u root -pk15720 erp
+
+# ✅ METODO 3: Com argumento -e (para linhas simples, SEM ACENTOS)
+mysql -h 100.126.166.63 -u root -pk15720 erp -e "SELECT * FROM task_management LIMIT 5;"
+
+# ❌ NAO FUNCIONA EM POWERSHELL (reserved operator):
+mysql -h 100.126.166.63 -u root -pk15720 erp < "arquivo.sql"
+```
+
+#### Exemplo: Criar tarefas (SEM ACENTOS - OBRIGATORIO):
+```powershell
+# Opção 1: Via arquivo SQL (RECOMENDADO)
+Get-Content "H:\DISCO_D\Desenvolvimento\Seprocom\spdealer\CRIAR_TAREFAS_SIMPLES.sql" | mysql -h 100.126.166.63 -u root -pk15720 erp
+
+# Opção 2: SQL direto via -e (VALIDAR SEM ACENTOS ANTES)
+mysql -h 100.126.166.63 -u root -pk15720 erp -e "INSERT INTO task_management (task_id, title, description, current_stage_id, priority_key, due_date, tags, category_key, created_by_user_id, estimated_hours) VALUES ('TASK-101-CADASTRO-CLIENTES', 'Revisao e Ajuste - Cadastro de Clientes', 'Revisar e ajustar modulo...', 2, 'HIGH', '2025-11-08', 'cadastro,clientes', 'Feature', 1, 8.0);"
+```
+
+#### Verificar tarefas criadas (copiar colunas corretas):
+```powershell
+# Verificar tarefas 101-105
+mysql -h 100.126.166.63 -u root -pk15720 erp -e "SELECT task_id, title, priority_key, estimated_hours, due_date FROM task_management WHERE task_id LIKE 'TASK-10%' ORDER BY task_id;"
+
+# Resultado esperado (SEM ??):
+# TASK-101-CADASTRO-CLIENTES      Revisao e Ajuste - Cadastro de Clientes    HIGH    8.00     2025-11-08
+# TASK-102-CADASTRO-FORNECEDORES  Revisao e Ajuste - Cadastro de Fornecedores HIGH   8.00     2025-11-08
+```
+
+#### Contar tarefas por prioridade:
+```powershell
+mysql -h 100.126.166.63 -u root -pk15720 erp -e "SELECT priority_key, COUNT(*) as total FROM task_management GROUP BY priority_key;"
+```
+
+#### Atualizar status de tarefa (mover para In Progress):
+```powershell
+mysql -h 100.126.166.63 -u root -pk15720 erp -e "UPDATE task_management SET current_stage_id = 3, started_at = NOW() WHERE task_id = 'TASK-101-CADASTRO-CLIENTES';"
+```
+
+#### Atualizar tarefa SEM ACENTOS (se houver corrupcao):
+```powershell
+mysql -h 100.126.166.63 -u root -pk15720 erp -e "UPDATE task_management SET title = 'Revisao e Ajuste - Cadastro de Clientes' WHERE task_id = 'TASK-101-CADASTRO-CLIENTES';"
+```
+
+#### Listar tarefas bloqueadas:
+```powershell
+mysql -h 100.126.166.63 -u root -pk15720 erp -e "SELECT task_id, title, blocked_reason FROM task_management WHERE is_blocked = 1;"
+```
+
+#### Deletar tarefas (se necessario limpar e recriar):
+```powershell
+mysql -h 100.126.166.63 -u root -pk15720 erp -e "DELETE FROM task_management WHERE task_id LIKE 'TASK-10%' OR task_id LIKE 'TASK-11%';"
+```
+
+#### Arquivo SQL: REGRA DE CRIACAO
+```sql
+-- ✅ CORRETO: arquivo.sql SEM ACENTOS
+-- Linhas com colunas corretas (sem erro de coluna nao existente)
+INSERT INTO task_management (
+  task_id,
+  title,
+  description,
+  current_stage_id,
+  priority_key,
+  due_date,
+  tags,
+  category_key,
+  created_by_user_id,
+  estimated_hours
+) VALUES (
+  'TASK-101-CADASTRO-CLIENTES',
+  'Revisao e Ajuste - Cadastro de Clientes',  -- SEM ACENTOS
+  'Descrição aqui sem acentos...',             -- SEM ACENTOS
+  2,
+  'HIGH',
+  '2025-11-08',
+  'cadastro,clientes,formulario',             -- SEM ACENTOS
+  'Feature',
+  1,
+  8.0
+);
+
+-- ❌ ERRADO: arquivo.sql COM ACENTOS (gera ??)
+INSERT INTO task_management (task_id, title, ...) VALUES ('TASK-101-CADASTRO-CLIENTES', 'Revisão e Ajuste - Cadastro de Clientes', ...);
+```

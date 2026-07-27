@@ -1,0 +1,9 @@
+/* Skin Saturno — SPDealer Design System "Warm Corporate Dusk" */
+:root {
+  --webrun-main-color: var(--slate-800, #1E293B);
+  --webrun-sidebar-size: var(--sidebar-width-collapsed, 68px);
+  --webrun-sidebar-expanded-size: var(--sidebar-width, 260px);
+  --webrun-sidebar-color: var(--sidebar-text, #CBD5E1);
+  --webrun-sidebar-bg-color: var(--sidebar-bg, #0F172A);
+  --webrun-navbar-size: var(--header-height, 56px);
+}

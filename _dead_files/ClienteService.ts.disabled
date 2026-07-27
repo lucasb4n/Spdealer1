@@ -1,0 +1,39 @@
+import { Cliente } from 'cliente';
+
+export class ClienteService {
+  static async listar(): Promise<Cliente[]> {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/v2/clientes`);
+    if (!response.ok) throw new Error('Erro ao buscar clientes');
+    return response.json();
+  }
+
+  static async salvar(cliente: Cliente): Promise<Cliente> {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/v2/clientes`, {
+      method: cliente.id ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cliente)
+    });
+    if (!response.ok) throw new Error('Erro ao salvar cliente');
+    return response.json();
+  }
+
+  static async remover(id: number): Promise<void> {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/v2/clientes/${id}`, {
+      method: 'DELETE'
+    });
+    if (!response.ok) throw new Error('Erro ao remover cliente');
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

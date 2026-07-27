@@ -1,0 +1,191 @@
+/**
+ * ClienteEditar.css
+ * 
+ * Estilos para formulário de edição de cliente
+ * - Padrão SPDealer: botões topo-esquerda
+ * - Responsivo: 320px, 768px, 1920px
+ * - Indicadores visuais de foco/erro
+ */
+
+/* ==================== CONTAINER PRINCIPAL ==================== */
+
+.cliente-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  background-color: #f8f9fa;
+  overflow-y: auto;
+}
+
+/* ==================== CABEÇALHO COM BOTÕES ==================== */
+
+.form-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  flex-shrink: 0;
+}
+
+.form-header-top h1 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+  flex: 1;
+}
+
+.btn-group-top {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn-group-top .btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-group-top .btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-group-top .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-group-top .btn i {
+  margin-right: 0.5rem;
+}
+
+/* ==================== FORMULÁRIO ==================== */
+
+.cliente-form {
+  flex: 1;
+  padding: 1.5rem;
+  background-color: #ffffff;
+  margin: 1rem;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow-y: auto;
+  max-width: 100%;
+}
+
+/* ==================== CAMPOS ==================== */
+
+.form-group {
+  margin-bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.form-group label {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #64748b;
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+.form-group label .required {
+  color: #dc3545;
+  margin-left: 0.25rem;
+}
+
+.form-control {
+  height: 1.75rem;
+  padding: 0 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  color: #1e293b;
+  background-color: #ffffff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+}
+
+.form-control:focus {
+  border-color: #3b82f6;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+  outline: none;
+}
+
+.form-control:disabled,
+.form-control[readonly] {
+  background-color: #f1f5f9;
+  color: #475569;
+  cursor: not-allowed;
+  border-color: #cbd5e1;
+}
+
+.form-control.is-invalid {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+}
+
+/* ==================== TEXTAREA ==================== */
+
+textarea.form-control {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* ==================== SELECT ==================== */
+
+select.form-control {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2.25rem;
+}
+
+/* ==================== CHECKBOX ==================== */
+
+.form-group-checkbox {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+}
+
+/* ==================== VALIDAÇÃO ==================== */
+
+.invalid-feedback {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* ==================== RESPONSIVIDADE ==================== */
+
+@media (max-width: 768px) {
+  .form-header-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .btn-group-top .btn {
+    flex: 1;
+  }
+}

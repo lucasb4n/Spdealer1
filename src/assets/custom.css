@@ -1,0 +1,87 @@
+/* Skin global do sistema - custom.css */
+:root {
+  --webrun-icon-font-family: "Font Awesome 6 Free";
+}
+body {
+  background: #f8f9fa !important;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: #222;
+  min-height: 100vh;
+  margin: 0;
+  transition: background 0.3s;
+}
+
+a {
+  color: var(--webrun-main-color, #0d6efd);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+a:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 4px;
+}
+
+.container {
+  padding: 2rem 1rem;
+}
+
+/* Cards e sombras suaves */
+.card {
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  background: #fff;
+  border: none;
+  margin-bottom: 2rem;
+  transition: box-shadow 0.2s;
+}
+.card:hover {
+  box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+}
+
+/* Botões globais */
+.btn, button {
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.btn-primary, button.btn-primary {
+  background: linear-gradient(90deg, #0d6efd 60%, #2563eb 100%);
+  border: none;
+}
+.btn-primary:hover, button.btn-primary:hover {
+  background: linear-gradient(90deg, #2563eb 60%, #0d6efd 100%);
+}
+
+/* Inputs e labels */
+input, select, textarea {
+  border-radius: 0.4rem;
+  border: 1px solid #ced4da;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: #0d6efd;
+  outline: none;
+  box-shadow: 0 0 0 2px #0d6efd22;
+}
+
+/* Responsividade extra */
+@media (max-width: 600px) {
+  .container {
+    padding: 1rem 0.25rem;
+  }
+  .card {
+    border-radius: 0.5rem;
+  }
+}

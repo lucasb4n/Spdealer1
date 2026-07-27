@@ -1,0 +1,1487 @@
+/* ParametrosGerais.css - Estilo para formulário de Parâmetros Gerais */
+
+.parametros-gerais-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: #f8fafc;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+}
+
+/* ===== sp-* helpers para PADRAO_ESQUELETO_FORMULARIO.md ===== */
+.sp-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+  margin: 12px 0;
+}
+.sp-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.sp-card__header-left { display: flex; flex-direction: column; }
+.sp-card__title { margin: 0; font-size: 18px; font-weight: 700; }
+.sp-card__subtitle { margin-top: 4px; color: #666; font-size: 13px; }
+.sp-card__header-actions { display: flex; align-items: center; gap: 12px; }
+.sp-card__body { padding: 18px; }
+
+.sp-form { display: block; max-width: 880px; }
+.sp-form__row { display: flex; align-items: center; margin-bottom: 12px; }
+.sp-form__label { width: 120px; text-align: right; margin-right: 12px; font-weight: 600; }
+.sp-form__control { flex: 1; }
+.sp-input { width: 100%; height: 34px; padding: 6px 8px; border: 1px solid #c8c8c8; border-radius: 4px; font-size: 14px; }
+.sp-input--readonly { background-color: #fff3b0; border-color: #c0a800; font-weight: 700; text-align: center; }
+
+/* compact helpers */
+.sp-input.is-invalid, .sp-form__input.is-invalid, .form-group input.is-invalid, .form-input-inline.is-invalid {
+  border-color: var(--sp-color-error, #dc3545) !important;
+  box-shadow: 0 0 0 3px rgba(220,53,69,0.06);
+}
+.invalid-feedback {
+  color: var(--sp-color-error, #dc3545);
+  font-size: 12px;
+  margin-top: 6px;
+}
+.sp-form__input.is-invalid::placeholder {
+  color: rgba(220,53,69,0.4);
+}
+
+.sp-small { font-size: 13px; }
+.sp-muted { color: #777; }
+
+/* fim sp-* */
+
+/* ✅ HEADER com Botões */
+.parametros-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+  gap: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.botoes-esquerda {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.titulo {
+  flex: 1;
+  text-align: center;
+}
+
+.titulo h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  padding: 0;
+}
+
+/* ✅ BOTÕES */
+.btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #2563eb;
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+}
+
+.btn-secondary {
+  background: #6b7280;
+  color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #4b5563;
+  box-shadow: 0 4px 6px rgba(107, 114, 128, 0.2);
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #dc2626;
+  box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
+}
+
+/* ✅ ALERTAS */
+.alert {
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin: 0 24px 12px 24px;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.alert-danger {
+  background: #fee2e2;
+  color: #991b1b;
+  border-left: 4px solid #dc2626;
+}
+
+.alert-success {
+  background: #dcfce7;
+  color: #166534;
+  border-left: 4px solid #22c55e;
+}
+
+/* ✅ ABAS - DINÂMICAS (aparecem quando houver mais de 1 aba) */
+.tabs-header {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid #e5e7eb;
+  background: white;
+  padding: 0 8px;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.tab-button {
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tab-button:hover {
+  color: #1f2937;
+  background: #f9fafb;
+}
+
+.tab-button.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+}
+
+/* ✅ CONTEÚDO - FORMULÁRIO ÚNICO */
+.parametros-form-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  min-height: 0;
+}
+
+.parametros-form {
+  width: 100%;
+  height: 100%;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+/* ✅ NOVO GRID: Organizado por LINHAS (Empresa, Sistema, Contingência consolidados) */
+.form-grid-empresa {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+/* ✅ ABAS DINÂMICAS */
+.tabs-header {
+  display: flex;
+  gap: 8px;
+  padding: 0 8px 12px 8px;
+  border-bottom: 2px solid #e5e7eb;
+  margin-bottom: 12px;
+  overflow-x: auto;
+}
+
+.tab-button {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tab-button:hover {
+  color: #1f2937;
+  background: #f3f4f6;
+}
+
+.tab-button.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+}
+
+/* ✅ GRID ABA PEÇAS - com group boxes */
+.form-grid-pecas {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Group box (fieldset) styling */
+.form-group-box {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fafbfc;
+  margin-bottom: 8px;
+}
+
+.form-group-box legend {
+  padding: 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-group-label {
+  padding: 0 8px;
+  margin-bottom: 8px;
+}
+
+.form-group-content {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+}
+
+.form-group-content.linha-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.form-group-content.linha-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.form-group-item {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Grid dinâmico para outras abas (Peças, etc) - 2 colunas */
+.form-grid-dinamico {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  width: 100%;
+}
+
+.form-grid-dinamico.linha-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.form-group-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Linha: 1 coluna (full-width) */
+.form-linha.linha-full {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  width: 100%;
+}
+
+/* Linha: 2 colunas */
+.form-linha.linha-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  width: 100%;
+}
+
+/* Linha: 3 colunas */
+.form-linha.linha-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  width: 100%;
+}
+
+/* Linha: 4 colunas */
+.form-linha.linha-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  width: 100%;
+}
+
+/* Linha: 7 colunas (Curvas ABC) */
+.form-linha.linha-7 {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  width: 100%;
+}
+
+/* ✅ Linha Dupla: 2 colunas (esquerda/direita) */
+.form-linha-dupla {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.form-coluna-esq,
+.form-coluna-dir {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.description-hint {
+  font-size: 12px;
+  color: #6b7280;
+  cursor: help;
+  opacity: 0.7;
+}
+
+.description-hint:hover {
+  opacity: 1;
+}
+
+/* ✅ INPUT/FIELD */
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group input:disabled,
+.form-group select:disabled,
+.form-group textarea:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.form-group-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-check-input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
+
+.form-check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin: 0;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+/* ✅ ABA PEÇAS: Group boxes com fieldset */
+.form-grid-pecas {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.form-group-box {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 12px;
+  background: #f9fafb;
+  margin: 0;
+}
+
+.form-group-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+  padding: 0 4px;
+  margin: 0 0 8px 0;
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-group-content {
+  display: grid;
+  gap: 8px 8px;
+}
+
+.form-group-content.linha-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.form-group-content.linha-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.form-group-content.linha-full {
+  grid-template-columns: 1fr;
+}
+
+.form-group-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}/* ✅ SEM CAMPOS */
+/* ✅ GRID DINÂMICO: Suporta layout 2-colunas para novas abas */
+.form-grid-dinamico {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  width: 100%;
+}
+
+.form-grid-dinamico.linha-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.form-group-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.no-fields {
+  padding: 40px 20px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* ✅ LOADING */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 16px;
+  color: #6b7280;
+}
+
+/* ✅ RESPONSIVIDADE */
+@media (max-width: 1024px) {
+  .parametros-header {
+    flex-wrap: wrap;
+  }
+
+  .titulo {
+    width: 100%;
+    margin: 0;
+  }
+
+  /* Em telas menores, reduzir para 2 colunas */
+  .form-linha.linha-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Ajustar group boxes em telas menores */
+  .form-group-content.linha-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .form-grid-dinamico.linha-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .parametros-header {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  .btn {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+
+  .titulo h1 {
+    font-size: 18px;
+  }
+
+  .parametros-form-container {
+    padding: 16px;
+  }
+
+  /* Em mobile, tudo fica em 1 coluna */
+  .form-linha.linha-2,
+  .form-linha.linha-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ✅ NOVO LAYOUT ABA EMPRESA - 2 COLUNAS COM LABELS AO LADO */
+.form-grid-empresa-2col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.form-secao-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  width: 100%;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.form-secao-2col:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.form-coluna-esq,
+.form-coluna-dir {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ✅ NOVA ESTRUTURA: Label INLINE com Input */
+.form-group-horizontal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 32px;
+}
+
+.form-label-inline {
+  font-size: 13px;
+  font-weight: 500;
+  color: #4b5563;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: fit-content;
+  max-width: 160px;
+  text-align: right;
+  padding-right: 8px;
+}
+
+.form-input-inline {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  background: white;
+  color: #1f2937;
+  transition: all 0.2s ease;
+  height: 32px;
+  box-sizing: border-box;
+}
+
+/* ✅ NOVO LAYOUT ABA SERVIÇO - 2 COLUNAS COM GRUPOS */
+.form-grid-servico-2col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.form-secao-2col-servico {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.form-secao-2col-servico:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* ✅ Rótulo de Grupo */
+.form-group-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  background: #f3f4f6;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-left: 3px solid #3b82f6;
+}
+
+/* 2 Colunas dentro de cada grupo da Serviço */
+.form-secao-2col-servico > .form-coluna-esq,
+.form-secao-2col-servico > .form-coluna-dir {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Grid para 2 colunas lado-a-lado */
+.form-secao-2col-servico {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.form-secao-2col-servico:has(.form-group-label) {
+  grid-template-columns: 1fr;
+}
+
+.form-secao-2col-servico .form-group-label {
+  grid-column: 1 / -1;
+}
+
+.form-input-inline:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: #f0f9ff;
+}
+
+.form-input-inline:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* ✅ ABA MÁQUINAS - LAYOUT COM GRUPOS E TABELA */
+.form-grid-maquinas {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 16px;
+  overflow-y: auto;
+  height: calc(100vh - 180px);
+}
+
+.grupo-maquinas {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.grupo-titulo {
+  background: #f3f4f6;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.grupo-conteudo {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.form-checkbox-row .form-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  flex-direction: row;
+}
+
+.form-checkbox-row .form-label {
+  padding: 0;
+  text-align: left;
+  margin-bottom: 0;
+  font-weight: normal;
+  font-size: 14px;
+}
+
+.form-checkbox-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  margin: 0;
+}
+
+.form-field-2col {
+  flex: 0 0 calc(25% - 6px);
+  min-width: 100px;
+}
+
+.form-field-4col {
+  flex: 0 0 calc(75% - 6px);
+  min-width: 150px;
+}
+
+/* Tabela PIS/Cofins */
+.tabela-piscofins {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+
+.tabela-piscofins thead {
+  background: #f9fafb;
+}
+
+.tabela-piscofins th,
+.tabela-piscofins td {
+  padding: 10px 12px;
+  text-align: left;
+  border: 1px solid #e5e7eb;
+}
+
+.tabela-piscofins th {
+  font-weight: 600;
+  color: #374151;
+  background: #f3f4f6;
+}
+
+.tabela-piscofins tr.row-labels td {
+  background: #f9fafb;
+  font-weight: 600;
+  color: #6b7280;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.tabela-piscofins input[type="text"] {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.tabela-piscofins input[type="text"]:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+/* ✅ ABA SERVIÇO - LAYOUT REORGANIZADO */
+.form-grid-servico-reorganizado {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 16px;
+  overflow-y: auto;
+  height: calc(100vh - 180px);
+}
+
+.grupo-servico {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.grupo-titulo-servico {
+  background: #f3f4f6;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.grupo-conteudo-servico {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Linhas e colunas para Serviço */
+.form-linha.linha-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-linha.linha-1 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-coluna-esq,
+.form-coluna-dir {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-linha-servico {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+}
+
+.form-linha-servico.linha-cols-1 {
+  grid-template-columns: 1fr;
+}
+
+.form-linha-servico.linha-cols-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.form-linha-servico.linha-cols-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.form-linha-servico.linha-cols-4 {
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+.form-field-servico {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-field-servico .form-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  width: 100%;
+  flex-direction: row;
+}
+
+.form-field-servico .form-label {
+  flex: 0 0 auto;
+  padding: 0;
+  text-align: left;
+  margin-bottom: 0;
+  font-weight: 500;
+  font-size: 13px;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.form-field-servico .form-input {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 13px;
+  min-width: 100px;
+}
+
+.form-field-servico input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  margin: 0;
+  flex: 0 0 18px;
+}
+
+/* Tabela PIS/COFINS para Serviço */
+.grupo-conteudo-servico .tabela-piscofins {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.grupo-conteudo-servico .tabela-piscofins thead {
+  background-color: #f3f4f6;
+  border-bottom: 1px solid #d1d5db;
+}
+
+.grupo-conteudo-servico .tabela-piscofins thead th {
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+}
+
+.grupo-conteudo-servico .tabela-piscofins tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.grupo-conteudo-servico .tabela-piscofins tbody td {
+  padding: 12px;
+}
+
+.grupo-conteudo-servico .tabela-piscofins .label-cell {
+  font-weight: 500;
+  color: #374151;
+  width: 40%;
+}
+
+.grupo-conteudo-servico .tabela-piscofins .input-cell {
+  width: 60%;
+}
+
+/* Responsividade para Serviço */
+@media (max-width: 1024px) {
+  .form-linha-servico.linha-cols-3 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .form-linha-servico.linha-cols-4 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .form-linha.linha-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-grid-servico-reorganizado {
+    gap: 16px;
+    padding: 12px;
+    height: calc(100vh - 160px);
+  }
+
+  .grupo-conteudo-servico {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .form-linha-servico {
+    grid-template-columns: 1fr !important;
+  }
+
+  .form-linha.linha-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .form-field-servico .form-label {
+    flex: 0 0 100%;
+    margin-bottom: 4px;
+  }
+
+  .form-field-servico .form-input {
+    width: 100%;
+  }
+}
+
+/* ✅ ABA FINANCEIRO - LAYOUT 2 COLUNAS */
+.form-grid-financeiro-2col {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 16px;
+  overflow-y: auto;
+  height: calc(100vh - 180px);
+}
+
+.grupo-financeiro {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.grupo-financeiro .grupo-titulo {
+  background: #f3f4f6;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.grupo-financeiro-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 16px;
+}
+
+.financeiro-coluna-esq,
+.financeiro-coluna-dir {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-field-financeiro {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.form-field-financeiro .form-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  width: 100%;
+  flex-direction: row;
+}
+
+.form-field-financeiro .form-label {
+  flex: 0 0 45%;
+  padding: 0;
+  text-align: left;
+  margin-bottom: 0;
+  font-weight: 500;
+  font-size: 13px;
+  color: #374151;
+}
+
+.form-field-financeiro .form-input {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 13px;
+  min-width: 80px;
+}
+
+.form-field-financeiro input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  margin: 0;
+  flex: 0 0 18px;
+}
+
+.form-field-financeiro input[type="checkbox"] + .form-label {
+  flex: 1;
+  padding-left: 8px;
+}
+
+/* Responsividade para Financeiro */
+@media (max-width: 1024px) {
+  .grupo-financeiro-2col {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .form-field-financeiro .form-label {
+    flex: 0 0 50%;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-grid-financeiro-2col {
+    gap: 16px;
+    padding: 12px;
+    height: calc(100vh - 160px);
+  }
+
+  .grupo-financeiro-2col {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .form-field-financeiro {
+    gap: 8px;
+  }
+
+  .form-field-financeiro .form-label {
+    flex: 0 0 100%;
+    margin-bottom: 4px;
+  }
+
+  .form-field-financeiro .form-input {
+    width: 100%;
+  }
+}
+
+/* ✅ RESPONSIVO: Em telas pequenas, labels acima */
+@media (max-width: 768px) {
+  .form-secao-2col {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .form-group-horizontal {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .form-label-inline {
+    max-width: 100%;
+    text-align: left;
+    padding-right: 0;
+    font-weight: 600;
+  }
+
+  .form-input-inline {
+    width: 100%;
+  }
+}
+
+/* ✅ ABA FISCAL - LAYOUT 2 COLUNAS */
+.form-grid-fiscal-2col {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 16px;
+  overflow-y: auto;
+  height: calc(100vh - 180px);
+}
+
+.grupo-fiscal {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  padding: 16px;
+}
+
+.grupo-fiscal-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+.fiscal-coluna-esq,
+.fiscal-coluna-dir {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-field-fiscal {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.form-field-fiscal .form-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  width: 100%;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.form-field-fiscal .form-label {
+  flex: 0 0 40%;
+  padding: 6px 0;
+  text-align: left;
+  margin-bottom: 0;
+  font-weight: 500;
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.3;
+}
+
+.form-field-fiscal .form-input {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 13px;
+  min-width: 100px;
+}
+
+.form-field-fiscal input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  margin: 4px 0 0 0;
+  flex: 0 0 18px;
+}
+
+.form-field-fiscal input[type="checkbox"] + .form-label {
+  flex: 1;
+  padding-left: 8px;
+  margin-top: 2px;
+}
+
+/* Campos finais de localização */
+.grupo-fiscal-final {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-field-fiscal-full {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.form-field-fiscal-full:last-child {
+  border-bottom: none;
+}
+
+.form-field-fiscal-full .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+}
+
+.form-field-fiscal-full .form-label {
+  font-weight: 500;
+  font-size: 13px;
+  color: #374151;
+  padding-bottom: 4px;
+}
+
+.form-field-fiscal-full .form-input {
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 13px;
+  width: 100%;
+}
+
+.form-field-fiscal-full input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  margin: 0;
+}
+
+/* Responsividade para Fiscal */
+@media (max-width: 1024px) {
+  .grupo-fiscal-2col {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .form-field-fiscal .form-label {
+    flex: 0 0 45%;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-grid-fiscal-2col {
+    gap: 16px;
+    padding: 12px;
+    height: calc(100vh - 160px);
+  }
+
+  .grupo-fiscal {
+    padding: 12px;
+  }
+
+  .grupo-fiscal-2col {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .form-field-fiscal {
+    gap: 8px;
+  }
+
+  .form-field-fiscal .form-label {
+    flex: 0 0 100%;
+    padding-bottom: 4px;
+  }
+
+  .form-field-fiscal .form-input {
+    width: 100%;
+  }
+
+  .grupo-fiscal-final {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .form-field-fiscal-full {
+    padding: 6px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .parametros-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .botoes-esquerda {
+    width: 100%;
+  }
+
+  .btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .titulo h1 {
+    font-size: 16px;
+  }
+
+  .tabs-header {
+    margin: 0;
+    padding: 0 12px;
+    overflow-x: auto;
+  }
+
+  .tab-button {
+    padding: 10px 16px;
+    font-size: 12px;
+  }
+
+  .form-group {
+    gap: 4px;
+  }
+
+  .form-label {
+    font-size: 12px;
+  }
+}
+
+/* ✅ GRUPO RETENÇÃO MP135 - 3 COLUNAS LADO A LADO */
+.tabela-retencao-mp135 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  align-items: end;
+}
+
+.linha-retencao {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.linha-retencao .form-label {
+  font-weight: 500;
+  color: #374151;
+  font-size: 13px;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.linha-retencao .form-input {
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 13px;
+  width: 100%;
+}
+
+/* Responsivo: empilha em telas menores */
+@media (max-width: 768px) {
+  .tabela-retencao-mp135 {
+    grid-template-columns: 1fr;
+  }
+}

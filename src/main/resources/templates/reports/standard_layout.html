@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title th:text="${title ?: 'Relatório'}">Relatório</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #111; margin: 20px }
+    .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px }
+    .company { display:flex; align-items:center; gap:12px }
+    .company .meta { font-weight:700 }
+    .filters { margin:8px 0; }
+    .filter-badge { display:inline-block; background:#eef2ff; color:#1e40af; padding:4px 8px; border-radius:4px; margin-right:6px; font-size:11px }
+    .audit-note { font-size:11px; color:#6b7280; margin-top:6px }
+    .report-body { margin-top:12px }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="company">
+      <div th:if="${logoBase64 != null}">
+        <img th:src="${logoBase64}" alt="Logo" style="height:56px;" />
+      </div>
+      <div>
+        <div class="meta" th:text="${EMPRESA_NOME}">Empresa</div>
+        <div class="muted" th:text="${EMPRESA_CNPJ}">00.000.000/0001-00</div>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <div class="muted">Gerado em: <span th:text="${generatedDate}"></span></div>
+      <div class="muted">Usuário: <span th:text="${USUARIO}"></span></div>
+    </div>
+  </div>
+
+  <div class="filters" th:if="${filtersUsed != null}">
+    <strong>Filtros utilizados:</strong>
+    <div style="margin-top:6px">
+      <span th:each="entry : ${#maps.entries(filtersUsed)}" class="filter-badge" th:text="${entry.key + ': ' + entry.value}">Filtro</span>
+    </div>
+    <div class="audit-note">Este bloco registra os filtros utilizados para geração do relatório (recomendado para auditoria).</div>
+  </div>
+
+  <div class="report-body">
+    <div th:replace="~{reports/${contentTemplate} :: content}"></div>
+  </div>
+
+  <div style="margin-top:18px; font-size:11px; color:#6b7280">
+    <div>Relatório gerado automaticamente. Para auditoria, mantenha os filtros e parâmetros aplicados.</div>
+  </div>
+</body>
+</html>

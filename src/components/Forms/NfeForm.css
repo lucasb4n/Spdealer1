@@ -1,0 +1,659 @@
+neto camp.nfe-container {
+    padding: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.nfe-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.nfe-header h2 {
+    margin: 0;
+    color: #333;
+}
+
+.btn-voltar {
+    padding: 8px 16px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.message {
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.message button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 5px;
+}
+
+.nfe-filtros {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.filtro-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filtro-group label {
+    font-size: 12px;
+    font-weight: bold;
+    color: #555;
+}
+
+.filtro-group input,
+.filtro-group select {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    min-width: 150px;
+}
+
+.btn-buscar {
+    padding: 8px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-buscar:hover {
+    background: #0056b3;
+}
+
+.nfe-content {
+    display: flex;
+    gap: 20px;
+    flex: 1;
+    overflow: hidden;
+}
+
+.nfe-lista {
+    flex: 1;
+    overflow: auto;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 15px;
+}
+
+.nfe-lista h3,
+.nfe-detalhes h3,
+.nfe-detalhes h4 {
+    margin-top: 0;
+    color: #333;
+}
+
+.nfe-table,
+.itens-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.nfe-table th,
+.itens-table th {
+    background: #f8f9fa;
+    padding: 10px;
+    text-align: left;
+    border-bottom: 2px solid #ddd;
+}
+
+.nfe-table td,
+.itens-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.nfe-table tr:hover {
+    background: #f8f9fa;
+    cursor: pointer;
+}
+
+.nfe-table tr.selected {
+    background: #e3f2fd;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.status-pendente {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-autorizada {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-cancelada {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-denegada {
+    background: #e2e3e5;
+    color: #383d41;
+}
+
+.nfe-detalhes {
+    flex: 1;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 15px;
+    overflow: auto;
+}
+
+.detalhes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.detalhe-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.detalhe-item.full-width {
+    grid-column: span 2;
+}
+
+.detalhe-item label {
+    font-size: 11px;
+    color: #666;
+    font-weight: bold;
+}
+
+.detalhe-item span {
+    font-size: 14px;
+    color: #333;
+}
+
+.chave-nfe {
+    font-family: monospace;
+    font-size: 12px !important;
+    word-break: break-all;
+    background: #f8f9fa;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.nfe-acoes {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.btn-xml {
+    padding: 10px 20px;
+    background: #17a2b8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-danfe {
+    padding: 10px 20px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-enviar {
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-cancelar {
+    padding: 10px 20px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-xml:hover {
+    background: #138496;
+}
+
+.btn-danfe:hover {
+    background: #218838;
+}
+
+.btn-enviar:hover {
+    background: #0056b3;
+}
+
+.btn-cancelar:hover {
+    background: #c82333;
+}
+
+.cancelamento-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+}
+
+.cancelamento-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cancelamento-form input,
+.cancelamento-form textarea {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.cancelamento-form textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.no-selection {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: #999;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 4px;
+    max-width: 90%;
+    max-height: 90%;
+    overflow: hidden;
+}
+
+.xml-modal {
+    width: 800px;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.modal-header button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.xml-content {
+    padding: 15px;
+    max-height: 500px;
+    overflow: auto;
+    background: #f8f9fa;
+    font-family: monospace;
+    font-size: 12px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.btn-download {
+    margin: 15px;
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    align-self: flex-end;
+}
+
+/* Table with expandable rows */
+.table-container {
+    overflow-x: auto;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.nfe-table tr.total {
+    background: #e8f5e9;
+    font-weight: bold;
+}
+
+.nfe-table tr.total:hover {
+    background: #e8f5e9;
+    cursor: default;
+}
+
+.total-label {
+    text-align: right;
+    font-weight: bold;
+}
+
+.cliente-cell {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.valor-cell {
+    font-weight: bold;
+    text-align: right;
+}
+
+.valor-destaque {
+    font-size: 16px;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.acoes-cell {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+}
+
+.expand-cell {
+    width: 30px;
+    text-align: center;
+}
+
+.btn-expand {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 10px;
+    color: #666;
+    padding: 2px 6px;
+}
+
+.btn-expand:hover {
+    color: #007bff;
+}
+
+.expanded-row {
+    background: #f8f9fa;
+}
+
+.expanded-row td {
+    padding: 0;
+    border: none;
+}
+
+.itens-expandidos {
+    padding: 10px;
+    background: #f8f9fa;
+}
+
+.itens-container h5 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 13px;
+}
+
+.itens-expandidos-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    background: white;
+}
+
+.itens-expandidos-table th {
+    background: #e9ecef;
+    padding: 6px 8px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.itens-expandidos-table td {
+    padding: 5px 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.itens-expandidos-table tr:hover {
+    background: #f8f9fa;
+}
+
+.no-itens {
+    text-align: center;
+    color: #999;
+    padding: 15px !important;
+}
+
+/* Status SEFAZ - Monitor de Envio/Retorno */
+.nfe-status-sefaz {
+    margin-top: 15px;
+    padding: 15px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.nfe-status-sefaz h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 14px;
+}
+
+.status-sefaz-textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    resize: vertical;
+    background: #f8f9fa;
+    color: #333;
+}
+
+.status-sefaz-textarea:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+/* Botões de ação no AG Grid */
+.acoes-cell {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-action {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: bold;
+    min-width: 50px;
+    text-align: center;
+}
+
+.btn-action:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-xml {
+    background: #17a2b8;
+    color: white;
+}
+
+.btn-xml:hover:not(:disabled) {
+    background: #138496;
+}
+
+.btn-danfe {
+    background: #28a745;
+    color: white;
+}
+
+.btn-danfe:hover:not(:disabled) {
+    background: #218838;
+}
+
+.btn-enviar {
+    background: #007bff;
+    color: white;
+}
+
+.btn-enviar:hover:not(:disabled) {
+    background: #0056b3;
+}
+
+.btn-nfse {
+    background: #7c3aed;
+    color: white;
+}
+
+.btn-nfse:hover:not(:disabled) {
+    background: #6d28d9;
+}
+
+.btn-status {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-status:hover:not(:disabled) {
+    background: #5a6268;
+}
+
+.btn-autorizar {
+    background: #28a745;
+    color: white;
+}
+
+.btn-autorizar:hover:not(:disabled) {
+    background: #218838;
+}
+
+.btn-action {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+
+.btn-autorizar {
+    background: #007bff;
+    color: white;
+}
+
+.btn-autorizar:hover {
+    background: #0056b3;
+}
+
+.btn-autorizar:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.btn-danfe {
+    background: #28a745;
+    color: white;
+}
+
+.btn-danfe:hover {
+    background: #218838;
+}
+
+.btn-status {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-status:hover {
+    background: #5a6268;
+}
+
+.btn-status:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}

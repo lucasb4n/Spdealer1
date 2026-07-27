@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="FluxoCaixaReport" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+  <property name="com.jaspersoft.studio.data.defaultdataadapter" value="New Data Adapter"/>
+  
+  <parameter name="TITULO_RELATORIO" class="java.lang.String">
+    <defaultValueExpression><![CDATA["RELATÓRIO DE FLUXO DE CAIXA"]]></defaultValueExpression>
+  </parameter>
+  <parameter name="DATA_INICIAL" class="java.lang.String"/>
+  <parameter name="DATA_FINAL" class="java.lang.String"/>
+  <parameter name="EMPRESA_NOME" class="java.lang.String"/>
+  <parameter name="EMPRESA_CNPJ" class="java.lang.String"/>
+  <parameter name="USUARIO" class="java.lang.String"/>
+  <parameter name="FILTRO_COBRANCA" class="java.lang.String"/>
+  <parameter name="FILTRO_DOCUMENTO" class="java.lang.String"/>
+  <parameter name="FILTRO_SO_PAGOS" class="java.lang.Boolean"/>
+  <parameter name="FILTRO_APENAS_ABERTOS" class="java.lang.Boolean"/>
+  
+  <queryString language="SQL"><![CDATA[SELECT 'RECEBER' as tipo, codigo_rec as codigo, numdup_rec as documento, nome_cli as pessoa FROM receber WHERE vlrsal_rec > 0
+UNION ALL
+SELECT 'PAGAR' as tipo, codigo_pag as codigo, numdup_pag as documento,
+  (SELECT COALESCE(c.nome_cli,'') FROM clientes c WHERE c.codigo_cli = pagar.codigo_pag AND c.cliforn_cli = 'F' LIMIT 1) as pessoa
+FROM pagar WHERE vlrsal_pag > 0 LIMIT 100]]></queryString>
+  <field name="tipo" class="java.lang.String"/>
+  <field name="codigo" class="java.lang.Integer"/>
+  <field name="documento" class="java.lang.String"/>
+  <field name="pessoa" class="java.lang.String"/>
+  <background><band splitType="Stretch"/></background>
+  
+  <title>
+    <band height="72">
+      <subreport>
+        <reportElement x="0" y="0" width="555" height="72" uuid="f1e2d3c4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"/>
+        <subreportParameter name="TITULO_RELATORIO">
+          <subreportParameterExpression><![CDATA[$P{TITULO_RELATORIO}]]></subreportParameterExpression>
+        </subreportParameter>
+        <subreportParameter name="EMPRESA_NOME">
+          <subreportParameterExpression><![CDATA[$P{EMPRESA_NOME}]]></subreportParameterExpression>
+        </subreportParameter>
+        <subreportParameter name="EMPRESA_CNPJ">
+          <subreportParameterExpression><![CDATA[$P{EMPRESA_CNPJ}]]></subreportParameterExpression>
+        </subreportParameter>
+        <subreportParameter name="USUARIO">
+          <subreportParameterExpression><![CDATA[$P{USUARIO}]]></subreportParameterExpression>
+        </subreportParameter>
+        <subreportParameter name="DATA_INICIAL">
+          <subreportParameterExpression><![CDATA[$P{DATA_INICIAL}]]></subreportParameterExpression>
+        </subreportParameter>
+        <subreportParameter name="DATA_FINAL">
+          <subreportParameterExpression><![CDATA[$P{DATA_FINAL}]]></subreportParameterExpression>
+        </subreportParameter>
+        <subreportParameter name="FILTRO_COBRANCA">
+          <subreportParameterExpression><![CDATA[$P{FILTRO_COBRANCA}]]></subreportParameterExpression>
+        </subreportParameter>
+        <subreportParameter name="FILTRO_DOCUMENTO">
+          <subreportParameterExpression><![CDATA[$P{FILTRO_DOCUMENTO}]]></subreportParameterExpression>
+        </subreportParameter>
+        <subreportParameter name="FILTRO_SO_PAGOS">
+          <subreportParameterExpression><![CDATA[$P{FILTRO_SO_PAGOS}]]></subreportParameterExpression>
+        </subreportParameter>
+        <subreportParameter name="FILTRO_APENAS_ABERTOS">
+          <subreportParameterExpression><![CDATA[$P{FILTRO_APENAS_ABERTOS}]]></subreportParameterExpression>
+        </subreportParameter>
+        <connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+        <subreportExpression><![CDATA["reports/templates/cabecalho_portrait.jasper"]]></subreportExpression>
+      </subreport>
+    </band>
+  </title>
+  
+  <pageHeader>
+    <band height="10">
+      <line>
+        <reportElement x="0" y="9" width="555" height="1" uuid="027b58c0-8417-48b2-8a31-74bc1b68662f"/>
+      </line>
+    </band>
+  </pageHeader>
+  
+  <detail>
+    <band height="12">
+      <textField>
+        <reportElement x="0" y="0" width="555" height="12" uuid="8c3d44c2-f669-4b24-b63b-1645accc53d8"/>
+        <textElement><font size="8"/></textElement>
+        <textFieldExpression><![CDATA[$F{tipo}]]></textFieldExpression>
+      </textField>
+    </band>
+  </detail>
+  
+  <pageFooter>
+    <band height="10"/>
+  </pageFooter>
+  
+  <summary>
+    <band height="1"/>
+  </summary>
+</jasperReport>

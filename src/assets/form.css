@@ -1,0 +1,73 @@
+/* Skin de formulários - form.css */
+/* Modernização visual dos formulários */
+.form-group, .form-label, .form-control {
+  border-radius: 1rem;
+  margin-bottom: 1.2rem;
+}
+input.form-control, select.form-control, textarea.form-control {
+  font-size: 1.08rem;
+  padding: 0.7rem 1.2rem;
+  border: 1.5px solid #e0e0e0 !important;
+  background: #f8fafd !important;
+  transition: border 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(34,51,106,0.04);
+}
+input.form-control:focus, select.form-control:focus, textarea.form-control:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px #2563eb22, 0 2px 8px rgba(34,51,106,0.08);
+}
+
+label.form-label {
+  font-weight: 600;
+  color: #22336a;
+  margin-bottom: 0.3rem;
+  letter-spacing: 0.2px;
+}
+
+/* Botões modernos */
+/* Botões modernos, fundo claro, responsivo */
+.btn, button {
+  border-radius: 1.5rem;
+  font-weight: 600;
+  padding: 0.6rem 1.6rem;
+  font-size: 1.08rem;
+  box-shadow: 0 2px 8px rgba(34,51,106,0.06);
+  border: none;
+  background: #f8fafd !important;
+  color: #22336a !important;
+  transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+}
+.btn-primary, button.btn-primary {
+  background: linear-gradient(90deg, #2563eb 60%, #0d6efd 100%);
+  color: #fff;
+}
+.btn-primary:hover, button.btn-primary:hover {
+  background: linear-gradient(90deg, #0d6efd 60%, #2563eb 100%);
+  box-shadow: 0 4px 16px rgba(37,99,235,0.12);
+  color: #fff;
+}
+.btn-outline-primary, button.btn-outline-primary {
+  background: #fff;
+  color: #2563eb;
+  border: 1.5px solid #2563eb;
+}
+.btn-outline-primary:hover, button.btn-outline-primary:hover {
+  background: #2563eb;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(37,99,235,0.10);
+}
+
+/* Alertas modernos */
+.alert {
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(34,51,106,0.06);
+  font-size: 1rem;
+}
+
+/* Responsividade para formulários */
+@media (max-width: 600px) {
+  .form-group, .form-label, .form-control {
+    font-size: 0.98rem;
+    padding: 0.4rem 0.7rem;
+  }
+}

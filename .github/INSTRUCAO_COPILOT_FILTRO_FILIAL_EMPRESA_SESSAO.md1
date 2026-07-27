@@ -1,0 +1,340 @@
+# 🔐 INSTRUÇÃO OBRIGATÓRIA: Filtro de Filial e Empresa por Variáveis de Sessão
+
+**Data de Vigência**: 7 de Novembro de 2025  
+**Aplicável a**: TODOS os projetos SPDealer e similares  
+**Prioridade**: 🔴 **CRÍTICA - Segurança de Dados**
+
+---
+
+## 📌 REGRA DE OURO
+
+> **TODA query SQL DEVE usar variáveis de sessão para filtrar por filial/empresa/depósito**  
+> **NUNCA hardcode valores como `empresa_xxx = '001'` ou `filial_xxx = '002'`**
+
+---
+
+## 🔑 Variáveis de Sessão Disponíveis (Definidas no Login)
+
+### Definição no Backend (AuthRestController.java)
+```java
+// No método login(), após autenticação bem-sucedida:
+session.setAttribute("id_fil", req.codigoFilSelecionado);  // Filial selecionada pelo usuário
+session.setAttribute("user_id", user.getId());              // ID do usuário
+session.setAttribute("username", user.getUsername());       // Nome de usuário
+// Nota: empresa_ger é SEMPRE '001' (fixo no sistema)
+```
+
+### Variáveis de Sessão
+| Variável | Valor | Tipo | Exemplo | Uso |
+|----------|-------|------|---------|-----|
+| `id_fil` | Código da filial | String | "001", "002", "099" | Para campos `filial_xxx`, `codigo_fil` |
+| `empresa_ger` | Empresa fixa | String | "001" (sempre fixo) | Para campos `empresa_xxx` |
+| `user_id` | ID do usuário | Integer | 1, 2, 3 | Para auditoria |
+| `username` | Nome do usuário | String | "admin", "operador" | Para logs |
+
+---
+
+## 📋 PADRÃO UNIVERSAL DE QUERY
+
+### Padrão 1: Tabelas com `filial_xxx` (SEM empresa)
+```java
+// ✅ CORRETO - Usa variável de sessão
+Integer idFil = (Integer) session.getAttribute("id_fil");
+String sql = "SELECT * FROM receber WHERE filial_rec = ?";
+List result = jdbcTemplate.query(sql, new Object[]{idFil}, mapper);
+
+// ❌ ERRADO - Hardcode de filial
+String sql = "SELECT * FROM receber WHERE filial_rec = '001'";
+
+// ❌ ERRADO - Sem filtro de filial
+String sql = "SELECT * FROM receber";
+```
+
+### Padrão 2: Tabelas com `empresa_xxx` (SEMPRE '001')
+```java
+// ✅ CORRETO - empresa SEMPRE fixo em '001', filial da sessão
+String sql = "SELECT * FROM masven WHERE empresa_xxx = '001' AND filial_xxx = ?";
+List result = jdbcTemplate.query(sql, new Object[]{idFil}, mapper);
+
+// ❌ ERRADO - Filial hardcoded
+String sql = "SELECT * FROM masven WHERE empresa_xxx = '001' AND filial_xxx = '001'";
+
+// ❌ ERRADO - Sem filial
+String sql = "SELECT * FROM masven WHERE empresa_xxx = '001'";
+```
+
+### Padrão 3: Tabelas com `dep_xxx` (Depósito - Segunda Dimensão)
+```java
+// ✅ CORRETO - Depósito pode vir como variável de sessão OU como parâmetro
+// Se existir uma "filial + depósito" na sessão:
+Integer idFil = (Integer) session.getAttribute("id_fil");
+String idDep = (String) session.getAttribute("id_dep");  // Se houver
+
+if (idDep != null) {
+    String sql = "SELECT * FROM kardex WHERE filial_kar = ? AND dep_kar = ?";
+    List result = jdbcTemplate.query(sql, new Object[]{idFil, idDep}, mapper);
+} else {
+    // Sem depósito: retornar todos de todas filiais/depósitos? 
+    // Depende da lógica de negócio
+    String sql = "SELECT * FROM kardex WHERE filial_kar = ?";
+    List result = jdbcTemplate.query(sql, new Object[]{idFil}, mapper);
+}
+
+// ❌ ERRADO - Hardcode
+String sql = "SELECT * FROM kardex WHERE filial_kar = '001' AND dep_kar = '01'";
+```
+
+### Padrão 4: Tabelas com `codigo_fil` (Chave Primária)
+```java
+// ✅ CORRETO - usar id_fil da sessão
+String idFil = (String) session.getAttribute("id_fil");  // Note: String, não Integer
+String sql = "SELECT * FROM masfil WHERE codigo_fil = ? AND empresa_ger = '001'";
+List result = jdbcTemplate.query(sql, new Object[]{idFil}, mapper);
+
+// ❌ ERRADO - Hardcode
+String sql = "SELECT * FROM masfil WHERE codigo_fil = '001'";
+```
+
+---
+
+## 📊 Mapeamento de Tabelas: Campo de Filial
+
+| Tabela | Campo Filial | Campo Empresa | Exemplo SQL | Prioridade |
+|--------|------------|---------------|-------------|-----------|
+| **receber** | `filial_rec` | ❌ Não tem | `WHERE filial_rec = ?` | 🔴 CRÍTICA |
+| **pagar** | `filial_pag` | ❌ Não tem | `WHERE filial_pag = ?` | 🔴 CRÍTICA |
+| **caixa** | `filial_cai` | ❌ Não tem | `WHERE filial_cai = ?` | 🔴 CRÍTICA |
+| **caixacab** | `filial_cai` | ❌ Não tem | `WHERE filial_cai = ?` | 🔴 CRÍTICA |
+| **kardex** | `filial_kar` | ❌ Não tem | `WHERE filial_kar = ? AND dep_kar = ?` | 🔴 CRÍTICA |
+| **kardexm** | `filial_karm` | ❌ Não tem | `WHERE filial_karm = ? AND dep_karm = ?` | 🟡 Alta |
+| **masven** | `filial_xxx` | `empresa_xxx` | `WHERE empresa_xxx = '001' AND filial_xxx = ?` | 🟡 Alta |
+| **masdep** | `filial_dep` | `empresa_xxx` | `WHERE empresa_xxx = '001' AND filial_dep = ?` | 🟡 Alta |
+| **masfil** | `codigo_fil` | `empresa_ger` | `WHERE empresa_ger = '001' AND codigo_fil = ?` | 🟢 Normal |
+| **mascai** | `filial_cai` | ❌ Não tem | `WHERE filial_cai = ?` | 🟡 Alta |
+| **masope** | `filial_xxx` | ❌ Não tem | `WHERE filial_xxx = ?` | 🟡 Alta |
+| **maspag** | `filial_xxx` | ❌ Não tem | `WHERE filial_xxx = ?` | 🟡 Alta |
+| **clientes** | ❌ Não tem | ❌ Não tem | ⚠️ Ver abaixo | 🔵 Especial |
+
+### Nota: Tabela `clientes` (Sem Filtro Nativo)
+```java
+// ⚠️ ESPECIAL: clientes não tem filial, mas pode ser filtrada por empresa
+// Solução: Usar através de join com tabela que tem filial
+String sql = "SELECT DISTINCT c.* FROM clientes c " +
+             "LEFT JOIN receber r ON c.codigo_cli = r.codigo_rec " +
+             "WHERE r.filial_rec = ?";
+// OU: filtrar no application layer (Java) se necessário
+```
+
+---
+
+## 🛠️ Guia Prático por Contexto
+
+### Context 1: Service (Spring Service)
+```java
+@Service
+public class RelatorioFinanceiroService {
+    @Autowired
+    private HttpSession session;
+    
+    public List<Map<String, Object>> buscarContasReceber() {
+        // ✅ CORRETO
+        String idFil = (String) session.getAttribute("id_fil");
+        String sql = "SELECT * FROM receber WHERE filial_rec = ?";
+        return jdbcTemplate.query(sql, new Object[]{idFil}, mapper);
+    }
+}
+```
+
+### Context 2: Repository (Spring Data JPA)
+```java
+@Repository
+public interface ReceberRepository extends JpaRepository<Receber, Long> {
+    // ❌ ERRADO em Interface: Não consegue acessar session
+    // List<Receber> findByFilialRec(String filialRec);  // Isso é OK, mas...
+    
+    // ✅ CORRETO: Implementar em service acima, não repository
+}
+```
+
+### Context 3: Controller (REST Endpoint)
+```java
+@RestController
+@RequestMapping("/api/relatorios")
+public class RelatoriosController {
+    @PostMapping("/financeiro")
+    public ResponseEntity<?> buscarRelatorio(
+            @RequestBody FiltroDTO filtros,
+            HttpSession session) {
+        // ✅ Receber session como parâmetro
+        String idFil = (String) session.getAttribute("id_fil");
+        
+        // Passar para service
+        return ResponseEntity.ok(service.buscar(filtros, idFil));
+    }
+}
+```
+
+### Context 4: Frontend (React/TypeScript)
+```typescript
+// ⚠️ Frontend NÃO acessa sessão backend diretamente
+// Sessão é automática via HttpSession (cookies)
+
+// ✅ CORRETO: Backend retorna dados já filtrados
+const response = await fetch('/api/relatorios/financeiro', {
+    method: 'POST',
+    body: JSON.stringify(filtros)
+    // Sessão enviada automaticamente em cookies
+});
+
+// ❌ ERRADO: Tentar enviar id_fil do frontend
+// Usuário malicioso poderia manipular e acessar dados de outra filial
+```
+
+---
+
+## 🚨 Checklist de Segurança
+
+Antes de fazer commit, verificar:
+
+```
+[ ] ✅ Toda query tem `WHERE filial_xxx = ?` ou equivalente
+[ ] ✅ Nenhum hardcode de filial (ex: filial_rec = '001')
+[ ] ✅ Variável `id_fil` vem de `session.getAttribute("id_fil")`
+[ ] ✅ Campo `empresa_xxx` SEMPRE usa '001' (fixo)
+[ ] ✅ Se tem `dep_xxx`, usar variável de sessão ou parâmetro
+[ ] ✅ Nenhuma query retorna dados sem filtro de filial
+[ ] ✅ Testes cobrem múltiplas filiais (testDataSetup com 2+ filiais)
+[ ] ✅ Logs incluem `idFil` para auditoria
+```
+
+---
+
+## 📝 Exemplos Reais (Copy-Paste)
+
+### Exemplo 1: Buscar Contas a Receber da Filial do Usuário
+```java
+@Service
+public class RelatorioFinanceiroService {
+    @Autowired private JdbcTemplate jdbcTemplate;
+    
+    public List<Map<String, Object>> buscarContasReceber(HttpSession session) {
+        String idFil = (String) session.getAttribute("id_fil");
+        if (idFil == null) idFil = "001";  // Fallback seguro
+        
+        String sql = "SELECT codigo_rec, numdup_rec, vlrsal_rec, dtvenci_rec " +
+                     "FROM receber " +
+                     "WHERE filial_rec = ? " +
+                     "ORDER BY dtvenci_rec DESC";
+        
+        return jdbcTemplate.queryForList(sql, idFil);
+    }
+}
+```
+
+### Exemplo 2: Buscar Estoque com Filial + Depósito
+```java
+public List<Kardex> buscarEstoque(HttpSession session, String idDep) {
+    String idFil = (String) session.getAttribute("id_fil");
+    if (idFil == null) idFil = "001";
+    
+    String sql = "SELECT * FROM kardex " +
+                 "WHERE filial_kar = ? AND dep_kar = ? " +
+                 "ORDER BY ordem";
+    
+    return jdbcTemplate.query(sql, new Object[]{idFil, idDep}, mapper);
+}
+```
+
+### Exemplo 3: Buscar Dados com Empresa (Sempre '001')
+```java
+public List<Departamento> buscarDepartamentos(HttpSession session) {
+    String idFil = (String) session.getAttribute("id_fil");
+    if (idFil == null) idFil = "001";
+    
+    String sql = "SELECT codigo_dep, descr_dep FROM masdep " +
+                 "WHERE empresa_xxx = '001' AND filial_dep = ? " +
+                 "ORDER BY codigo_dep";
+    
+    return jdbcTemplate.query(sql, new Object[]{idFil}, mapper);
+}
+```
+
+---
+
+## ⚠️ Problemas Comuns e Soluções
+
+### Problema 1: "Qual tipo de sessão usar: Integer ou String para id_fil?"
+**Resposta**: Depende da coluna no banco:
+- Se `filial_rec` é `VARCHAR(20)` → use `String`
+- Se `filial_rec` é `INT` → use `Integer`
+- **Padrão SPDealer**: `VARCHAR(3)` → use `String`
+
+### Problema 2: "Null Pointer Exception em session.getAttribute('id_fil')"
+**Solução**:
+```java
+String idFil = (String) session.getAttribute("id_fil");
+if (idFil == null || idFil.isEmpty()) {
+    idFil = "001";  // Fallback seguro
+    logger.warn("id_fil não encontrada em sessão, usando default '001'");
+}
+```
+
+### Problema 3: "Teste retorna dados de múltiplas filiais"
+**Causa**: Queries sem filtro de filial no código anterior.  
+**Solução**: 
+```bash
+# Buscar todo código que faz query sem "filial"
+grep -r "FROM receber" src/main/java --include="*.java" | grep -v "filial_rec"
+grep -r "FROM pagar" src/main/java --include="*.java" | grep -v "filial_pag"
+```
+
+### Problema 4: "PDF Export mostra dados em branco"
+**Causa**: Jasper/JasperReport não recebe variáveis de sessão.  
+**Solução**: Passar `id_fil` como parâmetro ao Jasper:
+```java
+Map<String, Object> parametros = new HashMap<>();
+parametros.put("filial_rec", idFil);  // ← Adicionar manualmente
+parametros.put("REPORT_LOCALE", new Locale("pt", "BR"));
+JasperPrint jasperPrint = JasperFillManager.fillReport(
+    jasperReport, 
+    parametros, 
+    dataSource
+);
+```
+
+---
+
+## 🔍 Verificação Rápida
+
+**Para verificar se uma query está segura:**
+
+```bash
+# ❌ Procurar por hardcodes perigosos
+grep -rn "filial_[a-z]* = '[0-9]'" src/main/java --include="*.java"
+grep -rn "filial_[a-z]* = \"[0-9]\"" src/main/java --include="*.java"
+
+# ✅ Verificar se usa variável de sessão
+grep -rn "session.getAttribute.*id_fil" src/main/java --include="*.java"
+```
+
+---
+
+## 📚 Referências
+
+- Documento: `INSTRUCAO_COPILOT_FILTRO_FILIAL_QUERIES.md` (específico de queries)
+- Arquitetura: `docs/ARQUITETURA.md` (estrutura geral do sistema)
+- Segurança: `SEGURANCA_FILIAL_EMPRESA.md` (se existir)
+
+---
+
+## 📞 Suporte
+
+**Dúvida sobre qual campo usar?** → Consultar tabela "Mapeamento de Tabelas" acima.  
+**Erro ao compilar?** → Verificar imports corretos de `HttpSession` e `session.getAttribute()`.  
+**Teste falhando?** → Verificar se test dataset tem múltiplas filiais configuradas.
+
+---
+
+**Última Atualização**: 7 de Novembro de 2025  
+**Versão**: 1.0  
+**Status**: ✅ Aprovado para produção

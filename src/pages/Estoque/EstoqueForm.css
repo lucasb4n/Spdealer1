@@ -1,0 +1,333 @@
+.sp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sp-field__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+.sp-field__input,
+.sp-field select {
+  padding: 10px 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+.sp-field__input:focus,
+.sp-field select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+.sp-field__input:disabled,
+.sp-field__input[readonly] {
+  background: #f1f5f9;
+  color: #475569;
+  cursor: not-allowed;
+}
+.sp-field__error {
+  font-size: 12px;
+  color: #ef4444;
+}
+.sp-required {
+  color: #ef4444;
+  margin-left: 4px;
+}
+
+.estoque-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: scroll;
+  scrollbar-width: auto;
+  scrollbar-color: #94a3b8 #e2e8f0;
+}
+.estoque-form::-webkit-scrollbar {
+  width: 8px;
+}
+.estoque-form::-webkit-scrollbar-track {
+  background: #e2e8f0;
+  border-radius: 4px;
+}
+.estoque-form::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 4px;
+  border: 2px solid #e2e8f0;
+}
+.estoque-form::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+.estoque-form .sp-card {
+  margin: 0;
+}
+
+.estoque-form .sp-card__header {
+  background: #f8fafc;
+  padding: 8px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.estoque-form .sp-card__header h3 {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #334155;
+  margin: 0;
+}
+
+.estoque-form-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 12px;
+  align-items: end;
+}
+
+.sp-field--local     { grid-column: span 2; min-width: 0; max-width: 130px; }
+.sp-field--codigo    { grid-column: span 1; min-width: 0; max-width: 80px; }
+.sp-field--produto   { grid-column: span 2; min-width: 0; max-width: 160px; }
+.sp-field--locacao   { grid-column: span 2; min-width: 0; max-width: 130px; }
+.sp-field--descricao { grid-column: span 3; min-width: 0; }
+.sp-field--referencia { grid-column: span 2; min-width: 0; }
+
+.classificacao-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 12px;
+  align-items: end;
+}
+
+.sp-field--ncm         { grid-column: span 5; }
+.sp-field--tributacao  { grid-column: span 4; }
+.sp-field--ipi         { grid-column: span 3; }
+
+.dados-especificos-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 12px;
+  align-items: end;
+}
+.sp-field--grupofab  { grid-column: span 2; }
+.sp-field--ean       { grid-column: span 2; }
+.sp-field--sigla     { grid-column: span 1; max-width: 80px; }
+.sp-field--grupo     { grid-column: span 4; }
+.sp-field--natureza  { grid-column: span 3; }
+.sp-field--tf        { grid-column: span 2; }
+.sp-field--unimed    { grid-column: span 2; }
+.sp-field--peso      { grid-column: span 1; }
+.sp-field--modelo    { grid-column: span 3; }
+.sp-field--grfuncao  { grid-column: span 4; }
+.sp-field--acesc     { grid-column: span 1; }
+.sp-field--estini    { grid-column: span 1; }
+
+.procedencia-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 12px;
+  align-items: end;
+}
+.sp-field--procedencia    { grid-column: span 8; }
+.sp-field--anp            { grid-column: span 2; }
+.sp-field--descranp       { grid-column: span 2; }
+
+.sp-field__checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  height: 42px;
+}
+.sp-field__checkbox-wrapper input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #2563eb;
+}
+
+.estoque-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.correspondentes-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 12px;
+  align-items: end;
+}
+
+.sp-field--corr-cat {
+  grid-column: span 1;
+  max-width: 80px;
+}
+
+.sp-field--corr-codigo {
+  grid-column: span 3;
+}
+
+.sp-field--corr-descricao {
+  grid-column: span 7;
+}
+
+.sp-field--corr-delete {
+  grid-column: span 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* ==================== ABAS ==================== */
+
+.sp-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.sp-tabs__nav {
+  display: flex;
+  background: #0f172a;
+  border-bottom: 1px solid #1e293b;
+  padding: 0 8px;
+  gap: 2px;
+  border-radius: 4px;
+}
+
+.sp-tabs__btn {
+  flex: 1;
+  padding: 6px 12px;
+  height: 28px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  justify-content: center;
+}
+
+.sp-tabs__btn:hover {
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.sp-tabs__btn.sp-tabs__btn--active,
+.sp-tabs__btn.active {
+  color: #fff !important;
+  border-bottom-color: #3b82f6;
+  border-bottom-width: 3px;
+  background: rgba(59, 130, 246, 0.15);
+}
+
+/* ==================== GRID PREÇO ==================== */
+
+.preco-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 12px;
+  align-items: end;
+}
+
+.sp-field--precorep   { grid-column: span 3; }
+.sp-field--precopub   { grid-column: span 3; }
+.sp-field--precogar   { grid-column: span 3; }
+.sp-field--precusto   { grid-column: span 3; }
+.sp-field--percsug    { grid-column: span 1; max-width: 100px; }
+.sp-field--precodol   { grid-column: span 1; max-width: 100px; }
+.sp-field--codpco     { grid-column: span 5; }
+.sp-field--tabela     { grid-column: span 5; }
+.sp-field--estmin     { grid-column: span 3; }
+.sp-field--estmax     { grid-column: span 3; }
+.sp-field--estmind    { grid-column: span 3; }
+.sp-field--reserva    { grid-column: span 3; }
+
+/* ==================== SWITCH (TOGGLE) ==================== */
+
+.sp-field__switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding-top: 4px;
+}
+
+.sp-field__switch-track {
+  position: relative;
+  width: 1.75rem;
+  height: 1rem;
+  background: #cbd5e1;
+  border-radius: 1rem;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.sp-field__switch-track.on {
+  background: #2563eb;
+}
+
+.sp-field__switch-track input {
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 1;
+  margin: 0;
+}
+
+.sp-field__switch-thumb {
+  position: absolute;
+  left: 0.125rem;
+  top: 0.125rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  background: white;
+  border-radius: 50%;
+  transition: left 0.2s;
+}
+
+.sp-field__switch-thumb.on {
+  left: 0.875rem;
+}
+
+.sp-field__switch-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #374151;
+  line-height: 1.2;
+}
+
+.sp-field__inline-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  height: 42px;
+  padding: 0 4px;
+}
+
+.sp-field__inline-switch-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #374151;
+  line-height: 1.2;
+  flex: 1;
+}

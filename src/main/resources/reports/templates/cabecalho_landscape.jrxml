@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+     name="cabecalho_landscape" pageWidth="762" pageHeight="595" orientation="Landscape" 
+     columnWidth="762" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0"
+     whenNoDataType="AllSectionsNoDetail">
+
+    <parameter name="TITULO_RELATORIO" class="java.lang.String"/>
+    <parameter name="EMPRESA_NOME" class="java.lang.String"/>
+    <parameter name="EMPRESA_CNPJ" class="java.lang.String"/>
+    <parameter name="USUARIO" class="java.lang.String"/>
+    <parameter name="DATA_INICIAL" class="java.lang.String"/>
+    <parameter name="DATA_FINAL" class="java.lang.String"/>
+    <parameter name="FILTRO_COBRANCA" class="java.lang.String"/>
+    <parameter name="FILTRO_DOCUMENTO" class="java.lang.String"/>
+    <parameter name="FILTRO_SO_PAGOS" class="java.lang.Boolean"/>
+    <parameter name="FILTRO_APENAS_ABERTOS" class="java.lang.Boolean"/>
+    <parameter name="FILTRO_DEPARTAMENTO" class="java.lang.String"/>
+    <parameter name="FILTRO_CENTRO_CUSTO" class="java.lang.String"/>
+    <parameter name="LOGO" class="java.io.InputStream"/>
+
+    <title>
+        <band height="62">
+            <line>
+                <reportElement x="0" y="0" width="762" height="1"/>
+                <graphicElement><pen lineWidth="2"/></graphicElement>
+            </line>
+
+            <image>
+                <reportElement x="2" y="2" width="58" height="40"/>
+                <imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+            </image>
+
+            <textField>
+                <reportElement x="64" y="3" width="495" height="15"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_NOME}]]></textFieldExpression>
+            </textField>
+
+            <textField pattern="dd/MM/yyyy HH:mm">
+                <reportElement x="560" y="3" width="202" height="15"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement x="64" y="18" width="495" height="12"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA["CNPJ: " + ($P{EMPRESA_CNPJ} != null ? $P{EMPRESA_CNPJ} : "")]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement x="560" y="18" width="202" height="12"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Usuário: " + ($P{USUARIO} != null ? $P{USUARIO} : "")]]></textFieldExpression>
+            </textField>
+
+            <textField isBlankWhenNull="true">
+                <reportElement x="0" y="32" width="762" height="14"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="10" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{TITULO_RELATORIO}]]></textFieldExpression>
+            </textField>
+
+            <textField isBlankWhenNull="true">
+                <reportElement x="0" y="46" width="762" height="12"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Período: " + 
+                    ($P{DATA_INICIAL} != null ? $P{DATA_INICIAL} : "") + 
+                    " a " + 
+                    ($P{DATA_FINAL} != null ? $P{DATA_FINAL} : "") +
+                    ($P{FILTRO_COBRANCA} != null && !$P{FILTRO_COBRANCA}.isEmpty() ? " | Cobrança: " + $P{FILTRO_COBRANCA} : "") +
+                    ($P{FILTRO_DOCUMENTO} != null && !$P{FILTRO_DOCUMENTO}.isEmpty() ? " | Doc: " + $P{FILTRO_DOCUMENTO} : "") +
+                    ($P{FILTRO_DEPARTAMENTO} != null && !$P{FILTRO_DEPARTAMENTO}.isEmpty() ? " | Tipo: " + $P{FILTRO_DEPARTAMENTO} : "") +
+                    ($P{FILTRO_CENTRO_CUSTO} != null && !$P{FILTRO_CENTRO_CUSTO}.isEmpty() ? " | C.Custo: " + $P{FILTRO_CENTRO_CUSTO} : "") +
+                    ($P{FILTRO_SO_PAGOS} != null && $P{FILTRO_SO_PAGOS}.booleanValue() ? " | Só Pagos" : "") +
+                    ($P{FILTRO_APENAS_ABERTOS} != null && $P{FILTRO_APENAS_ABERTOS}.booleanValue() ? " | Apenas Abertos" : "")
+                ]]></textFieldExpression>
+            </textField>
+
+            <line>
+                <reportElement x="0" y="60" width="762" height="1"/>
+                <graphicElement><pen lineWidth="1"/></graphicElement>
+            </line>
+        </band>
+    </title>
+</jasperReport>

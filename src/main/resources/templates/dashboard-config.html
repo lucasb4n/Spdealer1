@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Configuração do Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: #f8f9fa; }
+        .builder-sidebar { background: #2c3e50; color: #fff; min-height: 100vh; padding: 20px; }
+        .builder-main { padding: 30px; }
+        .widget-card { border: 1px solid #ddd; border-radius: 8px; background: #fff; margin-bottom: 15px; padding: 15px; cursor: grab; }
+        .preview-area { min-height: 400px; background: #fff; border-radius: 8px; border: 1px dashed #3498db; padding: 20px; }
+        .json-area { background: #222; color: #eee; border-radius: 8px; padding: 15px; font-size: 14px; }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 builder-sidebar">
+            <h4><i class="fas fa-wrench"></i> Widgets</h4>
+            <div id="widget-list">
+                <div class="widget-card" draggable="true" data-type="card"><i class="fas fa-square"></i> Card</div>
+                <div class="widget-card" draggable="true" data-type="chart"><i class="fas fa-chart-bar"></i> Gráfico</div>
+                <div class="widget-card" draggable="true" data-type="kpi"><i class="fas fa-bolt"></i> KPI</div>
+                <div class="widget-card" draggable="true" data-type="list"><i class="fas fa-list"></i> Lista</div>
+            </div>
+        </div>
+        <div class="col-md-6 builder-main">
+            <h3>Monte seu Dashboard</h3>
+            <div class="preview-area" id="preview-area">
+                <span class="text-muted">Arraste widgets aqui para montar seu dashboard</span>
+            </div>
+            <div class="mt-3" id="data-select-area">
+                <h5>Configuração de Dados do Widget</h5>
+                <div id="widget-data-config"></div>
+            </div>
+            <button class="btn btn-success mt-3" id="btn-save">Salvar Configuração</button>
+        </div>
+        <div class="col-md-3">
+            <h5>JSON Gerado</h5>
+            <pre class="json-area" id="json-area">{}</pre>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/templates/dashboard-config.js"></script>
+</body>
+</html>

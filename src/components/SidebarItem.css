@@ -1,0 +1,79 @@
+.menu-item-wrapper {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.menu-item-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  /* reduzir padding-left para alinhar com group title */
+  padding: 10px 24px 10px 8px !important; /* left:8px para consistência */
+  justify-content: flex-start;
+  font-size: 1.05rem;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.menu-item-content:hover, .menu-item-wrapper.active > .menu-item-content {
+  background: #2563eb;
+  color: #fff;
+}
+.menu-item-description {
+  flex: 1;
+  font-weight: 500;
+}
+.menu-icon {
+  font-size: 1.1rem;
+  min-width: 22px;
+  color: #b3c0d1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.expand-icon {
+  margin-left: auto;
+  color: #b3c0d1;
+  font-size: 1rem;
+}
+.submenu {
+  list-style: none;
+  margin: 0 0 0 12px;
+  padding: 0;
+  border-left: 2px solid #1a2a44;
+}
+
+/* ========================================================================= */
+/* ESTADO COLAPSADO - POSICIONAR ÍCONES À ESQUERDA */
+/* ========================================================================= */
+
+/* Quando sidebar está colapsado - Reposicionar conteúdo do item para ESQUERDA */
+.sidebar.collapsed .menu-item-content {
+  padding: 12px 8px 12px 12px !important;
+  justify-content: flex-start !important;
+  gap: 0 !important;
+}
+
+/* Aumentar tamanho do ícone quando colapsado */
+.sidebar.collapsed .menu-icon {
+  font-size: 1.3rem !important;
+  min-width: auto !important;
+  flex-shrink: 0;
+}
+
+/* Ocultar descrição de item quando sidebar colapsado */
+.sidebar.collapsed .menu-item-description {
+  display: none !important;
+}
+
+/* Ocultar ícone de expansão quando sidebar colapsado */
+.sidebar.collapsed .expand-icon {
+  display: none !important;
+}
+
+/* Ocultar submenu quando sidebar colapsado */
+.sidebar.collapsed .submenu {
+  display: none !important;
+}
+

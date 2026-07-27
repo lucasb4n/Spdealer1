@@ -1,0 +1,96 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e6]:
+      - button [ref=e7] [cursor=pointer]:
+        - img [ref=e8]
+      - img "L&S Logo" [ref=e10]
+      - generic [ref=e11]: MENU
+    - generic [ref=e13]:
+      - generic:
+        - img
+      - textbox "Buscar no menu..." [ref=e14]
+    - generic [ref=e16]: Nenhum item encontrado
+    - button "Sair" [ref=e18] [cursor=pointer]:
+      - img [ref=e19]
+      - generic [ref=e21]: Sair
+  - generic [ref=e22]:
+    - banner [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e26] [cursor=pointer]:
+          - img "SpDealer" [ref=e27]
+          - generic [ref=e28]:
+            - generic [ref=e29]: Sp
+            - generic [ref=e30]: Dealer
+        - generic [ref=e31]: SPDealer
+      - generic [ref=e33]:
+        - generic [ref=e34]: Boa tarde, Admin!
+        - generic [ref=e35]:
+          - generic [ref=e36]: sexta-feira, 24 de abril de 2026
+          - generic [ref=e37]: •
+          - generic [ref=e38]: 12:01
+      - generic [ref=e40]:
+        - button "Configurações" [ref=e42] [cursor=pointer]:
+          - img [ref=e43]
+        - button "3" [ref=e45] [cursor=pointer]:
+          - img [ref=e46]
+          - generic [ref=e48]: "3"
+        - button "Meu Perfil (admin)" [ref=e49] [cursor=pointer]:
+          - img [ref=e50]
+    - generic [ref=e53]:
+      - generic [ref=e54]:
+        - heading "Novo Cliente" [level=1] [ref=e55]
+        - generic [ref=e56]:
+          - button "Voltar" [ref=e57] [cursor=pointer]: Voltar
+          - button "Novo" [ref=e58] [cursor=pointer]: Novo
+          - button "Gravar" [ref=e59] [cursor=pointer]: Gravar
+      - generic [ref=e61]:
+        - generic [ref=e62]:
+          - button "Jurídica" [ref=e63] [cursor=pointer]
+          - button "Endereço" [ref=e64] [cursor=pointer]
+          - button "Física" [ref=e65] [cursor=pointer]
+          - button "Cobrança" [ref=e66] [cursor=pointer]
+          - button "Crédito" [ref=e67] [cursor=pointer]
+        - generic [ref=e68]:
+          - heading "Jurídica" [level=3] [ref=e70]
+          - generic [ref=e72]:
+            - generic [ref=e73]:
+              - generic [ref=e74]: Código
+              - textbox "Código" [ref=e75]:
+                - /placeholder: ""
+            - generic [ref=e76]:
+              - generic [ref=e77]: Tipo Pessoa*
+              - combobox "Tipo Pessoa*" [ref=e78] [cursor=pointer]:
+                - option "-- Selecionar --" [selected]
+            - generic [ref=e79]:
+              - generic [ref=e80]: CPF/CNPJ*
+              - textbox "CPF/CNPJ*" [ref=e81]:
+                - /placeholder: ""
+            - generic [ref=e82]:
+              - generic [ref=e83]: Nome/Razão Social*
+              - textbox "Nome/Razão Social*" [ref=e84]:
+                - /placeholder: ""
+            - generic [ref=e85]:
+              - generic [ref=e86]: Nome Fantasia
+              - textbox "Nome Fantasia" [ref=e87]:
+                - /placeholder: ""
+            - generic [ref=e88]:
+              - generic [ref=e89]: Email
+              - textbox "Email" [ref=e90]:
+                - /placeholder: ""
+            - generic [ref=e91]:
+              - generic [ref=e92]: Telefone
+              - textbox "Telefone" [ref=e93]:
+                - /placeholder: ""
+            - generic [ref=e94]:
+              - generic [ref=e95]: Celular
+              - textbox "Celular" [ref=e96]:
+                - /placeholder: ""
+            - generic [ref=e97]:
+              - generic [ref=e98]: Observações
+              - textbox "Observações" [ref=e99]:
+                - /placeholder: ""
+      - paragraph [ref=e101]:
+        - strong [ref=e102]: "Atalhos:"
+        - text: ENTER = proximo campo | TAB = navegacao | ESC = voltar | CTRL+S = gravar | CTRL+DEL = deletar
+  - button "Minimizar todas as janelas" [ref=e106] [cursor=pointer]:
+    - img [ref=e107]

@@ -1,0 +1,38 @@
+[Unit]
+Description=SPDealer Backend - Spring Boot Application
+After=network.target mariadb.service
+
+[Service]
+Type=simple
+User=spdealer
+WorkingDirectory=/opt/spdealer/backend
+
+# Variáveis de ambiente
+Environment="SPRING_PROFILES_ACTIVE=prod"
+Environment="SERVER_PORT=8080"
+Environment="DB_HOST=100.126.166.63"
+Environment="DB_PORT=3306"
+Environment="DB_NAME=erp"
+Environment="LOG_DIR=/opt/spdealer/data/logs"
+Environment="TZ=America/Sao_Paulo"
+
+# Comando de inicialização
+ExecStart=/usr/bin/java -Xmx1024m -Xms512m -jar /opt/spdealer/backend/spdealer.jar
+
+# Auto-restart
+Restart=always
+RestartSec=10
+StartLimitInterval=60
+StartLimitBurst=5
+
+# Logs
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=spdealer-backend
+
+# Limites
+LimitNOFILE=65536
+LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target

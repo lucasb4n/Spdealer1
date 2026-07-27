@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+    name="BaseTemplate_landscape" pageWidth="842" pageHeight="595" columnWidth="762" leftMargin="40" rightMargin="40"
+    topMargin="20" bottomMargin="20">
+    <property name="com.jaspersoft.studio.data.defaultdataadapter" value="MySQL Connector"/>
+
+    <!-- Estilos -->
+    <style name="Title" fontSize="16" isBold="true"/>
+    <style name="SubTitle" fontSize="12" isBold="true"/>
+    <style name="ColumnHeader" fontSize="10" isBold="true" backcolor="#EEEEEE"/>
+    <style name="Detail" fontSize="10"/>
+    <style name="Row" mode="Transparent"/>
+
+    <!-- Parâmetros padrão -->
+    <parameter name="EMPRESA_NOME" class="java.lang.String"/>
+    <parameter name="EMPRESA_CNPJ" class="java.lang.String"/>
+    <parameter name="USUARIO" class="java.lang.String"/>
+    <parameter name="DATA_INICIAL" class="java.util.Date"/>
+    <parameter name="DATA_FINAL" class="java.util.Date"/>
+    
+    <!-- Cabeçalho Landscape -->
+    <pageHeader>
+        <band height="80" splitType="Stretch">
+            <!-- Linha 1: Empresa - Data/Hora -->
+            <textField>
+                <reportElement style="Title" x="0" y="0" width="600" height="25"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$P{EMPRESA_NOME}]]></textFieldExpression>
+            </textField>
+            <textField pattern="dd/MM/yyyy HH:mm">
+                <reportElement x="600" y="0" width="162" height="25"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+            </textField>
+            
+            <!-- Linha 2: CNPJ - Página X de Y -->
+            <textField>
+                <reportElement style="SubTitle" x="0" y="28" width="600" height="20"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$P{EMPRESA_CNPJ}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="600" y="28" width="162" height="20" uuid="7a8b9c0d-1e2f-4a3b-8c9d-0e1f2a3b4c5d"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de "]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="762" y="28" width="20" height="20" uuid="8b9c0d1e-2f3a-4b5c-9d0e-1f2a3b4c5d6e"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+            
+            <!-- Linha 3: Usuário - Período -->
+            <textField>
+                <reportElement x="0" y="52" width="381" height="20"/>
+                <textElement verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA["Usuário: " + $P{USUARIO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="381" y="52" width="381" height="20"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA["Período: " + 
+                    ($P{DATA_INICIAL} != null ? new java.text.SimpleDateFormat("dd/MM/yyyy").format($P{DATA_INICIAL}) : "") + 
+                    " a " + 
+                    ($P{DATA_FINAL} != null ? new java.text.SimpleDateFormat("dd/MM/yyyy").format($P{DATA_FINAL}) : "")]]></textFieldExpression>
+            </textField>
+            
+            <!-- Linha de separação -->
+            <line>
+                <reportElement x="0" y="76" width="762" height="1"/>
+            </line>
+        </band>
+    </pageHeader>
+    
+    <!-- Rodapé -->
+    <pageFooter>
+        <band height="30" splitType="Stretch">
+            <textField>
+                <reportElement x="0" y="0" width="254" height="20"/>
+                <textElement verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="254" y="0" width="508" height="20"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA["Período: " + 
+                    ($P{DATA_INICIAL} != null ? new java.text.SimpleDateFormat("dd/MM/yyyy").format($P{DATA_INICIAL}) : "") + 
+                    " a " + 
+                    ($P{DATA_FINAL} != null ? new java.text.SimpleDateFormat("dd/MM/yyyy").format($P{DATA_FINAL}) : "")]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+</jasperReport>

@@ -1,0 +1,109 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 5000,
+    "environment": "production",
+    "ssl": {
+      "enabled": false,
+      "cert": "/root/Servidor/certificado/spdealer.crt",
+      "key": "/root/Servidor/certificado/spdealer.key"
+    }
+  },
+  "database": {
+    "host": "100.126.166.63",
+    "port": 3306,
+    "database": "erp",
+    "username": "root",
+    "password": "k15720",
+    "pool": {
+      "min": 2,
+      "max": 10,
+      "idleTimeoutMillis": 30000,
+      "connectionTimeoutMillis": 2000
+    }
+  },
+  "cors": {
+    "enabled": true,
+    "origin": [
+      "https://spdealer.com",
+      "https://www.spdealer.com",
+      "https://192.168.10.30",
+      "http://localhost:3000",
+      "http://192.168.10.70:3000"
+    ],
+    "credentials": true,
+    "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    "allowedHeaders": ["Content-Type", "Authorization", "X-Requested-With"]
+  },
+  "authentication": {
+    "jwtSecret": "seu-secret-key-aqui-mude-em-producao",
+    "jwtExpires": "24h",
+    "refreshTokenExpires": "30d"
+  },
+  "logging": {
+    "level": "info",
+    "format": "combined",
+    "path": "/root/Servidor/logs",
+    "maxSize": "20m",
+    "maxDays": 30
+  },
+  "cache": {
+    "enabled": true,
+    "ttl": 3600,
+    "redis": {
+      "enabled": false,
+      "host": "localhost",
+      "port": 6379,
+      "password": null
+    }
+  },
+  "socket": {
+    "enabled": true,
+    "transports": ["websocket", "polling"],
+    "reconnection": {
+      "enabled": true,
+      "delay": 1000,
+      "delayMax": 5000,
+      "attempts": 10
+    }
+  },
+  "api": {
+    "prefix": "/api",
+    "version": "v1",
+    "timeout": 30000,
+    "rateLimit": {
+      "enabled": true,
+      "windowMs": 900000,
+      "maxRequests": 100
+    }
+  },
+  "security": {
+    "helmet": true,
+    "hpp": true,
+    "csrf": true,
+    "xssFilter": true,
+    "contentSecurityPolicy": {
+      "enabled": true,
+      "directives": {
+        "defaultSrc": ["'self'"],
+        "styleSrc": ["'self'", "'unsafe-inline'"],
+        "scriptSrc": ["'self'"],
+        "imgSrc": ["'self'", "data:", "https:"]
+      }
+    }
+  },
+  "monitoring": {
+    "enabled": true,
+    "metricsPort": 9090,
+    "healthCheck": {
+      "interval": 30000,
+      "timeout": 5000
+    }
+  },
+  "backups": {
+    "enabled": true,
+    "path": "/root/Servidor/backups",
+    "schedule": "0 2 * * *",
+    "retention": 7
+  }
+}

@@ -1,0 +1,32 @@
+/* Arquivo vazio: Dashboard agora utiliza styled-components e theme centralizado. */
+
+/* Animação para o indicador de digitação do chat */
+@keyframes pulse {
+  0%, 70%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  35% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* Estilos para scrollbar do chat */
+.chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

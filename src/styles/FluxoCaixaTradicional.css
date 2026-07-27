@@ -1,0 +1,332 @@
+/* Fluxo de Caixa Tradicional - Estilos */
+
+.fluxo-caixa-container {
+  background-color: #f8f9fa;
+  padding: 20px;
+}
+
+.page-title {
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+/* KPI Cards */
+.kpi-card {
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: white;
+  height: 100%;
+}
+
+.kpi-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.kpi-card .card-body {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.kpi-label {
+  font-size: 0.875rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.kpi-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0.5rem 0;
+  line-height: 1.2;
+}
+
+.kpi-icon {
+  font-size: 2.5rem;
+  margin-top: 1rem;
+  opacity: 0.8;
+}
+
+/* Period Selector */
+.period-selector {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.period-btn {
+  padding: 10px 20px;
+  border: 2px solid #dee2e6;
+  background-color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #495057;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.period-btn:hover {
+  border-color: #0d6efd;
+  color: #0d6efd;
+}
+
+.period-btn.active {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: white;
+}
+
+/* Cards */
+.card {
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1.5rem;
+}
+
+.card-header {
+  background-color: #f8f9fa !important;
+  border-bottom: 2px solid #e9ecef;
+  padding: 1.5rem;
+  border-radius: 8px 8px 0 0;
+}
+
+.card-header h5 {
+  color: #2c3e50;
+  font-weight: 600;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+/* Tabelas */
+.table {
+  margin-bottom: 0;
+  font-size: 0.95rem;
+}
+
+.table thead th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  color: #495057;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  padding: 1rem;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid #e9ecef;
+  transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.table tbody td {
+  padding: 0.875rem 1rem;
+  vertical-align: middle;
+}
+
+.text-success {
+  color: #28a745 !important;
+}
+
+.text-danger {
+  color: #dc3545 !important;
+}
+
+.text-end {
+  text-align: right !important;
+}
+
+/* AG-Grid Customization */
+.ag-theme-bootstrap {
+  --ag-background-color: white;
+  --ag-header-background-color: #f8f9fa;
+  --ag-header-foreground-color: #495057;
+  --ag-grid-size: 8px;
+  --ag-list-item-height: 32px;
+  --ag-header-cell-padding: 10px;
+}
+
+.ag-theme-bootstrap .ag-header {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.ag-theme-bootstrap .ag-cell {
+  border-right: 1px solid #e9ecef;
+}
+
+.ag-theme-bootstrap .ag-row {
+  border-bottom: 1px solid #e9ecef;
+}
+
+.ag-theme-bootstrap .ag-row:hover {
+  background-color: #f8f9fa;
+}
+
+/* Badges */
+.badge {
+  font-size: 0.85rem;
+  padding: 0.375rem 0.75rem;
+  font-weight: 600;
+  border-radius: 4px;
+}
+
+.badge.bg-danger {
+  background-color: #dc3545 !important;
+}
+
+.badge.bg-success {
+  background-color: #28a745 !important;
+}
+
+.badge.bg-warning {
+  background-color: #ffc107 !important;
+  color: #212529;
+}
+
+/* Alert */
+.alert {
+  border-radius: 6px;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Loading Spinner */
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+  border-width: 0.3em;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .period-selector {
+    flex-wrap: wrap;
+  }
+
+  .period-btn {
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .kpi-value {
+    font-size: 1.25rem;
+  }
+
+  .table {
+    font-size: 0.85rem;
+  }
+
+  .table thead th {
+    font-size: 0.75rem;
+    padding: 0.75rem 0.5rem;
+  }
+
+  .table tbody td {
+    padding: 0.65rem 0.5rem;
+  }
+}
+
+/* Estados de Saúde */
+.health-normal {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.health-attention {
+  color: #ffc107;
+  font-weight: bold;
+}
+
+.health-critical {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+/* Emojis de Status */
+.status-normal::before {
+  content: '🟢 ';
+}
+
+.status-attention::before {
+  content: '🟡 ';
+}
+
+.status-critical::before {
+  content: '🔴 ';
+}
+
+/* Recomendações */
+.recomendacao-positiva {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.recomendacao-negativa {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.recomendacao-neutra {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+/* Animações suaves */
+.card {
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Print Styles */
+@media print {
+  .period-selector {
+    display: none;
+  }
+
+  .card {
+    box-shadow: none;
+    border: 1px solid #dee2e6;
+  }
+
+  .kpi-card {
+    page-break-inside: avoid;
+  }
+}

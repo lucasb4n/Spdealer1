@@ -1,0 +1,37 @@
+<!-- Formulário de manutenção de permissões de menu por usuário -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Permissões de Menu por Usuário</title>
+    <link rel="stylesheet" href="/static/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-4">
+    <h2>Permissões de Menu</h2>
+    <form id="formUserMenuConfig" class="mb-3">
+        <div class="row">
+            <div class="col-md-4">
+                <input type="number" class="form-control" name="userId" placeholder="ID do Usuário" required>
+            </div>
+            <div class="col-md-4">
+                <input type="number" class="form-control" name="menuItemId" placeholder="ID do Item de Menu" required>
+            </div>
+            <div class="col-md-2">
+                <select class="form-control" name="visible">
+                    <option value="true">Visível</option>
+                    <option value="false">Oculto</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-success">Salvar Permissão</button>
+            </div>
+        </div>
+    </form>
+    <ul id="userMenuConfigList" class="list-group">
+        <!-- Permissões renderizadas dinamicamente -->
+    </ul>
+</div>
+<script src="/static/menu/user-menu-config.js"></script>
+</body>
+</html>

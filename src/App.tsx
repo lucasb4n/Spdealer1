@@ -47,7 +47,7 @@ import TiposFornecedores from 'pages/TiposFornecedores';
 import InventarioPage from 'pages/InventarioPage';
 import ManutencaoTipoTmoForm from 'pages/Servico/Manutencao/ManutencaoTipoTmoForm';
 import ManutencaoTipoTmoList from 'pages/Servico/Manutencao/ManutencaoTipoTmoList';
-import ManutencaoGrupoReparoList from './refatorado/servico/manutencao/ManutencaoGrupoReparoList';
+import ManutencaoGrupoReparoList from 'pages/Servico/Manutencao/ManutencaoGrupoReparoList';
 import ServicoPorTipo from './refatorado/servico/ServicoPorTipo';
 import MenuAdminForm from './refatorado/frontend/MenuAdminForm';
 import DictionaryLocalizar from 'components/DictionaryCrud/DictionaryLocalizar';
@@ -57,8 +57,8 @@ import TiposOsPage from 'pages/Cadastros/TiposOsPage';
 import GrupoItensPage from 'pages/Cadastros/GrupoItensPage';
 import NiveisPrecoPage from 'pages/Cadastros/NiveisPrecoPage';
 import NaturezaItensPage from 'pages/Cadastros/NaturezaItensPage';
-import FlowRunnerPage from './refatorado/flow/FlowRunnerPage';
-import FlowEditorPage from './refatorado/flow/FlowEditorPage';
+// import FlowRunnerPage from './refatorado/flow/FlowRunnerPage'; // Módulo desabilitado
+// import FlowEditorPage from './refatorado/flow/FlowEditorPage'; // Módulo desabilitado
 import NfeForm from 'components/Forms/NfeForm';
 import OrcamentoPage from 'pages/Vendas/OrcamentoPage';
 import ReportsLanding from 'pages/ReportsLanding';

@@ -411,7 +411,7 @@ const OrdemCompraFormPage: React.FC = () => {
               placeholder="dd/mm/aaaa"
             />
           </Campo>
-          <Campo label="Cod. Fornecedor" width={260}>
+          <Campo label="Cod. Fornecedor" width={380}>
             <div style={{ display: 'flex', gap: 6 }}>
               <input
                 style={readOnlyStyle()}
@@ -442,7 +442,7 @@ const OrdemCompraFormPage: React.FC = () => {
 
         {/* Linha 03 */}
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 12 }}>
-          <Campo label="Cliente" width={260}>
+          <Campo label="Cliente" width={380}>
             <div style={{ display: 'flex', gap: 6 }}>
               <input
                 style={readOnlyStyle()}

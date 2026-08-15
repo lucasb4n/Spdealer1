@@ -2,6 +2,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
+// Ordem correta dos estilos do AG Grid: base antes do tema (ver ag-grid-order.css)
+import './ag-grid-order.css';
 // Registramos os módulos necessários do AG Grid (apenas AllCommunity)
 import './index.css';
 import './assets/form.css';

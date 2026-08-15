@@ -1,336 +1,187 @@
-<#
-.SYNOPSIS
-  Deploy do WAR do SPDealer para um Tomcat remoto via SCP/SSH.
+#!/usr/bin/env bash
+# =============================================================================
+# Deploy Script para SPDealer
+# Servidor: 192.168.10.70
+# Destino: /usr/local/tomcat10/webapps
+# Usuário: root
+# WAR: spdealer.war
+# Backup: spdealer.war.bak.YYYYMMDDHHMMSS
+# Execução no terminal: ./deploy.ps1
+# =============================================================================
 
-.DESCRIPTION
-  Suporta dois ambientes:
-  - DEV: 192.168.10.70, banco erp (teste)
-  - PROD: 100.126.166.63, banco erp (produção)
-  
-  O script compila o projeto com Maven e faz deploy do WAR.
+python3 - "$@" << 'PYEOF'
+import os
+import sys
+import glob
+import shutil
+import subprocess
+import datetime
+import time
 
-  Para DEV:   .\deploy.ps1 -D DEV   (ou -Ambiente DEV)
-  Para PROD:  .\deploy.ps1 -P PROD  (ou -Ambiente PROD)
+try:
+    import paramiko
+except ImportError:
+    print("Instalando dependencia paramiko...")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "paramiko"])
+    import paramiko
 
-.EXAMPLE
-  .\deploy.ps1 -D DEV
-  .\deploy.ps1 -P PROD
-  .\deploy.ps1 -Ambiente PROD
+# Configurações do Deploy
+REMOTE_HOST = "192.168.10.70"
+REMOTE_PORT = 22
+REMOTE_USER = "root"
+REMOTE_PASSWORDS = ["k15720", "senhak15720"]
+REMOTE_WEBAPPS = "/usr/local/tomcat10/webapps"
+WAR_TARGET_NAME = "spdealer.war"
+SERVICE_NAME = "spdealer.service"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) if __file__ != '<stdin>' else os.getcwd()
 
-#>
+print("==================================================")
+print("             DEPLOY SPDEALER                      ")
+print(f" Servidor:  {REMOTE_HOST}")
+print(f" Destino:   {REMOTE_WEBAPPS}")
+print(f" Usuário:   {REMOTE_USER}")
+print(f" Arquivo:   {WAR_TARGET_NAME}")
+print("==================================================")
 
-[CmdletBinding()]
-param(
-    [Parameter(Mandatory=$false)]
-    [ValidateSet("DEV", "PROD")]
-    [Alias("D", "P")]
-    [string]$Ambiente = "PROD",
+# 1. PASSO 1: Localizar / Compilar WAR
+target_dir = os.path.join(SCRIPT_DIR, "target")
+war_files = glob.glob(os.path.join(target_dir, "spdealer*.war"))
+war_files = [f for f in war_files if not f.endswith(".original") and not f.endswith("-exec.war")]
+
+if not war_files or "--rebuild" in sys.argv or "-r" in sys.argv:
+    print("\n[PASSO 1] Compilando projeto com Maven...")
     
-    [string]$RemoteUser = "root",
-    [string]$RemoteTomcatWebapps = "/usr/local/tomcat10/webapps",
-    [int]$SshPort = 22,
-    [int]$SshTimeoutSec = 30,
-    [switch]$SkipCompile,
-    [switch]$SkipDeploy
-)
-
-# Configurações por ambiente
-$config = @{
-    DEV = @{
-        Host = "100.116.217.83"
-        WarName = "spdealer_test.war"
-        Profile = "prod"
-        Servico = "spdealer.service"
-        CORS = "http://100.116.217.83:3000,http://100.116.217.83:5070"
-    }
-    PROD = @{
-        Host = "100.116.217.83"
-        WarName = "spdealer.war"
-        Profile = "prod"
-        Servico = "spdealer.service"
-        CORS = "https://spdealer.seprocom.com.br"
-    }
-}
-
-$cfg = $config[$Ambiente]
-$RemoteHost = $cfg.Host
-$warName = $cfg.WarName
-$profile = $cfg.Profile
-$servico = $cfg.Servico
-
-# Comandos nativos ou PuTTY
-$ScpCmd = "pscp"
-$SshCmd = "plink"
-$RemotePw = "k15720"
-$HostKey = "ssh-ed25519 255 SHA256:7QTt4U5Npd0PbJnhwB48FBjvpN/eXtP1bs5Woiit6kg"
-
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  AMBIENTE: $Ambiente" -ForegroundColor Cyan
-Write-Host "  Servidor: $RemoteHost" -ForegroundColor Cyan
-Write-Host "  WAR: $warName" -ForegroundColor Cyan
-Write-Host "  Profile: $profile" -ForegroundColor Cyan
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host ""
-
-function AbortIfError($code, $msg) {
-    if ($code -ne 0) {
-        Write-Error $msg
-        exit $code
-    }
-}
-
-# ============================================================================
-# PASSO 1: Compilar projeto com Maven
-# ============================================================================
-
-if (-not $SkipCompile) {
-    Write-Output "=============================================="
-    Write-Output "PASSO 1: Compilando projeto com Maven..."
-    Write-Output "=============================================="
+    # Configurar JDK 17 se disponível
+    env = os.environ.copy()
+    jdk17_path = "/home/lucas/.local/tools/jdk-17.0.12+7"
+    if os.path.isdir(jdk17_path):
+        env["JAVA_HOME"] = jdk17_path
+        env["PATH"] = f"{jdk17_path}/bin:" + env.get("PATH", "")
     
-    # Configurar Maven local para garantir consistência e evitar conflito de variáveis
-    $localMvnDir = Join-Path $PSScriptRoot "tools\maven_extracted\apache-maven-3.9.6"
-    if (-not (Test-Path $localMvnDir)) {
-        $localMvnDir = Join-Path $PSScriptRoot "tools\apache-maven-3.9.6"
-    }
-    if (-not (Test-Path $localMvnDir)) {
-        $localMvnDir = Join-Path $PSScriptRoot "tools\apache-maven-3.9.4"
-    }
+    mvn_cmd = "mvn package -DskipTests -Pprod"
+    res = subprocess.run(mvn_cmd, shell=True, cwd=SCRIPT_DIR, env=env)
+    if res.returncode != 0:
+        print("❌ Erro na compilação Maven. Deploy abortado.")
+        sys.exit(res.returncode)
     
-    if (Test-Path $localMvnDir) {
-        $resolvedMvnPath = (Resolve-Path $localMvnDir).Path
-        $env:MAVEN_HOME = $resolvedMvnPath
-        $env:M2_HOME = $resolvedMvnPath
-        $env:PATH = "$(Join-Path $resolvedMvnPath 'bin');$env:PATH"
-        Write-Output "Configurado Maven local: MAVEN_HOME=$env:MAVEN_HOME"
-    } else {
-        Write-Warning "Aviso: Maven local não encontrado em .\tools. Utilizando o ambiente global padrão."
-    }
-    
-    # Modificar temporariamente a homepage no package.json e as variaveis no .env
-    $packageJsonPath = Join-Path $PSScriptRoot "package.json"
-    $origPackageJson = Get-Content -Raw -Path $packageJsonPath
-    
-    $envPath = Join-Path $PSScriptRoot ".env"
-    $origEnv = Get-Content -Raw -Path $envPath
-    
-    try {
-        if ($Ambiente -eq "DEV") {
-            $targetHomepage = "/spdealer_test/"
-            $targetApiUrl = "/spdealer_test/api"
-        } else {
-            $targetHomepage = "/spdealer/"
-            $targetApiUrl = "/spdealer/api"
-        }
-        
-        $updatedPackageJson = $origPackageJson -replace '"homepage":\s*"[^"]*"', ('"homepage": "' + $targetHomepage + '"')
-        $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-        [System.IO.File]::WriteAllText($packageJsonPath, $updatedPackageJson, $utf8NoBom)
-        Write-Output "Configurada homepage temporaria no package.json: $targetHomepage"
+    war_files = glob.glob(os.path.join(target_dir, "spdealer*.war"))
+    war_files = [f for f in war_files if not f.endswith(".original") and not f.endswith("-exec.war")]
 
-        $updatedEnv = $origEnv -replace 'REACT_APP_API_URL=[^\r\n]*', ("REACT_APP_API_URL=" + $targetApiUrl)
-        [System.IO.File]::WriteAllText($envPath, $updatedEnv, $utf8NoBom)
-        Write-Output "Configurado REACT_APP_API_URL temporario no .env: $targetApiUrl"
+if not war_files:
+    print("❌ Nenhum arquivo WAR encontrado na pasta target.")
+    sys.exit(1)
 
-        $mvnCmd = "mvn clean package -DskipTests -P$profile"
-        Write-Output "Executando: $mvnCmd"
-        
-        Invoke-Expression $mvnCmd
-        $mvnExitCode = $LASTEXITCODE
-        
-        if ($mvnExitCode -ne 0) {
-            Write-Error "FALHA NA COMPILAÇÃO! Verifique os erros acima."
-            Write-Error "Deploy cancelado devido a erros de compilação."
-            exit $mvnExitCode
-        }
-        
-        Write-Host "Compilação concluída com sucesso!" -ForegroundColor Green
-    } finally {
-        # Restaurar package.json e .env originais
-        $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-        [System.IO.File]::WriteAllText($packageJsonPath, $origPackageJson, $utf8NoBom)
-        Write-Output "Restaurado package.json original"
-        
-        [System.IO.File]::WriteAllText($envPath, $origEnv, $utf8NoBom)
-        Write-Output "Restaurado .env original"
-    }
-} else {
-    Write-Output "=============================================="
-    Write-Output "PASSO 1: Compilação ignorada (-SkipCompile)"
-    Write-Output "=============================================="
-}
+# Escolher o WAR mais recente
+war_files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+local_war_source = war_files[0]
+print(f"✓ WAR local localizado: {local_war_source}")
 
-# ============================================================================
-# PASSO 2: Verificar/Criar WAR
-# ============================================================================
+# Prepara nome final do WAR
+local_war_final = os.path.join(target_dir, WAR_TARGET_NAME)
+if local_war_source != local_war_final:
+    shutil.copy2(local_war_source, local_war_final)
 
-Write-Output "=============================================="
-Write-Output "PASSO 2: Preparando WAR..."
-Write-Output "=============================================="
+war_size_mb = os.path.getsize(local_war_final) / (1024 * 1024)
+print(f"✓ Tamanho do WAR: {war_size_mb:.2f} MB")
 
-$warFiles = Get-ChildItem -Path .\target -Filter "spdealer*.war" | Sort-Object LastWriteTime -Descending
-if ($warFiles.Count -eq 0) {
-    Write-Error "Nenhum WAR encontrado em .\target"
-    exit 1
-}
+# 2. PASSO 2: Conexão SSH / SFTP com o servidor remoto
+print("\n[PASSO 2] Conectando ao servidor remoto (192.168.10.70)...")
+ssh = paramiko.SSHClient()
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-$localWarBase = $warFiles[0].FullName
-$localWar = Join-Path (Split-Path $localWarBase -Parent) $warName
+connected = False
+for pw in REMOTE_PASSWORDS:
+    try:
+        ssh.connect(REMOTE_HOST, port=REMOTE_PORT, username=REMOTE_USER, password=pw, timeout=10)
+        connected = True
+        print(f"✓ Conexão SSH estabelecida com sucesso com usuário {REMOTE_USER}.")
+        break
+    except Exception:
+        continue
 
-# Copiar para nome correto
-Copy-Item $localWarBase $localWar -Force
-Write-Host "WAR preparado: $localWar" -ForegroundColor Green
+if not connected:
+    print(f"❌ Falha ao autenticar via SSH em {REMOTE_HOST} com o usuário {REMOTE_USER}.")
+    sys.exit(1)
 
-if ($SkipDeploy) {
-    Write-Output "=============================================="
-    Write-Output "Deploy ignorado (-SkipDeploy)"
-    Write-Output "=============================================="
-    Write-Output "WAR disponível em: $localWar"
-    exit 0
-}
+# 3. PASSO 3: Upload do WAR via SFTP para pasta temporária
+timestamp_str = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+remote_tmp_war = f"/tmp/{WAR_TARGET_NAME}.tmp.{timestamp_str}"
 
-# ============================================================================
-# PASSO 3: Deploy para servidor remoto com Posh-SSH
-# ============================================================================
+print(f"\n[PASSO 3] Enviando {WAR_TARGET_NAME} para {remote_tmp_war}...")
+sftp = ssh.open_sftp()
+sftp.put(local_war_final, remote_tmp_war)
+sftp.close()
+print("✓ Envio concluído com sucesso.")
 
-Write-Output "=============================================="
-Write-Output "PASSO 3: Deploy para servidor remoto..."
-Write-Output "=============================================="
+# 4. PASSO 4: Deploy no Tomcat remoto (Backup do antigo, limpeza, movimentação e restart)
+print("\n[PASSO 4] Executando comandos de deploy no Tomcat remoto...")
 
-Import-Module Posh-SSH -ErrorAction Stop
+remote_bash_commands = f"""set -e
+echo "1. Parando serviço {SERVICE_NAME}..."
+systemctl stop {SERVICE_NAME} 2>/dev/null || true
+sleep 3
 
-$timestampStr = Get-Date -Format "yyyyMMddHHmmss"
-$remoteTmp = "/tmp/" + $warName + "." + $timestampStr
+WEBAPPS="{REMOTE_WEBAPPS}"
+WARNAME="{WAR_TARGET_NAME}"
+TIMESTAMP="{timestamp_str}"
+BACKUP_NAME="$WARNAME.bak.$TIMESTAMP"
 
-$securePw = ConvertTo-SecureString $RemotePw -AsPlainText -Force
-$cred = New-Object System.Management.Automation.PSCredential ($RemoteUser, $securePw)
-
-Write-Output "Conectando via SSH a $RemoteHost como $RemoteUser..."
-try {
-    $sshSession = New-SSHSession -ComputerName $RemoteHost -Credential $cred -Port $SshPort -AcceptKey -ErrorAction Stop
-} catch {
-    AbortIfError 1 "Falha ao estabelecer conexão SSH: $_"
-}
-
-Write-Output "Copiando $localWar para o servidor remoto em $remoteTmp..."
-try {
-    Set-SCPItem -ComputerName $RemoteHost -Credential $cred -Port $SshPort -Path $localWar -Destination "/tmp" -NewName ($warName + "." + $timestampStr) -AcceptKey -ErrorAction Stop
-} catch {
-    Remove-SSHSession -SessionId $sshSession.SessionId -ErrorAction SilentlyContinue
-    AbortIfError 1 "SCP falhou no envio do WAR: $_"
-}
-
-# Remote bash script
-$remoteTemplate = @'
-set -e
-echo "Parando serviço {SERVICO} (se existir)..."
-systemctl stop {SERVICO} || true
-
-timestamp=$(date +%Y%m%d%H%M%S)
-WEBAPPS="{WEBAPPS}"
-WARNAME="{WARNAME}"
-
-# Backup antigo
-if [ -f "{WEBAPPS}/{WARNAME}" ]; then
-  mv "{WEBAPPS}/{WARNAME}" "{WEBAPPS}/{WARNAME}.bak.$timestamp"
-  echo "WAR antigo movido para backup"
+if [ -f "$WEBAPPS/$WARNAME" ]; then
+    echo "2. Criando backup do WAR antigo -> $BACKUP_NAME"
+    mv "$WEBAPPS/$WARNAME" "$WEBAPPS/$BACKUP_NAME"
+    echo "✓ Backup criado com sucesso: $BACKUP_NAME"
+else
+    echo "2. WAR anterior não encontrado em $WEBAPPS/$WARNAME (primeiro deploy?)"
 fi
-# Limpeza do contexto para evitar arquivos corrompidos
-echo "Limpando aplicação {WARFOLDER} antiga..."
-rm -rf "$WEBAPPS/{WARFOLDER}"
-rm -f "$WEBAPPS/{WARNAME}"
 
-echo "Limpando pastas temporárias (temp e work)..."
-rm -rf /usr/local/tomcat10/temp/*
-rm -rf /usr/local/tomcat10/work/*
+echo "3. Removendo contexto descompactado anterior..."
+rm -rf "$WEBAPPS/spdealer"
 
-echo "Movendo novo WAR para webapps..."
-mv "{REMOTE_TMP}" "{WEBAPPS}/{WARNAME}"
+echo "4. Limpando diretórios temporários do Tomcat (temp e work)..."
+rm -rf /usr/local/tomcat10/temp/* /usr/local/tomcat10/work/*
 
-echo "Definindo permissões (tentativa: tomcat:tomcat)..."
-chown -R tomcat:tomcat "{WEBAPPS}/{WARNAME}" || true
+echo "5. Posicionando o novo WAR em $WEBAPPS/$WARNAME..."
+mv "{remote_tmp_war}" "$WEBAPPS/$WARNAME"
+chown tomcat:tomcat "$WEBAPPS/$WARNAME" 2>/dev/null || true
 
-echo "Iniciando serviço {SERVICO}..."
-systemctl start {SERVICO} || { 
-    echo "Falha ao iniciar {SERVICO}, tentando iniciar Tomcat diretamente..."
-    if [ -f /usr/local/tomcat10/bin/startup.sh ]; then
-        /usr/local/tomcat10/bin/shutdown.sh 2>/dev/null || true
-        sleep 2
-        /usr/local/tomcat10/bin/startup.sh
-    fi
-}
+echo "6. Iniciando serviço {SERVICE_NAME}..."
+systemctl start {SERVICE_NAME} || {{
+    echo "Aviso: systemctl start falhou, iniciando via startup.sh..."
+    /usr/local/tomcat10/bin/startup.sh 2>/dev/null || true
+}}
 
-echo "Aguardando 8 segundos para Tomcat explodir WAR..."
+echo "7. Aguardando Tomcat inicializar (8 segundos)..."
 sleep 8
 
-echo "Estado do Tomcat:"
+echo "--------------------------------------------------"
+echo "Últimas linhas do log do Tomcat (catalina.out):"
+echo "--------------------------------------------------"
 if [ -f /usr/local/tomcat10/logs/catalina.out ]; then
-    echo "--- Últimas 50 linhas de catalina.out ---"
-    tail -n 50 /usr/local/tomcat10/logs/catalina.out
+    tail -n 30 /usr/local/tomcat10/logs/catalina.out
 fi
+"""
 
-echo "Deploy remoto concluído com sucesso"
-exit 0
-'@
+stdin, stdout, stderr = ssh.exec_command(f"bash -c '{remote_bash_commands}'")
+out_text = stdout.read().decode('utf-8', errors='replace')
+err_text = stderr.read().decode('utf-8', errors='replace')
+exit_code = stdout.channel.recv_exit_status()
 
-$warFolder = $warName -replace '\.war$', ''
-$remoteCmd = $remoteTemplate -replace '\{SERVICO\}', $servico
-$remoteCmd = $remoteCmd -replace '\{WEBAPPS\}', $RemoteTomcatWebapps
-$remoteCmd = $remoteCmd -replace '\{WARNAME\}', $warName
-$remoteCmd = $remoteCmd -replace '\{WARFOLDER\}', $warFolder
-$remoteCmd = $remoteCmd -replace '\{REMOTE_TMP\}', $remoteTmp
+print(out_text)
+if err_text and exit_code != 0:
+    print(f"Avisos/Erros: {err_text}")
 
-$localRemoteScript = Join-Path $env:TEMP "spdealer-deploy-remote.sh.$timestampStr"
-# Write with LF-only (Unix line endings) to avoid bash errors on remote Linux
-[System.IO.File]::WriteAllText($localRemoteScript, ($remoteCmd -replace "`r\n", "`n"))
+ssh.close()
 
-$sharedScriptSuffix = $timestampStr
-$remoteScriptPath = "/tmp/spdealer-deploy-remote.sh." + $sharedScriptSuffix
+if exit_code == 0:
+    PUBLIC_URL = "https://spdealer.seprocom.com.br/spdealer/"
+    print("\n==================================================")
+    print("      DEPLOY CONCLUÍDO COM SUCESSO!               ")
+    print(f" URL Pública:  {PUBLIC_URL}")
+    print(f" URL Interna:  http://{REMOTE_HOST}:5070/spdealer/")
+    print(f" Backup gerado: {WAR_TARGET_NAME}.bak.{timestamp_str}")
+    print("==================================================")
+else:
+    print(f"\n❌ O deploy finalizou com código de erro {exit_code}.")
+    sys.exit(exit_code)
 
-Write-Output "Copiando script remoto para $remoteScriptPath..."
-try {
-    Set-SCPItem -ComputerName $RemoteHost -Credential $cred -Port $SshPort -Path $localRemoteScript -Destination "/tmp" -NewName ("spdealer-deploy-remote.sh." + $sharedScriptSuffix) -AcceptKey -ErrorAction Stop
-} catch {
-    Remove-SSHSession -SessionId $sshSession.SessionId -ErrorAction SilentlyContinue
-    AbortIfError 1 "SCP falhou no envio do script remoto: $_"
-}
-
-Write-Output "Executando script remoto..."
-$exitCode = 0
-try {
-    $result = Invoke-SSHCommand -SessionId $sshSession.SessionId -Command "bash $remoteScriptPath" -ErrorAction Stop
-    $result.Output | ForEach-Object { Write-Output $_ }
-    $exitCode = $result.ExitStatus
-} catch {
-    $exitCode = 1
-    Write-Error "Falha ao executar comandos SSH: $_"
-} finally {
-    Remove-SSHSession -SessionId $sshSession.SessionId -ErrorAction SilentlyContinue
-}
-
-if ($exitCode -ne 0) {
-    Write-Warning "Execução remota retornou código $exitCode. Verifique logs remotos."
-} else {
-    Write-Host "Script remoto finalizado com código 0" -ForegroundColor Green
-}
-
-# ============================================================================
-# RESUMO
-# ============================================================================
-
-Write-Host ""
-Write-Host "========================================" -ForegroundColor Green
-Write-Host "  DEPLOY CONCLUÍDO" -ForegroundColor Green
-Write-Host "========================================" -ForegroundColor Green
-Write-Host ""
-
-if ($Ambiente -eq "DEV") {
-    Write-Host "URL de Teste: http://$RemoteHost:5070/$($warName -replace '\.war$', '')" -ForegroundColor Cyan
-    Write-Host ""
-    Write-Host "Para promover para PRODUÇÃO:" -ForegroundColor Yellow
-    Write-Host "  .\deploy.ps1 -Ambiente PROD" -ForegroundColor Yellow
-} else {
-    Write-Host "URL de Produção: https://spdealer.seprocom.com.br" -ForegroundColor Cyan
-}
-
-Write-Host ""
+PYEOF

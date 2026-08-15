@@ -16,6 +16,7 @@ import { ClienteForm } from '../../components/Forms/ClienteForm';
 import { DocumentoFormatterService } from '../../services/DocumentoFormatterService';
 import { focusField } from '../../utils/formFieldNavigation';
 import { useTableColumns } from '../../hooks/useTableColumns';
+import { API_BASE_URL } from '../../services/apiConfig';
 import './ClienteEditar.css';
 
 // ✅ Interface gerada dinamicamente do dictionary
@@ -75,7 +76,7 @@ const ClienteEditar: React.FC<ClienteEditarProps> = ({ clienteId }) => {
   const carregarCliente = async (clienteId: string) => {
     setCarregando(true);
     try {
-      const response = await fetch(`/api/clientes/${clienteId}`);
+      const response = await fetch(`${API_BASE_URL}/clientes/${clienteId}`);
       if (!response.ok) throw new Error('Erro ao carregar cliente');
       const data = await response.json();
       setDados(data);
@@ -102,7 +103,7 @@ const ClienteEditar: React.FC<ClienteEditarProps> = ({ clienteId }) => {
     setErro(null);
 
     try {
-      const url = modo === 'novo' ? '/api/clientes' : `/api/clientes/${payload.codigo_cli}`;
+      const url = modo === 'novo' ? `${API_BASE_URL}/clientes` : `${API_BASE_URL}/clientes/${payload.codigo_cli}`;
       const method = modo === 'novo' ? 'POST' : 'PUT';
 
       // Não enviar `compl_cli` em updates — campo não existe no DB

@@ -22,7 +22,26 @@ public class AuthService {
     public Optional<User> authenticate(String username, String password) {
         System.out.println("[AUTH-DEBUG] Tentando autenticar usuário: " + username);
         
-        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (username == null) return Optional.empty();
+        String trimmedUser = username.trim();
+
+        // 1. Busca exata por username
+        Optional<User> userOptional = userRepository.findByUsername(trimmedUser);
+        
+        // 2. Busca case-insensitive
+        if (!userOptional.isPresent()) {
+            userOptional = userRepository.findByUsernameIgnoreCase(trimmedUser);
+        }
+        
+        // 3. Fallback em maiúsculas (ex: SERGIO)
+        if (!userOptional.isPresent()) {
+            userOptional = userRepository.findByUsername(trimmedUser.toUpperCase());
+        }
+
+        // 4. Fallback em minúsculas (ex: sergio)
+        if (!userOptional.isPresent()) {
+            userOptional = userRepository.findByUsername(trimmedUser.toLowerCase());
+        }
         
         if (userOptional.isPresent()) {
             User user = userOptional.get();
@@ -31,7 +50,7 @@ public class AuthService {
             System.out.println("[AUTH-DEBUG] Ativo: " + user.getActive());
             System.out.println("[AUTH-DEBUG] ID do Grupo: " + user.getGroupId());
             
-            if (user.getActive() != null && !user.getActive()) {
+            if (Boolean.FALSE.equals(user.getActive())) {
                 System.out.println("[AUTH-DEBUG] FALHA: Usuário inativo!");
                 return Optional.empty();
             }
@@ -43,7 +62,7 @@ public class AuthService {
                 System.out.println("[AUTH-DEBUG] FALHA: Senha informada [" + password + "] não confere com a do banco!");
             }
         } else {
-            System.out.println("[AUTH-DEBUG] FALHA: Usuário não encontrado no banco!");
+            System.out.println("[AUTH-DEBUG] FALHA: Usuário não encontrado no banco para [" + username + "]!");
         }
         
         return Optional.empty();

@@ -1,0 +1,7 @@
+/* Garante a ordem correta de carregamento do AG Grid:
+   base (ag-grid.css) ANTES do tema (ag-theme-alpine.css).
+   Se o base for injetado depois do tema, os valores padrão
+   (bordas escuras rgba(0,0,0,0.25), fonte Helvetica, sem highlight
+   de seleção) sobrescrevem o tema alpine. */
+@import 'ag-grid-community/styles/ag-grid.css';
+@import 'ag-grid-community/styles/ag-theme-alpine.css';

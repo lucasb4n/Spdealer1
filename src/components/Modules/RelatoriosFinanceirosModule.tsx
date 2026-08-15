@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faSpinner, faChevronRight, faChevronDown, faMoneyBillWave, faFileInvoiceDollar, faCashRegister, faCalendarAlt, faDownload, faFilter, faInfoCircle, faFileCsv, faFilePdf, faSync, faCheck, faExclamationTriangle, faTrash, faPlus, faEdit, faHandshake } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faSpinner, faChevronRight, faChevronDown, faMoneyBillWave, faFileInvoiceDollar, faCashRegister, faCalendarAlt, faDownload, faFilter, faInfoCircle, faFileCsv, faFilePdf, faSync, faCheck, faExclamationTriangle, faTrash, faPlus, faEdit, faHandshake, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import { RelatoriosService } from 'services/RelatoriosService';
@@ -14,6 +14,7 @@ import { hasPermission, parsePermissions } from 'utils/permissionUtils';
 import RegistrarLancamentoModal from 'components/RegistrarLancamentoModal';
 import CaixaBancosForm from 'components/Forms/CaixaBancosForm';
 import MultiSelectDropdown from '../MultiSelectDropdown';
+import { API_BASE_URL } from '../../services/apiConfig';
 /* eslint-disable react-hooks/exhaustive-deps */
 
 /*
@@ -503,6 +504,14 @@ const RelatoriosFinanceirosModule: React.FC<RelatoriosFinanceirosModuleProps> = 
   const [showCaixaPopup, setShowCaixaPopup] = useState<boolean>(false);
   const [caixaPopupPayload, setCaixaPopupPayload] = useState<any>(null);
   const [caixaPopupReadOnlyPrimary, setCaixaPopupReadOnlyPrimary] = useState<boolean>(true);
+
+  // Estados para o modal de envio de boletos
+  const [showBoletoModal, setShowBoletoModal] = useState(false);
+  const [boletoProcessing, setBoletoProcessing] = useState(false);
+  const [boletoResults, setBoletoResults] = useState<{ id: any; codigo_bol?: string; sucesso: boolean; mensagem: string }[]>([]);
+  const [boletoSelectedCount, setBoletoSelectedCount] = useState(0);
+  const [boletoRowsComBoleto, setBoletoRowsComBoleto] = useState<any[]>([]);
+  const [boletoRowsSemBoleto, setBoletoRowsSemBoleto] = useState<any[]>([]);
 
   // Estados para Previsão Financeira na Linha de Grupo
   const [previsaoPorData, setPrevisaoPorData] = useState<Record<string, any>>({});
@@ -2899,11 +2908,10 @@ const RelatoriosFinanceirosModule: React.FC<RelatoriosFinanceirosModuleProps> = 
   const buscarDados = async (overrideFiltros?: FiltroRelatorio) => {
     const usedFiltros = overrideFiltros || filtros;
 
-    // Resetar gridApi para forçar nova renderização do AG Grid
-    // Isso é crítico quando volta de Fluxo para Contas a Receber/Pagar
-    if (usedFiltros.tipo !== 'fluxo') {
-      setGridApi(null);
-    }
+    // NOTA: não zerar gridApi aqui. O grid já montado não dispara onGridReady de
+    // novo, então zerar deixaria gridApi null e quebraria o botão "Mandar Boleto".
+    // A troca de aba já é tratada em handleSubMenuClick (setGridApi(null)) e o
+    // novo grid dispara onGridReady naturalmente.
 
     setLoading(true);
     (window as any)._hasSearchedFinanceiro = true;
@@ -3048,6 +3056,86 @@ const RelatoriosFinanceirosModule: React.FC<RelatoriosFinanceirosModuleProps> = 
       console.error('❌ Erro ao exportar CSV:', error);
       alert('Erro ao exportar CSV. Verifique o console.');
     }
+  };
+
+  const handleMandarBoleto = () => {
+    // Fallback: gridApi pode ser null por reset em buscarDados, usar window.__agGridApi como reserva
+    const api = gridApi || (window as any).__agGridApi;
+    if (!api) {
+      alert('Grid não está pronto. Tente novamente.');
+      return;
+    }
+    const selected = api.getSelectedRows();
+    if (selected.length === 0) {
+      alert('Nenhum registro selecionado. Marque os checkboxes das contas a enviar.');
+      return;
+    }
+    const comBoleto = selected.filter((r: any) => r.codigo_bol && String(r.codigo_bol).trim() !== '');
+    const semBoleto = selected.filter((r: any) => !r.codigo_bol || String(r.codigo_bol).trim() === '');
+
+    setBoletoRowsComBoleto(comBoleto);
+    setBoletoRowsSemBoleto(semBoleto);
+    setBoletoSelectedCount(semBoleto.length);
+    setBoletoResults([]);
+    setShowBoletoModal(true);
+  };
+
+  const processarBoletos = async () => {
+    if (boletoRowsSemBoleto.length === 0) return;
+    setBoletoProcessing(true);
+    setBoletoResults([]);
+
+    const results: { id: any; codigo_bol?: string; sucesso: boolean; mensagem: string }[] = [];
+    const baseUrl = '/api/boletos';
+
+    for (const row of boletoRowsSemBoleto) {
+      const receberId = row.receber_id || row.id || row.codigo_rec || row.numdup_rec;
+      try {
+        // 1. Chamar servlet do boleto passando os dados do registro da tabela receber
+        const emitRes = await fetch(`${baseUrl}/emitir/${receberId}`, { method: 'POST' });
+        const emitData = await emitRes.json();
+
+        if (!emitData.sucesso) {
+          results.push({
+            id: receberId,
+            sucesso: false,
+            mensagem: emitData.mensagem || 'Erro ao gerar boleto no servlet'
+          });
+          continue;
+        }
+
+        const codigoBolGerado = emitData.boletoId || emitData.codigo_bol || (emitData.boleto ? emitData.boleto.id : null);
+
+        // 2. Chamar servlet para enviar ao banco
+        const enviarRes = await fetch(`${baseUrl}/enviar/${receberId}`, { method: 'POST' });
+        const enviarData = await enviarRes.json();
+
+        if (enviarData.sucesso) {
+          results.push({
+            id: receberId,
+            codigo_bol: String(codigoBolGerado || ''),
+            sucesso: true,
+            mensagem: `Boleto ${codigoBolGerado ? '#' + codigoBolGerado : ''} gerado e enviado com sucesso ao banco!`
+          });
+        } else {
+          results.push({
+            id: receberId,
+            codigo_bol: String(codigoBolGerado || ''),
+            sucesso: false,
+            mensagem: `Boleto ${codigoBolGerado ? '#' + codigoBolGerado : ''} gerado, mas erro ao enviar ao banco: ${enviarData.mensagem || 'Falha de comunicação'}`
+          });
+        }
+      } catch (err: any) {
+        results.push({
+          id: receberId,
+          sucesso: false,
+          mensagem: err.message || 'Erro de conexão com o servlet de boleto'
+        });
+      }
+    }
+
+    setBoletoResults(results);
+    setBoletoProcessing(false);
   };
 
   const exportarRelatorio = async () => {
@@ -3770,6 +3858,19 @@ const RelatoriosFinanceirosModule: React.FC<RelatoriosFinanceirosModuleProps> = 
     // Contas a Receber: SEM coluna Tipo, COM coluna Documento, "Clientes"
     const columnDefsReceber = [
         {
+          headerName: '',
+          field: 'selection',
+          width: 50,
+          headerCheckboxSelection: true,
+          checkboxSelection: true,
+          showDisabledCheckboxes: true,
+          suppressHeaderMenuButton: true,
+          suppressMenu: true,
+          sortable: false,
+          filter: false,
+          resizable: false
+        },
+        {
           field: 'codigo_rec',
           headerName: 'Código',
           width: 80,
@@ -3785,6 +3886,18 @@ const RelatoriosFinanceirosModule: React.FC<RelatoriosFinanceirosModuleProps> = 
           field: 'parcela_rec',
           headerName: 'Parc.',
           width: 50,
+          getQuickFilterText: (params: any) => params.value || ''
+        },
+        {
+          field: 'codigo_bol',
+          headerName: 'Cód. Boleto',
+          width: 120,
+          getQuickFilterText: (params: any) => params.value || ''
+        },
+        {
+          field: 'nomefan_bco',
+          headerName: 'Banco',
+          width: 140,
           getQuickFilterText: (params: any) => params.value || ''
         },
         {
@@ -4032,6 +4145,8 @@ const RelatoriosFinanceirosModule: React.FC<RelatoriosFinanceirosModuleProps> = 
               rowData={dados}
               pinnedBottomRowData={totalRow ? [totalRow] : []}
               defaultColDef={{ resizable: true, sortable: true, filter: true, floatingFilter: true }}
+              rowSelection="multiple"
+              suppressRowClickSelection={true}
               pagination={true}
               paginationPageSize={50}
               domLayout="normal"
@@ -4538,6 +4653,19 @@ const RelatoriosFinanceirosModule: React.FC<RelatoriosFinanceirosModuleProps> = 
     // Contas a Pagar: SEM coluna Tipo, COM coluna Documento, "Fornecedores"
     columnDefsPagar = [
       {
+        headerName: '',
+        field: 'selection',
+        width: 50,
+        headerCheckboxSelection: true,
+        checkboxSelection: true,
+        showDisabledCheckboxes: true,
+        suppressHeaderMenuButton: true,
+        suppressMenu: true,
+        sortable: false,
+        filter: false,
+        resizable: false
+      },
+      {
         field: 'codigo_pag',
         headerName: 'Código',
         width: 80,
@@ -4549,14 +4677,20 @@ const RelatoriosFinanceirosModule: React.FC<RelatoriosFinanceirosModuleProps> = 
         width: 90,
         getQuickFilterText: (params: any) => params.value || ''
       },
-      {
-        field: 'parcela_pag',
-        headerName: 'Parc.',
-        width: 50,
-        getQuickFilterText: (params: any) => params.value || ''
-      },
-      {
-        field: 'cgccpf_pag_formatted',
+        {
+          field: 'parcela_pag',
+          headerName: 'Parc.',
+          width: 50,
+          getQuickFilterText: (params: any) => params.value || ''
+        },
+        {
+          field: 'nomefan_bco',
+          headerName: 'Banco',
+          width: 140,
+          getQuickFilterText: (params: any) => params.value || ''
+        },
+        {
+          field: 'cgccpf_pag_formatted',
         headerName: 'Documento',
         width: 154,
         getQuickFilterText: (params: any) => params.value || ''
@@ -4883,6 +5017,8 @@ const RelatoriosFinanceirosModule: React.FC<RelatoriosFinanceirosModuleProps> = 
             rowData={dados}
             pinnedBottomRowData={totalRow ? [totalRow] : []}
             defaultColDef={{ resizable: true, sortable: true, filter: true, floatingFilter: true }}
+            rowSelection="multiple"
+            suppressRowClickSelection={true}
             pagination={true}
             paginationPageSize={50}
             domLayout="normal"
@@ -5237,6 +5373,12 @@ const RelatoriosFinanceirosModule: React.FC<RelatoriosFinanceirosModuleProps> = 
                               <FontAwesomeIcon icon={faDownload} />
                               Exportar CSV
                             </Button>
+                            {(tipoAtivo === 'receber' || tipoAtivo === 'pagar') && (
+                              <Button type="button" onClick={handleMandarBoleto} style={{ background: '#2563eb', borderColor: '#2563eb' }}>
+                                <FontAwesomeIcon icon={faPaperPlane} />
+                                Mandar Boleto
+                              </Button>
+                            )}
                             <Button
                               type="button"
                               onClick={exportarRelatorio}
@@ -5761,6 +5903,116 @@ const RelatoriosFinanceirosModule: React.FC<RelatoriosFinanceirosModuleProps> = 
                 if (refresh) buscarConsultaCaixa();
               }}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmação / aviso de envio de boletos */}
+      {showBoletoModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 520, maxHeight: '90vh', overflow: 'auto', background: '#fff', borderRadius: 12, padding: 24, boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
+            {!boletoProcessing && boletoResults.length === 0 && (
+              <>
+                {/* Caso 1: Todos os registros selecionados já possuem boleto */}
+                {boletoRowsSemBoleto.length === 0 && boletoRowsComBoleto.length > 0 && (
+                  <>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid #e5e7eb' }}>
+                      <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#9a3412' }}>⚠️ Boleto Já Gerado</h3>
+                      <button className="btn btn-sm btn-outline-secondary" onClick={() => setShowBoletoModal(false)}>✕ Fechar</button>
+                    </div>
+                    <div style={{ marginBottom: 16, padding: 14, background: '#fff7ed', borderRadius: 8, border: '1px solid #ffedd5' }}>
+                      <p style={{ margin: 0, fontWeight: 600, color: '#c2410c', fontSize: 14 }}>
+                        Os registros selecionados ({boletoRowsComBoleto.length}) já possuem código de boleto atribuído.
+                      </p>
+                      <p style={{ margin: '8px 0 0 0', fontSize: 13, color: '#9a3412' }}>
+                        Cód(s). Boleto: {boletoRowsComBoleto.map((r: any) => r.codigo_bol).join(', ')}
+                      </p>
+                    </div>
+                    <p style={{ fontSize: 13, color: '#4b5563', marginBottom: 20 }}>
+                      Registros que já possuem boleto gerado não podem ser reenviados para o banco.
+                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                      <button className="btn btn-secondary" onClick={() => setShowBoletoModal(false)}>Ok, entendi</button>
+                    </div>
+                  </>
+                )}
+
+                {/* Caso 2: Existem registros pendentes para gerar/enviar boleto */}
+                {boletoRowsSemBoleto.length > 0 && (
+                  <>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid #e5e7eb' }}>
+                      <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#1f2937' }}>Mandar Boleto</h3>
+                      <button className="btn btn-sm btn-outline-secondary" onClick={() => setShowBoletoModal(false)}>✕ Fechar</button>
+                    </div>
+
+                    {boletoRowsComBoleto.length > 0 && (
+                      <div style={{ marginBottom: 12, padding: 10, background: '#fff7ed', borderRadius: 6, border: '1px solid #fed7aa', fontSize: 13, color: '#9a3412' }}>
+                        ⚠️ <strong>Aviso:</strong> {boletoRowsComBoleto.length} registro(s) já possuem boleto gerado e serão ignorados.
+                      </div>
+                    )}
+
+                    <div style={{ marginBottom: 16, padding: 14, background: '#eff6ff', borderRadius: 8, border: '1px solid #bfdbfe' }}>
+                      <span style={{ fontWeight: 600, color: '#1e40af', fontSize: 14 }}>
+                        Enviar {boletoRowsSemBoleto.length} boleto(s) pendente(s) para o banco?
+                      </span>
+                    </div>
+                    <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 20 }}>
+                      Os dados da conta a receber serão enviados ao servlet do boleto. O <strong>Cód. Boleto</strong> interno será vinculado ao registro após o retorno de sucesso.
+                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                      <button className="btn btn-outline-secondary" onClick={() => setShowBoletoModal(false)}>Cancelar</button>
+                      <button className="btn btn-primary" onClick={processarBoletos} style={{ background: '#2563eb', borderColor: '#2563eb', color: '#fff' }}>
+                        Sim, enviar {boletoRowsSemBoleto.length} boleto(s)
+                      </button>
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+
+            {boletoProcessing && (
+              <div style={{ textAlign: 'center', padding: 28 }}>
+                <FontAwesomeIcon icon={faSpinner} spin style={{ fontSize: 36, color: '#2563eb', marginBottom: 16 }} />
+                <p style={{ fontWeight: 600, color: '#374151', margin: 0 }}>Gerando e enviando boletos ao servlet/banco...</p>
+              </div>
+            )}
+
+            {!boletoProcessing && boletoResults.length > 0 && (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid #e5e7eb' }}>
+                  <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#1f2937' }}>Resultado do Processamento</h3>
+                  <button className="btn btn-sm btn-outline-secondary" onClick={() => { setShowBoletoModal(false); buscarDados(); }}>✕ Fechar</button>
+                </div>
+                <div style={{ marginBottom: 16 }}>
+                  {boletoResults.filter(r => r.sucesso).length > 0 && (
+                    <div style={{ padding: '8px 12px', background: '#f0fdf4', borderRadius: 8, border: '1px solid #bbf7d0', marginBottom: 8, color: '#166534', fontWeight: 600, fontSize: 13 }}>
+                      ✓ {boletoResults.filter(r => r.sucesso).length} boleto(s) gerado(s) e enviado(s) com sucesso
+                    </div>
+                  )}
+                  {boletoResults.filter(r => !r.sucesso).length > 0 && (
+                    <div style={{ padding: '8px 12px', background: '#fef2f2', borderRadius: 8, border: '1px solid #fecaca', marginBottom: 8, color: '#991b1b', fontWeight: 600, fontSize: 13 }}>
+                      ✕ {boletoResults.filter(r => !r.sucesso).length} registro(s) com erro no processamento
+                    </div>
+                  )}
+                </div>
+                <div style={{ maxHeight: 280, overflow: 'auto' }}>
+                  {boletoResults.map((r, i) => (
+                    <div key={i} style={{ padding: '8px 12px', background: r.sucesso ? '#f0fdf4' : '#fef2f2', borderRadius: 6, marginBottom: 6, fontSize: 13 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontWeight: 600, color: r.sucesso ? '#166534' : '#991b1b' }}>Reg. #{r.id} {r.codigo_bol ? `(Cód. Bol: ${r.codigo_bol})` : ''}</span>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: r.sucesso ? '#16a34a' : '#dc2626' }}>{r.sucesso ? 'SUCESSO' : 'ERRO'}</span>
+                      </div>
+                      <div style={{ color: '#4b5563', marginTop: 2, fontSize: 12 }}>{r.mensagem}</div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+                  <button className="btn btn-primary" onClick={() => { setShowBoletoModal(false); buscarDados(); }} style={{ background: '#2563eb', borderColor: '#2563eb', color: '#fff' }}>
+                    Concluir e Atualizar
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

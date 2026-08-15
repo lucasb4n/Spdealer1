@@ -243,6 +243,7 @@ interface ContasReceberForm {
   dtvenci_rec: string;
   dtpagi_rec: string;
   banco_rec: string;
+  codigo_bol?: string; // Código do boleto
   nossonumero_rec: string;
   
   // Valores
@@ -280,6 +281,7 @@ const ContasReceberForm: React.FC = () => {
     dtvenci_rec: '',
     dtpagi_rec: '',
     banco_rec: '',
+    codigo_bol: '',
     nossonumero_rec: '',
     
     vlrdup_rec: 0,
@@ -775,6 +777,16 @@ const ContasReceberForm: React.FC = () => {
                         </option>
                       ))}
                     </Select>
+                  </FormGroup>
+
+                  <FormGroup>
+                    <Label>Cód. Boleto</Label>
+                    <Input
+                      type="text"
+                      value={formData.codigo_bol || ''}
+                      onChange={(e) => handleInputChange('codigo_bol', e.target.value)}
+                      placeholder="Código do boleto"
+                    />
                   </FormGroup>
 
                   <FormGroup>

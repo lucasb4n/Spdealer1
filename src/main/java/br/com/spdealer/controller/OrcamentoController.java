@@ -278,17 +278,24 @@ public class OrcamentoController {
                     continue;
                 }
                 throw e;
+            } catch (IllegalArgumentException e) {
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                return ResponseEntity.status(400).body(Map.of(
+                    "success", false,
+                    "error", e.getMessage()
+                ));
             } catch (Exception e) {
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 System.err.println("Erro ao criar orçamento: " + e.getMessage());
                 e.printStackTrace();
-                return ResponseEntity.status(500).body(Map.of(
+                String detail = e.getCause() != null && e.getCause().getMessage() != null ? e.getCause().getMessage() : e.getMessage();
+                return ResponseEntity.status(400).body(Map.of(
                     "success", false,
-                    "error", "Erro ao criar orçamento: " + e.getMessage()
+                    "error", "Erro ao criar orçamento: " + (detail != null ? detail : "Verifique se todos os campos dos itens foram preenchidos.")
                 ));
             }
         }
-        return ResponseEntity.status(500).body(Map.of(
+        return ResponseEntity.status(400).body(Map.of(
             "success", false,
             "error", "Erro ao criar orçamento após " + maxRetries + " tentativas devido a conflito de chave duplicada."
         ));
@@ -552,9 +559,13 @@ public class OrcamentoController {
     @Transactional(rollbackFor = Exception.class)
     public ResponseEntity<Map<String, Object>> marcarPerda(
             @PathVariable Integer numero,
-            @RequestParam String motivo,
+            @RequestParam(required = false) String motivo,
             @RequestParam(required = false) Integer filial) {
         try {
+            if (motivo == null || motivo.trim().isEmpty() || "undefined".equalsIgnoreCase(motivo.trim())) {
+                motivo = "001";
+            }
+
             String filialPadded = filial != null ? padFilial(filial) : "001";
 
             String checkSql = "SELECT COUNT(*) FROM orcamp WHERE NUMERO_ORP = ? AND FILIAL_ORP = ?";
@@ -1190,10 +1201,32 @@ public class OrcamentoController {
         // PRECUSTO_ORPP = cost price from kardex (precusto_kar)
         BigDecimal qtdisp = null;
         BigDecimal precusto = null;
+
+        // Helper to get value from either _ORPP or _ORP suffix
+        java.util.function.BiFunction<String, String, Object> getField = (key, fallback) -> 
+            item.get(key) != null ? item.get(key) : item.get(fallback);
+
         String fab = getString(item, "FAB_ORPP");
-        Object codigo = item.get("CODIGO_ORPP");
-        if (codigo == null) codigo = item.get("CODIGO_ORP");
-        if (fab != null && codigo != null) {
+        if (fab == null || fab.trim().isEmpty()) {
+            fab = getString(item, "FAB_ORP");
+        }
+
+        Object codigoObj = getField.apply("CODIGO_ORPP", "CODIGO_ORP");
+        String codigoStr = codigoObj != null ? codigoObj.toString().trim() : "";
+
+        Object descrObj = getField.apply("DESCR_ORPP", "DESCR_ORP");
+        String descrStr = descrObj != null ? descrObj.toString().trim() : "";
+        String descrInfo = descrStr.isEmpty() ? ("Item #" + seq) : ("Item #" + seq + " (" + descrStr + ")");
+
+        if (fab == null || fab.trim().isEmpty()) {
+            throw new IllegalArgumentException("O " + descrInfo + " está sem o campo 'Fabricante' (FAB_ORPP) preenchido.");
+        }
+        if (codigoStr.isEmpty()) {
+            throw new IllegalArgumentException("O " + descrInfo + " está sem o campo 'Código da Peça/Serviço' (CODIGO_ORPP) preenchido.");
+        }
+
+        Object codigo = codigoStr;
+        if (fab != null && !codigoStr.isEmpty()) {
             try {
                 String kardexSql = """
                     SELECT COALESCE(QTDE_KAR, 0) - COALESCE(QTALOC_KAR, 0) AS qtdisp,
@@ -1202,7 +1235,7 @@ public class OrcamentoController {
                     WHERE FAB_KAR = ? AND CODPROD_KAR = ? AND DEP_KAR = 1
                     LIMIT 1
                     """;
-                List<Map<String, Object>> kardexResult = jdbcTemplate.queryForList(kardexSql, fab, codigo.toString());
+                List<Map<String, Object>> kardexResult = jdbcTemplate.queryForList(kardexSql, fab, codigoStr);
                 if (!kardexResult.isEmpty()) {
                     Map<String, Object> row = kardexResult.get(0);
                     qtdisp = getBigDecimal(row, "qtdisp");
@@ -1213,33 +1246,24 @@ public class OrcamentoController {
             }
         }
 
-        String codigoMper = getString(item, "CODIGO_MPER");
-        if (codigoMper != null && codigoMper.trim().isEmpty()) {
-            codigoMper = null;
-        }
-
-            String sql = """
-                INSERT INTO orcampp (
-                    FILIAL_ORPP, NUMERO_ORPP, REQUIS_ORPP, FAB_ORPP, CODIGO_ORPP,
-                    DESCR_ORPP, QTALOC_ORPP, QTREC_ORPP, QTSOL_ORPP, QTFALTA_ORPP,
-                    PRECUSTO_ORPP, PRECOPUB_ORPP, PRECOTOT_ORPP,
-                    VALORIPI_ORPP, VLRDESC_ORPP, ICMSST_ORPP, PRECOLIQ_ORPP,
-                    ITEMCLI_ORPP, DTREQ_ORPP, QTDISP_ORPP, QTPERD_ORPP,
-                    VALORAVI_ORPP, CODIGO_MPER, VENDEDOR_ORPP,
-                    PERC_NIVEL_ORPP, VLR_NIVEL_ORPP
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """;
-        
-        // Helper to get value from either _ORPP or _ORP suffix
-        java.util.function.BiFunction<String, String, Object> getField = (key, fallback) -> 
-            item.get(key) != null ? item.get(key) : item.get(fallback);
+        String sql = """
+            INSERT INTO orcampp (
+                FILIAL_ORPP, NUMERO_ORPP, REQUIS_ORPP, FAB_ORPP, CODIGO_ORPP,
+                DESCR_ORPP, QTALOC_ORPP, QTREC_ORPP, QTSOL_ORPP, QTFALTA_ORPP,
+                PRECUSTO_ORPP, PRECOPUB_ORPP, PRECOTOT_ORPP,
+                VALORIPI_ORPP, VLRDESC_ORPP, ICMSST_ORPP, PRECOLIQ_ORPP,
+                ITEMCLI_ORPP, DTREQ_ORPP, QTDISP_ORPP,
+                VALORAVI_ORPP, VENDEDOR_ORPP,
+                PERC_NIVEL_ORPP, VLR_NIVEL_ORPP
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """;
 
         jdbcTemplate.update(sql,
             filial,
             numeroOrp,
             String.format("%08d", seq),
-            getString(item, "FAB_ORPP"),
-            getField.apply("CODIGO_ORPP", "CODIGO_ORP"),
+            fab,
+            codigoStr,
             getField.apply("DESCR_ORPP", "DESCR_ORP"),
             getField.apply("QTALOC_ORPP", "QTDE_ORP"),
             qtrec,
@@ -1255,9 +1279,7 @@ public class OrcamentoController {
             getField.apply("ITEMCLI_ORPP", "ITEM_CLI_ORPP"),
             dtreq,
             qtdisp,
-            getBigDecimal(item, "QTPERD_ORPP"),
             getField.apply("VALORAVI_ORPP", "VALORAVI_ORP"),
-            codigoMper,
             vendedor,
             getBigDecimal(item, "PERC_NIVEL_ORPP"),
             getBigDecimal(item, "VLR_NIVEL_ORPP")

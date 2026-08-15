@@ -463,30 +463,31 @@ const PagarFormModal: React.FC<PagarFormModalProps> = ({
     parcela_pag: '001',
     tipodoc_pag: '',
     tpcob_pag: '',
-    dpto_pag: '',
+    dpto_pag: null,
     cgccpf_pag: '',
+    tipopessoa_pag: '',
     dtmovi_pag: new Date().toISOString().split('T')[0],
     dtemissi_pag: new Date().toISOString().split('T')[0],
     dtvenci_pag: '',
-    dtpagi_pag: '',
+    dtpagi_pag: null,
     banco_pag: '',
     nossonumero_pag: '',
-    vlrnf_pag: 0,
-    vlrdesc_pag: 0,
-    vlracre_pag: 0,
-    vlrpag_pag: 0,
+    vlrdup_pag: 0,
+    vlrdesc_pag: null,
+    vlracre_pag: null,
+    vlrpag_pag: null,
     vlrsal_pag: 0,
-    vlrir_pag: 0,
-    vlriss_pag: 0,
-    vlrpis_pag: 0,
-    vlrcofins_pag: 0,
-    vlrcsll_pag: 0,
-    vlrinss_pag: 0,
-    vlrdescob_pag: 0,
-    vlrdev_pag: 0,
+    vlrir_pag: null,
+    vlriss_pag: null,
+    vlrpis_pag: null,
+    vlrcofins_pag: null,
+    vlrcsll_pag: null,
+    vlrinss_pag: null,
+    vlrdescob_pag: null,
+    vlrdev_pag: null,
     obs_pag: '',
     condic_pag: '',
-    status_pag: 'A',
+    status_pag: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -500,6 +501,16 @@ const PagarFormModal: React.FC<PagarFormModalProps> = ({
   const [tiposCobranca, setTiposCobranca] = useState<Array<{codigo: string, descricao: string}>>([]);
   const [departamentos, setDepartamentos] = useState<Array<{codigo: string, descricao: string}>>([]);
   const [bancos, setBancos] = useState<Array<{codigo: string, descricao: string}>>([]);
+
+  // ============= ESTADO - PESQUISA DE FORNECEDOR (F4) =============
+  const [showFornecedorModal, setShowFornecedorModal] = useState(false);
+  const [fornecedores, setFornecedores] = useState<any[]>([]);
+  const [loadingFornecedores, setLoadingFornecedores] = useState(false);
+  const [fornecedorSearch, setFornecedorSearch] = useState('');
+  const [fornecedorSort, setFornecedorSort] = useState<{
+    field: string;
+    dir: 'asc' | 'desc';
+  }>({ field: 'nome_cli', dir: 'asc' });
 
   // ============= LIFECYCLE =============
   // 1. PRIMEIRO: Carregar listas dinâmicas ao montar (SEMPRE)
@@ -540,7 +551,7 @@ const PagarFormModal: React.FC<PagarFormModalProps> = ({
   useEffect(() => {
     calcularSaldo();
   }, [
-    formData.vlrnf_pag,
+    formData.vlrdup_pag,
     formData.vlrpag_pag,
     formData.vlrdesc_pag,
     formData.vlracre_pag,
@@ -560,7 +571,7 @@ const PagarFormModal: React.FC<PagarFormModalProps> = ({
       const normTiposDoc = (Array.isArray(tiposDoc) ? tiposDoc : []).map((d: any) => ({ codigo: d.codigo_docp || d.codigo || d.codigo_doc || (d.codigo?.toString?.() || ''), descricao: d.descr_docp || d.descricao || d.descr || '' })).filter((x: any) => x.codigo);
       const normTiposCob = (Array.isArray(tiposCob) ? tiposCob : []).map((d: any) => ({ codigo: d.codigo || d.codigo_cob || d.codigo_cobp || d.codigo?.toString?.() || '', descricao: d.descr_cobp || d.descricao || d.descr || d.nomefan_bco || '' })).filter((x: any) => x.codigo);
       const normDeptos = (Array.isArray(deptos) ? deptos : []).map((d: any) => ({ codigo: d.codigo_dep || d.codigo || d.codigo_dep?.toString?.() || '', descricao: d.descr_dep || d.descricao || d.descr || '' })).filter((x: any) => x.codigo);
-      const normBancos = (Array.isArray(bancosList) ? bancosList : []).map((d: any) => ({ codigo: d.codigo_bco || d.codigo || d.codigo?.toString?.() || '', descricao: d.nomefan_bco || d.descricao || d.nome || '' })).filter((x: any) => x.codigo);
+      const normBancos = (Array.isArray(bancosList) ? bancosList : []).map((d: any) => ({ codigo: d.codigo_bco || d.codigo || d.codigo?.toString?.() || '', descricao: d.nome_bco || d.nomefan_bco || d.descricao || d.nome || '' })).filter((x: any) => x.codigo);
 
       setTiposDocumento(normTiposDoc);
       setTiposCobranca(normTiposCob);
@@ -611,10 +622,10 @@ const PagarFormModal: React.FC<PagarFormModalProps> = ({
     if (!formData.numdup_pag?.trim())
       newErrors.numdup_pag = 'Documento obrigatório';
     if (
-      !formData.vlrnf_pag ||
-      (formData.vlrnf_pag as number) <= 0
+      !formData.vlrdup_pag ||
+      (formData.vlrdup_pag as number) <= 0
     )
-      newErrors.vlrnf_pag = 'Valor deve ser maior que 0';
+      newErrors.vlrdup_pag = 'Valor deve ser maior que 0';
     if (!formData.dtvenci_pag?.trim())
       newErrors.dtvenci_pag = 'Vencimento obrigatório';
 
@@ -625,7 +636,7 @@ const PagarFormModal: React.FC<PagarFormModalProps> = ({
   // ============= CÁLCULOS =============
   const calcularSaldo = () => {
     const saldo =
-      (formData.vlrnf_pag || 0) +
+      (formData.vlrdup_pag || 0) +
       (formData.vlracre_pag || 0) -
       (formData.vlrpag_pag || 0) -
       (formData.vlrdesc_pag || 0);
@@ -678,7 +689,11 @@ const PagarFormModal: React.FC<PagarFormModalProps> = ({
 
     setLoading(true);
     try {
-      onSave(formData);
+      const payload: any = { ...formData };
+      if (mode === 'create') {
+        payload.vlrsal_pag = payload.vlrdup_pag;
+      }
+      onSave(payload);
       setHasUnsavedChanges(false);
     } catch (error) {
       console.error('Erro ao salvar:', error);
@@ -705,6 +720,68 @@ const PagarFormModal: React.FC<PagarFormModalProps> = ({
     if (e.target === e.currentTarget) {
       handleClose();
     }
+  };
+
+  // ============= PESQUISA DE FORNECEDOR (F4) =============
+  const openFornecedorModal = async () => {
+    setShowFornecedorModal(true);
+    setLoadingFornecedores(true);
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/clientes?cliforn_cli=F&limit=5000`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        const list = Array.isArray(data) ? data : data.data ?? [];
+        // Filtrar apenas fornecedores (cliforn_cli = 'F' ou 'A')
+        setFornecedores(
+          list.filter(
+            (c: any) =>
+              !c.cliforn_cli ||
+              String(c.cliforn_cli).toUpperCase() === 'F' ||
+              String(c.cliforn_cli).toUpperCase() === 'A'
+          )
+        );
+      } else {
+        setFornecedores([]);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar fornecedores:', error);
+      setFornecedores([]);
+    } finally {
+      setLoadingFornecedores(false);
+    }
+  };
+
+  const handleFornecedorSelect = (row: any) => {
+    if (!row) return;
+    handleInputChange('codigo_pag', String(row.codigo_cli || ''));
+    handleInputChange('cgccpf_pag', String(row.cgccpf_cli || row.cpf_cnpj_cli || '').replace(/\D/g, ''));
+    handleInputChange('tipopessoa_pag', String(row.tipopessoa_cli || row.tipopessoa_for || ''));
+    setShowFornecedorModal(false);
+    setFornecedorSearch('');
+  };
+
+  const handleFornecedorSort = (field: string) => {
+    setFornecedorSort(prev => ({
+      field,
+      dir: prev.field === field && prev.dir === 'asc' ? 'desc' : 'asc',
+    }));
+  };
+
+  const getFornecedoresOrdenados = () => {
+    const term = fornecedorSearch.toLowerCase().trim();
+    const filtered = fornecedores.filter((f: any) => {
+      if (!term) return true;
+      return String(f.nome_cli || '').toLowerCase().includes(term);
+    });
+    const { field, dir } = fornecedorSort;
+    return [...filtered].sort((a: any, b: any) => {
+      const va = String(a[field] ?? '').toLocaleLowerCase();
+      const vb = String(b[field] ?? '').toLocaleLowerCase();
+      const cmp = va.localeCompare(vb, 'pt-BR', { numeric: true });
+      return dir === 'asc' ? cmp : -cmp;
+    });
   };
 
   // ============= RENDER =============
@@ -779,7 +856,14 @@ const PagarFormModal: React.FC<PagarFormModalProps> = ({
                 maxLength={7}
                 value={formData.codigo_pag || ''}
                 onChange={e => handleInputChange('codigo_pag', e.target.value)}
-                placeholder="Código"
+                onKeyDown={e => {
+                  if (e.key === 'F4') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openFornecedorModal();
+                  }
+                }}
+                placeholder="Código (F4 pesquisa)"
                 $error={!!errors.codigo_pag}
               />
               {errors.codigo_pag && (
@@ -858,14 +942,16 @@ const PagarFormModal: React.FC<PagarFormModalProps> = ({
               )}
             </FormGroup>
 
-            <FormGroup>
-              <Label>Data Pagamento</Label>
-              <Input
-                type="date"
-                value={formData.dtpagi_pag || ''}
-                onChange={e => handleInputChange('dtpagi_pag', e.target.value)}
-              />
-            </FormGroup>
+            {mode === 'edit' && (
+              <FormGroup>
+                <Label>Data Pagamento</Label>
+                <Input
+                  type="date"
+                  value={formData.dtpagi_pag || ''}
+                  onChange={e => handleInputChange('dtpagi_pag', e.target.value)}
+                />
+              </FormGroup>
+            )}
           </FormGrid>
 
           {/* SEÇÃO: VALORES */}
@@ -879,14 +965,14 @@ const PagarFormModal: React.FC<PagarFormModalProps> = ({
                 type="number"
                 step="0.01"
                 className="currency"
-                value={formData.vlrnf_pag || 0}
+                value={formData.vlrdup_pag || 0}
                 onChange={e =>
-                  handleInputChange('vlrnf_pag', parseFloat(e.target.value) || 0)
+                  handleInputChange('vlrdup_pag', parseFloat(e.target.value) || 0)
                 }
-                $error={!!errors.vlrnf_pag}
+                $error={!!errors.vlrdup_pag}
               />
-              {errors.vlrnf_pag && (
-                <ErrorMessage>{errors.vlrnf_pag}</ErrorMessage>
+              {errors.vlrdup_pag && (
+                <ErrorMessage>{errors.vlrdup_pag}</ErrorMessage>
               )}
             </FormGroup>
 
@@ -1189,6 +1275,204 @@ const PagarFormModal: React.FC<PagarFormModalProps> = ({
           )}
         </ModalContent>
       </ModalContainer>
+
+      {/* MODAL PESQUISA DE FORNECEDOR (F4) */}
+      {showFornecedorModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.6)',
+            zIndex: 2000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          onClick={() => setShowFornecedorModal(false)}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 12,
+              width: '90vw',
+              maxWidth: 700,
+              maxHeight: '80vh',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div
+              style={{
+                padding: '1rem 1.25rem',
+                borderBottom: '1px solid #e5e7eb',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <h3
+                style={{
+                  margin: 0,
+                  fontSize: '1rem',
+                  fontWeight: 700,
+                  color: '#1e293b',
+                }}
+              >
+                Pesquisar Fornecedor
+              </h3>
+              <button
+                onClick={() => setShowFornecedorModal(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '1.5rem',
+                  cursor: 'pointer',
+                  color: '#64748b',
+                  lineHeight: 1,
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <div style={{ padding: '0 1.25rem' }}>
+              <div
+                style={{
+                  marginBottom: '12px',
+                  marginTop: '12px',
+                  display: 'flex',
+                  gap: '8px',
+                  alignItems: 'center',
+                }}
+              >
+                <input
+                  type="text"
+                  placeholder="🔍 Pesquisar por nome..."
+                  value={fornecedorSearch}
+                  onChange={e => setFornecedorSearch(e.target.value)}
+                  style={{
+                    flex: 1,
+                    padding: '10px 12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                  }}
+                />
+                {fornecedorSearch && (
+                  <button
+                    onClick={() => setFornecedorSearch('')}
+                    style={{
+                      padding: '10px 16px',
+                      background: '#f3f4f6',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                    }}
+                  >
+                    Limpar
+                  </button>
+                )}
+              </div>
+              {loadingFornecedores ? (
+                <div style={{ padding: '20px', textAlign: 'center', color: '#6b7280' }}>
+                  Carregando fornecedores...
+                </div>
+              ) : (
+                <>
+                  <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '10px' }}>
+                    {fornecedores.length > 0
+                      ? `Exibindo ${getFornecedoresOrdenados().length} de ${fornecedores.length} fornecedor(es)`
+                      : 'Nenhum fornecedor encontrado'}
+                  </div>
+                  <table
+                    style={{
+                      width: '100%',
+                      borderCollapse: 'collapse',
+                      fontSize: '14px',
+                    }}
+                  >
+                    <thead>
+                      <tr style={{ background: '#f3f4f6', color: '#374151' }}>
+                        <th
+                          onClick={() => handleFornecedorSort('codigo_cli')}
+                          style={{ padding: '8px 12px', textAlign: 'left', width: 110, cursor: 'pointer', userSelect: 'none', textDecoration: fornecedorSort.field === 'codigo_cli' ? 'underline' : 'none' }}
+                          title="Clique para ordenar"
+                        >
+                          Código {fornecedorSort.field === 'codigo_cli' && (fornecedorSort.dir === 'asc' ? '▲' : '▼')}
+                        </th>
+                        <th
+                          onClick={() => handleFornecedorSort('nome_cli')}
+                          style={{ padding: '8px 12px', textAlign: 'left', cursor: 'pointer', userSelect: 'none', textDecoration: fornecedorSort.field === 'nome_cli' ? 'underline' : 'none' }}
+                          title="Clique para ordenar"
+                        >
+                          Nome {fornecedorSort.field === 'nome_cli' && (fornecedorSort.dir === 'asc' ? '▲' : '▼')}
+                        </th>
+                        <th
+                          onClick={() => handleFornecedorSort('cpf_cnpj_cli')}
+                          style={{ padding: '8px 12px', textAlign: 'left', cursor: 'pointer', userSelect: 'none', textDecoration: fornecedorSort.field === 'cpf_cnpj_cli' ? 'underline' : 'none' }}
+                          title="Clique para ordenar"
+                        >
+                          Documento {fornecedorSort.field === 'cpf_cnpj_cli' && (fornecedorSort.dir === 'asc' ? '▲' : '▼')}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {getFornecedoresOrdenados()
+                        .slice(0, 200)
+                        .map((f: any) => (
+                          <tr
+                            key={f.codigo_cli}
+                            onClick={() => handleFornecedorSelect(f)}
+                            style={{
+                              cursor: 'pointer',
+                              borderBottom: '1px solid #e5e7eb',
+                            }}
+                            onMouseEnter={e =>
+                              (e.currentTarget.style.background = '#f9fafb')
+                            }
+                            onMouseLeave={e =>
+                              (e.currentTarget.style.background = 'transparent')
+                            }
+                          >
+                            <td style={{ padding: '8px 12px' }}>{f.codigo_cli}</td>
+                            <td style={{ padding: '8px 12px' }}>{f.nome_cli}</td>
+                            <td style={{ padding: '8px 12px' }}>{f.cpf_cnpj_cli || f.cgccpf_cli || ''}</td>
+                          </tr>
+                        ))}
+                      {getFornecedoresOrdenados().length === 0 && (
+                        <tr>
+                          <td
+                            colSpan={3}
+                            style={{ padding: '20px', textAlign: 'center', color: '#ef4444' }}
+                          >
+                            Nenhum fornecedor encontrado
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </>
+              )}
+            </div>
+            <div
+              style={{
+                padding: '0.75rem 1.25rem',
+                borderTop: '1px solid #e5e7eb',
+                textAlign: 'right',
+                fontSize: '13px',
+                color: '#6b7280',
+              }}
+            >
+              Clique em um fornecedor para selecionar
+            </div>
+          </div>
+        </div>
+      )}
     </ModalOverlay>
   );
 };

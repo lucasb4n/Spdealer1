@@ -13,9 +13,13 @@ const CaixaPage = lazy(() => import('../pages/CaixaBancos'));
 const RelatorioCrud = lazy(() => import('../pages/RelatorioCrud'));
 const NotFound = lazy(() => import('../pages/NotFound'));
 const NfeSaidaPage = lazy(() => import('../pages/Financeiro/NfeSaidaPage'));
-const OrcamentoPage = lazy(() => import('../pages/Vendas/OrcamentoPage'));
-const MenuAdminForm = lazy(() => import('../refatorado/frontend/MenuAdminForm'));
-const EntradaMercadoriaPage = lazy(() => import('../pages/Compras/EntradaMercadoriaPage'));
+  const OrcamentoPage = lazy(() => import('../pages/Vendas/OrcamentoPage'));
+  const MenuAdminForm = lazy(() => import('../refatorado/frontend/MenuAdminForm'));
+  const EntradaMercadoriaPage = lazy(() => import('../pages/Compras/EntradaMercadoriaPage'));
+  const ManutencaoTipoTmoList = lazy(() => import('../pages/Servico/Manutencao/ManutencaoTipoTmoList'));
+  const ManutencaoTipoTmoForm = lazy(() => import('../pages/Servico/Manutencao/ManutencaoTipoTmoForm'));
+  const ManutencaoGrupoReparoList = lazy(() => import('../pages/Servico/Manutencao/ManutencaoGrupoReparoList'));
+  const ServicoPorTipo = lazy(() => import('../refatorado/servico/ServicoPorTipo'));
 // const FlowRunnerPage = lazy(() => import('../refatorado/flow/FlowRunnerPage')); // TODO: módulo não existe
 
 // Dicionário: path → component (keys normalized to lowercase)
@@ -35,10 +39,10 @@ const routeMap: Record<string, React.LazyExoticComponent<React.ComponentType<any
   '/parametros/programas-permissoes': MenuAdminForm,
   '/vendas/orcamento': OrcamentoPage,
   '/pecas/compras/entrada-mercadoria': EntradaMercadoriaPage,
-  // '/parametros/flow-runner': FlowRunnerPage, // TODO: módulo não existe
-  // '/parametros/flow-form': FlowRunnerPage, // TODO: módulo não existe
-  // '/ferramentas/flow-form': FlowRunnerPage, // TODO: módulo não existe
-  // '/parametros/ferramentas/flow-form': FlowRunnerPage, // TODO: módulo não existe
+  '/servico/manutencao/tipo-tmo': ManutencaoTipoTmoList,
+  '/servico/manutencao/tipo-tmo/cad': ManutencaoTipoTmoForm,
+  '/servico/manutencao/grupo-reparo': ManutencaoGrupoReparoList,
+  '/servico/por-tipo': ServicoPorTipo,
 };
 
 interface MenuItem {
@@ -68,11 +72,11 @@ const DynamicRoutes: React.FC = () => {
         if (Array.isArray(groups)) {
           groups.forEach((g: any) => {
             (g.items || g.itens || g.menuItems || []).forEach((it: any) => {
-              // Suporte a diferentes nomes retornados pelo backend: 'path', 'route', 'href'
-              const resolvedPath = String(it.path || it.route || it.href || '#');
-              const label = it.label || it.title || it.name || it.descricao;
-              items.push({ id: it.id, path: resolvedPath, label, parentId: it.parentId ?? null, ordem: it.ordem });
-            });
+                  // Suporte a diferentes nomes retornados pelo backend: 'path', 'route', 'href'
+                  const resolvedPath = String(it.path || it.route || it.href || '#');
+                  const label = it.label || it.title || it.name || it.descricao;
+                  items.push({ id: it.id, path: resolvedPath, label, parentId: it.parentId ?? null, ordem: it.ordem });
+                });
           });
         }
 

@@ -42,12 +42,15 @@ import IncluirRegistro from './Lucas/Cadastro de Clientes/IncluirRegistro/Fronte
 import EstoqueConsultaPage from 'pages/EstoqueConsultaPage';
 import CadastroEstoquePage from 'pages/Estoque/CadastroEstoquePage';
 import EntradaMercadoriaPage from 'pages/Compras/EntradaMercadoriaPage';
+import ManutencaoOrdemCompraPage from 'pages/Compras/ManutencaoOrdemCompraPage';
+import OrdemCompraFormPage from 'pages/Compras/OrdemCompraFormPage';
 import ParametrosGerais from 'pages/ParametrosGerais';
 import TiposFornecedores from 'pages/TiposFornecedores';
 import InventarioPage from 'pages/InventarioPage';
 import ManutencaoTipoTmoForm from 'pages/Servico/Manutencao/ManutencaoTipoTmoForm';
 import ManutencaoTipoTmoList from 'pages/Servico/Manutencao/ManutencaoTipoTmoList';
 import ManutencaoGrupoReparoList from 'pages/Servico/Manutencao/ManutencaoGrupoReparoList';
+import ManutencaoModelosPage from 'pages/Servico/Manutencao/ManutencaoModelosPage';
 import ServicoPorTipo from './refatorado/servico/ServicoPorTipo';
 import MenuAdminForm from './refatorado/frontend/MenuAdminForm';
 import DictionaryLocalizar from 'components/DictionaryCrud/DictionaryLocalizar';
@@ -131,6 +134,8 @@ function App() {
                 <Route path="/nfe/monitor" element={<NfeForm />} />
                 <Route path="/pecas/compras/nfe" element={<NfeForm />} />
                 <Route path="/pecas/compras/entrada-mercadoria" element={<EntradaMercadoriaPage />} />
+                <Route path="/pecas/compras/manutencao-ordem-compra" element={<ManutencaoOrdemCompraPage />} />
+                <Route path="/pecas/compras/manutencao-ordem-compra/nova" element={<OrdemCompraFormPage />} />
                 <Route path="/parametros/geral" element={<ParametrosGerais />} />
                 <Route path="/parametros/configuracoes" element={<ConfiguracoesGeraisModule />} />
                 <Route path="/parametros/tipos-fornecedores" element={<TiposFornecedores />} />
@@ -140,6 +145,7 @@ function App() {
                 <Route path="/servico/manutencao/tipo-tmo/cad" element={<ManutencaoTipoTmoForm />} />
                 <Route path="/servico/manutencao/tipo-tmo/:id/edit" element={<ManutencaoTipoTmoForm />} />
                 <Route path="/servico/manutencao/grupo-reparo" element={<ManutencaoGrupoReparoList />} />
+                <Route path="/servico/manutencao/modelos-maquina" element={<ManutencaoModelosPage />} />
                 <Route path="/servico/por-tipo" element={<ServicoPorTipo />} />
                 <Route path="/vendas/orcamento" element={<OrcamentoPage />} />
                 <Route path="/vendas/orcamento/:numero" element={<OrcamentoPage />} />

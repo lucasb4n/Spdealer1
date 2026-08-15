@@ -31,6 +31,8 @@ const MainContent = styled.div<{ $sidebarCollapsed: boolean }>`
   overflow: hidden;
   padding: 0;
   padding-top: var(--header-height, 64px);
+  padding-bottom: 24px;
+  box-sizing: border-box;
   margin: 0;
   margin-left: ${props => props.$sidebarCollapsed ? 'var(--sidebar-width-collapsed, 68px)' : 'var(--sidebar-width, 260px)'};
   transition: all var(--transition-slow, 300ms ease);

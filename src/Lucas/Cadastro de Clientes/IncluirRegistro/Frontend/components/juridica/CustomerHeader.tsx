@@ -28,11 +28,14 @@ const formatCNPJ = (v: string) => {
 const CustomerHeader: React.FC<Props> = ({ data, onChange, isEdit }) => {
   const juridica = data?.juridica || {}
   const _tp = String(juridica['tipopessoa_cli'] || juridica['tipopessoa'] || juridica['tipo'] || '').trim().toLowerCase()
-  const tipo = _tp === 'c' ? 'CPF' : _tp === 'f' ? 'CNPJ' : ((juridica['tipo'] as string) || 'CNPJ')
+  // Convenção do ERP: 'F' = física/CPF, 'J' = jurídica/CNPJ. Suporte legado 'c'=CNPJ e 'f'=CPF
+  const tipo = (_tp === 'f' || _tp === 'cpf' || _tp === 'pf')
+    ? 'CPF'
+    : ((_tp === 'j' || _tp === 'cnpj' || _tp === 'pj' || _tp === 'c') ? 'CNPJ' : ((juridica['tipo'] as string) || 'CNPJ'))
 
   const handleTipo = (value: 'CNPJ' | 'CPF') => {
     onChange('juridica.tipo', value)
-    onChange('juridica.tipopessoa_cli', value === 'CPF' ? 'c' : 'f')
+    onChange('juridica.tipopessoa_cli', value === 'CPF' ? 'F' : 'J')
     onChange('juridica.cgccpf_cli', '')
   }
 

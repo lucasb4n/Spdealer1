@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Boleto_Banco" pageWidth="595" pageHeight="842" columnWidth="559" leftMargin="18" rightMargin="18" topMargin="14" bottomMargin="14" whenNoDataType="AllSectionsNoDetail" isFloatColumnFooter="false" uuid="0a3f9e57-7c2e-4a1b-9b3e-2f5d8a1c4e6b">
+    <style name="rotulo" fontName="SansSerif" fontSize="6" isBold="true"/>
+    <style name="valor" fontName="SansSerif" fontSize="10" isBold="true"/>
+    <style name="valor9" fontName="SansSerif" fontSize="9" isBold="true"/>
+    <style name="titulo" fontName="SansSerif" fontSize="11" isBold="true"/>
+    <field name="BANCO_NUMERO" class="java.lang.String"/>
+    <field name="LOCAL_PAGAMENTO" class="java.lang.String"/>
+    <field name="CEDENTE_NOME" class="java.lang.String"/>
+    <field name="CEDENTE_DOCUMENTO" class="java.lang.String"/>
+    <field name="CEDENTE_ENDERECO" class="java.lang.String"/>
+    <field name="DATA_DOCUMENTO" class="java.util.Date"/>
+    <field name="DATA_PROCESSAMENTO" class="java.util.Date"/>
+    <field name="DATA_VENCIMENTO" class="java.util.Date"/>
+    <field name="AGENCIA_CODIGO_CEDENTE" class="java.lang.String"/>
+    <field name="NUMERO_DOCUMENTO" class="java.lang.String"/>
+    <field name="ESPECIE_DOC" class="java.lang.String"/>
+    <field name="ACEITE" class="java.lang.String"/>
+    <field name="VALOR_DOCUMENTO" class="java.lang.Double"/>
+    <field name="INSTRUCOES" class="java.lang.String"/>
+    <field name="PAGADOR_NOME" class="java.lang.String"/>
+    <field name="PAGADOR_DOCUMENTO" class="java.lang.String"/>
+    <field name="PAGADOR_ENDERECO" class="java.lang.String"/>
+    <field name="NOSSO_NUMERO" class="java.lang.String"/>
+    <field name="CARTEIRA" class="java.lang.String"/>
+    <field name="MOEDA" class="java.lang.String"/>
+    <field name="QUANTIDADE" class="java.lang.String"/>
+    <field name="LINHA_DIGITAVEL" class="java.lang.String"/>
+    <field name="PIX_QRCODE" class="java.lang.String"/>
+    <field name="CODIGO_BARRAS_IMAGEM" class="java.lang.String"/>
+    <detail>
+        <band height="640" splitType="Prevent">
+
+            <!-- ============ RECIBO DO PAGADOR ============ -->
+            <staticText>
+                <reportElement x="0" y="0" width="200" height="16" uuid="5a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d"/>
+                <textElement>
+                    <font fontName="SansSerif" size="11" isBold="true"/>
+                </textElement>
+                <text><![CDATA[RECIBO DO PAGADOR]]></text>
+            </staticText>
+
+            <frame>
+                <reportElement x="445" y="0" width="114" height="50" uuid="6b2c3d4e-5f6a-4b7c-9d8e-0f1a2b3c4d5e"/>
+                <box>
+                    <pen lineWidth="0.5"/>
+                </box>
+                <staticText>
+                    <reportElement x="2" y="2" width="110" height="8" uuid="7c3d4e5f-6a7b-4c8d-ae9f-1a2b3c4d5e6f"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Vencimento]]></text>
+                </staticText>
+                <textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+                    <reportElement x="2" y="12" width="110" height="16" uuid="8d4e5f6a-7b8c-4d9e-bf0a-1b2c3d4e5f60"/>
+                    <textElement><font fontName="SansSerif" size="10" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{DATA_VENCIMENTO}]]></textFieldExpression>
+                </textField>
+            </frame>
+
+            <frame>
+                <reportElement x="0" y="18" width="443" height="32" uuid="9e5f6a7b-8c9d-4eaf-c01b-2c3d4e5f6071"/>
+                <box>
+                    <pen lineWidth="0.5"/>
+                </box>
+                <staticText>
+                    <reportElement x="2" y="2" width="200" height="8" uuid="af6a7b8c-9dae-4fb0-d12c-3d4e5f607182"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Local de Pagamento]]></text>
+                </staticText>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="2" y="12" width="439" height="16" uuid="b07b8c9d-aebf-40c1-e23d-4e5f60718293"/>
+                    <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{LOCAL_PAGAMENTO}]]></textFieldExpression>
+                </textField>
+            </frame>
+
+            <frame>
+                <reportElement x="0" y="52" width="443" height="110" uuid="c18c9dae-bfc0-41d2-f34e-5f60718293a4"/>
+                <box>
+                    <pen lineWidth="0.5"/>
+                </box>
+                <staticText>
+                    <reportElement x="2" y="2" width="200" height="8" uuid="d29daebf-c0d1-42e3-045f-60718293a4b5"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Beneficiário]]></text>
+                </staticText>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="2" y="12" width="439" height="14" uuid="e3aebfc0-d1e2-43f4-1560-718293a4b5c6"/>
+                    <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{CEDENTE_NOME}]]></textFieldExpression>
+                </textField>
+                <staticText>
+                    <reportElement x="2" y="30" width="200" height="8" uuid="f4bfc0d1-e2f3-4405-2671-8293a4b5c6d7"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[CNPJ/CPF do Beneficiário]]></text>
+                </staticText>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="2" y="40" width="439" height="14" uuid="05c0d1e2-f304-4516-3782-93a4b5c6d7e8"/>
+                    <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{CEDENTE_DOCUMENTO}]]></textFieldExpression>
+                </textField>
+                <staticText>
+                    <reportElement x="2" y="58" width="200" height="8" uuid="16d1e2f3-0415-4627-4893-a4b5c6d7e8f9"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Endereço do Beneficiário]]></text>
+                </staticText>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="2" y="68" width="439" height="30" uuid="27e2f304-1526-4738-59a4-b5c6d7e8f90a"/>
+                    <textElement><font fontName="SansSerif" size="8"/></textElement>
+                    <textFieldExpression><![CDATA[$F{CEDENTE_ENDERECO}]]></textFieldExpression>
+                </textField>
+            </frame>
+
+            <componentElement>
+                <reportElement x="448" y="52" width="111" height="110" uuid="38f30415-2637-4849-6ab5-c6d7e8f90a1b">
+                    <printWhenExpression><![CDATA[$F{PIX_QRCODE} != null && $F{PIX_QRCODE}.length() > 0]]></printWhenExpression>
+                </reportElement>
+                <jr:QRCode xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+                    <jr:codeExpression><![CDATA[$F{PIX_QRCODE}]]></jr:codeExpression>
+                </jr:QRCode>
+            </componentElement>
+
+            <frame>
+                <reportElement x="0" y="164" width="559" height="32" uuid="49041526-3748-495a-7bc6-d7e8f90a1b2c"/>
+                <box>
+                    <pen lineWidth="0.5"/>
+                </box>
+                <staticText>
+                    <reportElement x="2" y="2" width="200" height="8" uuid="5a152637-4859-4a6b-8cd7-e8f90a1b2c3d"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Agência/Código do Beneficiário]]></text>
+                </staticText>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="2" y="12" width="439" height="16" uuid="6b263748-596a-4b7c-9de8-f90a1b2c3d4e"/>
+                    <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{AGENCIA_CODIGO_CEDENTE}]]></textFieldExpression>
+                </textField>
+                <staticText>
+                    <reportElement x="445" y="2" width="112" height="8" uuid="7c374859-6a7b-4c8d-ae9f-0a1b2c3d4e5f"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Data do Documento]]></text>
+                </staticText>
+                <textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+                    <reportElement x="445" y="12" width="112" height="16" uuid="8d48596a-7b8c-4d9e-bf0a-1b2c3d4e5f60"/>
+                    <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{DATA_DOCUMENTO}]]></textFieldExpression>
+                </textField>
+            </frame>
+
+            <frame>
+                <reportElement x="0" y="198" width="559" height="32" uuid="9e596a7b-8c9d-4eaf-c01b-2c3d4e5f6071"/>
+                <box>
+                    <pen lineWidth="0.5"/>
+                </box>
+                <staticText>
+                    <reportElement x="2" y="2" width="100" height="8" uuid="af6a7b8c-9dae-4fb0-d12c-3d4e5f607182"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Nº do Documento]]></text>
+                </staticText>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="2" y="12" width="100" height="16" uuid="b07b8c9d-aebf-40c1-e23d-4e5f60718293"/>
+                    <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{NUMERO_DOCUMENTO}]]></textFieldExpression>
+                </textField>
+                <staticText>
+                    <reportElement x="108" y="2" width="100" height="8" uuid="c18c9dae-bfc0-41d2-f34e-5f60718293a4"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Espécie Doc]]></text>
+                </staticText>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="108" y="12" width="100" height="16" uuid="d29daebf-c0d1-42e3-045f-60718293a4b5"/>
+                    <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{ESPECIE_DOC}]]></textFieldExpression>
+                </textField>
+                <staticText>
+                    <reportElement x="214" y="2" width="70" height="8" uuid="e3aebfc0-d1e2-43f4-1560-718293a4b5c6"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Aceite]]></text>
+                </staticText>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="214" y="12" width="70" height="16" uuid="f4bfc0d1-e2f3-4405-2671-8293a4b5c6d7"/>
+                    <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{ACEITE}]]></textFieldExpression>
+                </textField>
+                <staticText>
+                    <reportElement x="290" y="2" width="110" height="8" uuid="05c0d1e2-f304-4516-3782-93a4b5c6d7e8"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Data Processamento]]></text>
+                </staticText>
+                <textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+                    <reportElement x="290" y="12" width="110" height="16" uuid="16d1e2f3-0415-4627-4893-a4b5c6d7e8f9"/>
+                    <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{DATA_PROCESSAMENTO}]]></textFieldExpression>
+                </textField>
+                <staticText>
+                    <reportElement x="406" y="2" width="151" height="8" uuid="27e2f304-1526-4738-59a4-b5c6d7e8f90a"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Valor do Documento]]></text>
+                </staticText>
+                <textField pattern="R$ #,##0.00" isBlankWhenNull="true">
+                    <reportElement x="406" y="12" width="151" height="16" uuid="38f30415-2637-4849-6ab5-c6d7e8f90a1b"/>
+                    <textElement textAlignment="Right"><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{VALOR_DOCUMENTO}]]></textFieldExpression>
+                </textField>
+            </frame>
+
+            <frame>
+                <reportElement x="0" y="232" width="559" height="70" uuid="49041526-3748-495a-7bc6-d7e8f90a1b2c"/>
+                <box>
+                    <pen lineWidth="0.5"/>
+                </box>
+                <staticText>
+                    <reportElement x="2" y="2" width="300" height="8" uuid="5a152637-4859-4a6b-8cd7-e8f90a1b2c3d"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Instruções (texto de responsabilidade do beneficiário)]]></text>
+                </staticText>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="2" y="12" width="555" height="56" uuid="6b263748-596a-4b7c-9de8-f90a1b2c3d4e"/>
+                    <textElement><font fontName="SansSerif" size="8"/></textElement>
+                    <textFieldExpression><![CDATA[$F{INSTRUCOES}]]></textFieldExpression>
+                </textField>
+            </frame>
+
+            <frame>
+                <reportElement x="0" y="304" width="559" height="48" uuid="7c374859-6a7b-4c8d-ae9f-0a1b2c3d4e5f"/>
+                <box>
+                    <pen lineWidth="0.5"/>
+                </box>
+                <staticText>
+                    <reportElement x="2" y="2" width="200" height="8" uuid="8d48596a-7b8c-4d9e-bf0a-1b2c3d4e5f60"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Pagador]]></text>
+                </staticText>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="2" y="12" width="555" height="34" uuid="9e596a7b-8c9d-4eaf-c01b-2c3d4e5f6071"/>
+                    <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{PAGADOR_NOME} + ($F{PAGADOR_DOCUMENTO} != null ? "  -  " + $F{PAGADOR_DOCUMENTO} : "") + "\n" + ($F{PAGADOR_ENDERECO} != null ? $F{PAGADOR_ENDERECO} : "")]]></textFieldExpression>
+                </textField>
+            </frame>
+
+            <line>
+                <reportElement x="0" y="354" width="559" height="1" uuid="af0a1b2c-3d4e-4f50-8162-93a4b5c6d7e8"/>
+                <graphicElement>
+                    <pen lineWidth="0.5" lineStyle="Dashed"/>
+                </graphicElement>
+            </line>
+
+            <!-- ============ FICHA DE COMPENSAÇÃO ============ -->
+            <frame>
+                <reportElement x="0" y="358" width="559" height="22" uuid="b01b2c3d-4e5f-4061-9273-a4b5c6d7e8f9"/>
+                <box>
+                    <pen lineWidth="0.5"/>
+                </box>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="2" y="1" width="70" height="20" uuid="c12c3d4e-5f60-4172-a384-b5c6d7e8f90a"/>
+                    <textElement verticalAlignment="Middle"><font fontName="SansSerif" size="10" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{BANCO_NUMERO}]]></textFieldExpression>
+                </textField>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="75" y="1" width="482" height="20" uuid="d23d4e5f-6071-4283-b495-c6d7e8f90a1b"/>
+                    <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="SansSerif" size="12" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{LINHA_DIGITAVEL}]]></textFieldExpression>
+                </textField>
+            </frame>
+
+            <frame>
+                <reportElement x="0" y="382" width="559" height="32" uuid="e34e5f60-7182-4394-c5a6-d7e8f90a1b2c"/>
+                <box>
+                    <pen lineWidth="0.5"/>
+                </box>
+                <staticText>
+                    <reportElement x="2" y="2" width="100" height="8" uuid="f45f6071-8293-44a5-d6b7-e8f90a1b2c3d"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Vencimento]]></text>
+                </staticText>
+                <textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+                    <reportElement x="2" y="12" width="100" height="16" uuid="05607182-93a4-45b6-e7c8-f90a1b2c3d4e"/>
+                    <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{DATA_VENCIMENTO}]]></textFieldExpression>
+                </textField>
+                <staticText>
+                    <reportElement x="108" y="2" width="110" height="8" uuid="16718293-a4b5-46c7-f8d9-0a1b2c3d4e5f"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Agência/Código do Beneficiário]]></text>
+                </staticText>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="108" y="12" width="110" height="16" uuid="278293a4-b5c6-47d8-09ea-1b2c3d4e5f60"/>
+                    <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{AGENCIA_CODIGO_CEDENTE}]]></textFieldExpression>
+                </textField>
+                <staticText>
+                    <reportElement x="224" y="2" width="110" height="8" uuid="3893a4b5-c6d7-48e9-1afb-2c3d4e5f6071"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Nosso Número]]></text>
+                </staticText>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="224" y="12" width="110" height="16" uuid="49a4b5c6-d7e8-49fa-2b0c-3d4e5f607182"/>
+                    <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{NOSSO_NUMERO}]]></textFieldExpression>
+                </textField>
+                <staticText>
+                    <reportElement x="340" y="2" width="100" height="8" uuid="5ab5c6d7-e8f9-4a0b-3c1d-4e5f60718293"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Nº do Documento]]></text>
+                </staticText>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="340" y="12" width="100" height="16" uuid="6bc6d7e8-f90a-4b1c-4d2e-5f60718293a4"/>
+                    <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{NUMERO_DOCUMENTO}]]></textFieldExpression>
+                </textField>
+                <staticText>
+                    <reportElement x="446" y="2" width="111" height="8" uuid="7cd7e8f9-0a1b-4c2d-5e3f-60718293a4b5"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Valor do Documento]]></text>
+                </staticText>
+                <textField pattern="R$ #,##0.00" isBlankWhenNull="true">
+                    <reportElement x="446" y="12" width="111" height="16" uuid="8de8f90a-1b2c-4d3e-6f40-718293a4b5c6"/>
+                    <textElement textAlignment="Right"><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{VALOR_DOCUMENTO}]]></textFieldExpression>
+                </textField>
+            </frame>
+
+            <frame>
+                <reportElement x="0" y="416" width="559" height="32" uuid="9ef90a1b-2c3d-4e4f-7051-8293a4b5c6d7"/>
+                <box>
+                    <pen lineWidth="0.5"/>
+                </box>
+                <staticText>
+                    <reportElement x="2" y="2" width="80" height="8" uuid="af0a1b2c-3d4e-4f50-8162-93a4b5c6d7e8"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Espécie Doc]]></text>
+                </staticText>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="2" y="12" width="80" height="16" uuid="b01b2c3d-4e5f-4061-9273-a4b5c6d7e8f9"/>
+                    <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{ESPECIE_DOC}]]></textFieldExpression>
+                </textField>
+                <staticText>
+                    <reportElement x="88" y="2" width="70" height="8" uuid="c12c3d4e-5f60-4172-a384-b5c6d7e8f90a"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Aceite]]></text>
+                </staticText>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="88" y="12" width="70" height="16" uuid="d23d4e5f-6071-4283-b495-c6d7e8f90a1b"/>
+                    <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{ACEITE}]]></textFieldExpression>
+                </textField>
+                <staticText>
+                    <reportElement x="164" y="2" width="110" height="8" uuid="e34e5f60-7182-4394-c5a6-d7e8f90a1b2c"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Data Processamento]]></text>
+                </staticText>
+                <textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+                    <reportElement x="164" y="12" width="110" height="16" uuid="f45f6071-8293-44a5-d6b7-e8f90a1b2c3d"/>
+                    <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{DATA_PROCESSAMENTO}]]></textFieldExpression>
+                </textField>
+                <staticText>
+                    <reportElement x="280" y="2" width="100" height="8" uuid="05607182-93a4-45b6-e7c8-f90a1b2c3d4e"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Carteira]]></text>
+                </staticText>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="280" y="12" width="100" height="16" uuid="16718293-a4b5-46c7-f8d9-0a1b2c3d4e5f"/>
+                    <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{CARTEIRA}]]></textFieldExpression>
+                </textField>
+                <staticText>
+                    <reportElement x="386" y="2" width="80" height="8" uuid="278293a4-b5c6-47d8-09ea-1b2c3d4e5f60"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Espécie Moeda]]></text>
+                </staticText>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="386" y="12" width="80" height="16" uuid="3893a4b5-c6d7-48e9-1afb-2c3d4e5f6071"/>
+                    <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{MOEDA}]]></textFieldExpression>
+                </textField>
+                <staticText>
+                    <reportElement x="472" y="2" width="85" height="8" uuid="49a4b5c6-d7e8-49fa-2b0c-3d4e5f607182"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Quantidade]]></text>
+                </staticText>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="472" y="12" width="85" height="16" uuid="5ab5c6d7-e8f9-4a0b-3c1d-4e5f60718293"/>
+                    <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{QUANTIDADE}]]></textFieldExpression>
+                </textField>
+            </frame>
+
+            <frame>
+                <reportElement x="0" y="450" width="559" height="50" uuid="6bc6d7e8-f90a-4b1c-4d2e-5f60718293a4"/>
+                <box>
+                    <pen lineWidth="0.5"/>
+                </box>
+                <staticText>
+                    <reportElement x="2" y="2" width="300" height="8" uuid="7cd7e8f9-0a1b-4c2d-5e3f-60718293a4b5"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Instruções (texto de responsabilidade do beneficiário)]]></text>
+                </staticText>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="2" y="12" width="555" height="36" uuid="8de8f90a-1b2c-4d3e-6f40-718293a4b5c6"/>
+                    <textElement><font fontName="SansSerif" size="8"/></textElement>
+                    <textFieldExpression><![CDATA[$F{INSTRUCOES}]]></textFieldExpression>
+                </textField>
+            </frame>
+
+            <frame>
+                <reportElement x="0" y="502" width="559" height="50" uuid="9ef90a1b-2c3d-4e4f-7051-8293a4b5c6d7"/>
+                <box>
+                    <pen lineWidth="0.5"/>
+                </box>
+                <staticText>
+                    <reportElement x="2" y="2" width="200" height="8" uuid="af0a1b2c-3d4e-4f50-8162-93a4b5c6d7e8"/>
+                    <textElement><font fontName="SansSerif" size="6" isBold="true"/></textElement>
+                    <text><![CDATA[Pagador]]></text>
+                </staticText>
+                <textField isBlankWhenNull="true">
+                    <reportElement x="2" y="12" width="555" height="36" uuid="b01b2c3d-4e5f-4061-9273-a4b5c6d7e8f9"/>
+                    <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$F{PAGADOR_NOME} + ($F{PAGADOR_DOCUMENTO} != null ? "  -  " + $F{PAGADOR_DOCUMENTO} : "") + "\n" + ($F{PAGADOR_ENDERECO} != null ? $F{PAGADOR_ENDERECO} : "")]]></textFieldExpression>
+                </textField>
+            </frame>
+
+            <image scaleImage="RetainShape" onErrorType="Icon">
+                <reportElement x="20" y="556" width="519" height="52" uuid="c12c3d4e-5f60-4172-a384-b5c6d7e8f90a"/>
+                <imageExpression><![CDATA[$F{CODIGO_BARRAS_IMAGEM}]]></imageExpression>
+            </image>
+
+            <staticText>
+                <reportElement x="0" y="612" width="559" height="14" uuid="d23d4e5f-6071-4283-b495-c6d7e8f90a1b"/>
+                <textElement textAlignment="Center"><font fontName="SansSerif" size="8"/></textElement>
+                <text><![CDATA[Autenticação mecânica - Ficha de Compensação]]></text>
+            </staticText>
+
+            <textField isBlankWhenNull="true">
+                <reportElement x="0" y="630" width="559" height="10" uuid="e34e5f60-7182-4394-c5a6-d7e8f90a1b2c"/>
+                <textElement textAlignment="Center"><font fontName="SansSerif" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{CEDENTE_NOME} + "  -  " + $F{CEDENTE_ENDERECO}]]></textFieldExpression>
+            </textField>
+
+        </band>
+    </detail>
+</jasperReport>

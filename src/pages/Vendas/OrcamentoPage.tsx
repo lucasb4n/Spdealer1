@@ -72,6 +72,8 @@ export default function OrcamentoPage() {
   const [showReverterModal, setShowReverterModal] = useState(false);
   const [perdaMotivo, setPerdaMotivo] = useState('');
   const [masperList, setMasperList] = useState<any[]>([]);
+  const [showLimiteModal, setShowLimiteModal] = useState(false);
+  const [limiteInfo, setLimiteInfo] = useState<{ cliente: string; valorPedido: number; limite: number; saldoPendente: number; disponivel: number } | null>(null);
 
   const { control, setValue, watch, handleSubmit, reset, formState: { errors } } = useForm<Partial<Orcamento>>({
     defaultValues: defaultOrcamento,
@@ -407,6 +409,43 @@ export default function OrcamentoPage() {
     setShowPerdaModal(true);
   }, []);
 
+  const handleVirarPedido = useCallback(async () => {
+    const codCli = watch('CODCLI_ORP');
+    if (!codCli || Number(codCli) <= 0) {
+      alert('Selecione um cliente antes de virar pedido.');
+      return;
+    }
+    try {
+      const response = await fetch(`/api/clientes/${codCli}/limite-disponivel`);
+      if (!response.ok) {
+        alert('Erro ao consultar o valor disponível do cliente.');
+        return;
+      }
+      const data = await response.json();
+      const limite = Number(data.limite_credito || 0);
+      const saldoPendente = Number(data.saldo_pendente || 0);
+      const disponivel = Number(data.limite_disponivel || 0);
+      const valorPedido = totais.totger || 0;
+
+      if (valorPedido > disponivel) {
+        setLimiteInfo({
+          cliente: watch('NOME_CLI') || '',
+          valorPedido,
+          limite,
+          saldoPendente,
+          disponivel,
+        });
+        setShowLimiteModal(true);
+        return;
+      }
+
+      setValue('TIPO_ORP', 'P');
+    } catch (err) {
+      alert('Erro ao consultar o valor disponível do cliente.');
+      console.error(err);
+    }
+  }, [watch, setValue, totais.totger]);
+
   if (isLoading) {
     return (
       <div className="orcamento-page" style={{ alignItems: 'center', justifyContent: 'center' }}>
@@ -541,6 +580,7 @@ export default function OrcamentoPage() {
             onSelectOrcamento={(num) => navigate(`/vendas/orcamento/${num}`)}
             onClientChange={handleClientChange}
             readOnly={isConfirmado}
+            isEditing={isEditing}
           />
         )}
 
@@ -572,6 +612,7 @@ export default function OrcamentoPage() {
             numero={numero}
             itens={itens}
             onRecalcularItensPorNivel={handleRecalcularItensPorNivel}
+            onVirarPedido={handleVirarPedido}
           />
         )}
 
@@ -635,6 +676,59 @@ export default function OrcamentoPage() {
         }
       `}</style>
 
+      {showLimiteModal && limiteInfo && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.6)', zIndex: 1100,
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <div style={{
+            background: '#fff', borderRadius: 12, width: '100%', maxWidth: 480,
+            padding: '1.5rem', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#1e293b', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ color: '#dc2626' }}>!</span>
+                Valor acima do disponível
+              </h3>
+              <button onClick={() => setShowLimiteModal(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#64748b', lineHeight: 1 }}>×</button>
+            </div>
+            <div style={{ background: '#f8fafc', borderRadius: 8, padding: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: 4 }}>Cliente</div>
+              <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1e293b' }}>{limiteInfo.cliente || '—'}</div>
+            </div>
+            <div style={{ marginBottom: '1rem', fontSize: '0.8125rem', color: '#4b5563', lineHeight: 1.6 }}>
+              O valor do pedido <strong>{limiteInfo.valorPedido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> passa do valor disponível de <strong>{limiteInfo.disponivel.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> para este cliente. O orçamento <strong>não</strong> foi convertido em pedido.
+            </div>
+            <div style={{ background: '#f8fafc', borderRadius: 8, padding: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', padding: '2px 0' }}>
+                <span style={{ color: '#64748b' }}>Limite de crédito</span>
+                <span style={{ fontWeight: 700, color: '#1e293b' }}>{limiteInfo.limite.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', padding: '2px 0' }}>
+                <span style={{ color: '#64748b' }}>Saldo pendente</span>
+                <span style={{ fontWeight: 700, color: '#dc2626' }}>{limiteInfo.saldoPendente.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', padding: '2px 0' }}>
+                <span style={{ color: '#64748b' }}>Valor disponível</span>
+                <span style={{ fontWeight: 700, color: '#2563eb' }}>{limiteInfo.disponivel.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', borderTop: '1px solid #e5e7eb', paddingTop: '1rem' }}>
+              <button
+                onClick={() => setShowLimiteModal(false)}
+                style={{
+                  padding: '0.5rem 1rem', borderRadius: 6, border: 'none',
+                  background: '#2563eb', color: '#fff', fontWeight: 600, cursor: 'pointer', fontSize: '0.8125rem'
+                }}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showPerdaModal && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -663,23 +757,27 @@ export default function OrcamentoPage() {
               <div style={{ border: '1px solid #e2e8f0', borderRadius: 6, maxHeight: 160, overflow: 'auto' }}>
                 {masperList.length === 0 ? (
                   <div style={{ padding: '0.75rem', fontSize: '0.75rem', color: '#94a3b8', textAlign: 'center' }}>Nenhum motivo disponível</div>
-                ) : masperList.map((m: any, idx: number) => (
-                  <div
-                    key={idx}
-                    onClick={() => setPerdaMotivo(String(m.codigo_mper))}
-                    style={{
-                      padding: '0.5rem 0.75rem',
-                      cursor: 'pointer',
-                      fontSize: '0.8125rem',
-                      background: perdaMotivo === String(m.codigo_mper) ? '#eff6ff' : 'transparent',
-                      color: perdaMotivo === String(m.codigo_mper) ? '#2563eb' : '#1e293b',
-                      borderBottom: '1px solid #f1f5f9',
-                      fontWeight: perdaMotivo === String(m.codigo_mper) ? 700 : 400
-                    }}
-                  >
-                    {m.descr_mper || m.descricao || 'Sem descrição'}
-                  </div>
-                ))}
+                ) : masperList.map((m: any, idx: number) => {
+                  const cod = String(m.codigo_mper ?? m.codigo ?? m.CODIGO_MPER ?? m.CODIGO ?? '').trim();
+                  const isSelected = perdaMotivo === cod;
+                  return (
+                    <div
+                      key={idx}
+                      onClick={() => setPerdaMotivo(cod)}
+                      style={{
+                        padding: '0.5rem 0.75rem',
+                        cursor: 'pointer',
+                        fontSize: '0.8125rem',
+                        background: isSelected ? '#eff6ff' : 'transparent',
+                        color: isSelected ? '#2563eb' : '#1e293b',
+                        borderBottom: '1px solid #f1f5f9',
+                        fontWeight: isSelected ? 700 : 400
+                      }}
+                    >
+                      {m.descr_mper || m.descricao || m.DESCR_MPER || 'Sem descrição'}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 

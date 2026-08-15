@@ -3,7 +3,6 @@ import FlowStudioEditor from '../flow/FlowStudioEditor';
 import { AgGridReact } from 'ag-grid-react';
 import { ColDef } from 'ag-grid-community';
 import { Tabs, Tab } from 'react-bootstrap';
-import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import './ContextMenu.css';
 

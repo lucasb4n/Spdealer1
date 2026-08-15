@@ -83,6 +83,7 @@ public class RelatoriosFinanceirosService {
               c.cliforn_cli,
               d.descr_dep,
               b.nomefan_bco,
+              r.codigo_bol,
               r.vlracre_rec,
               b.txjuro_bco
             FROM receber r

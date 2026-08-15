@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -45,54 +46,50 @@ public class ClienteController {
         try {
             logger.debug("listarClientes called with cliforn_cli={}, search={}, tipopessoa={}, tipofor={}, cidade={}, uf={}, status={}", cliforn_cli, search, tipopessoa, tipofor, cidade, uf, status);
             StringBuilder sql = new StringBuilder();
-            // Alias columns to match frontend expectations (cpf_cnpj_cli, telefone_cli)
-            sql.append("SELECT codigo_cli, cgccpf_cli AS cpf_cnpj_cli, nome_cli, nomefan_cli, cidade_cli, uf_cli, fone_cli AS telefone_cli, celular_cli, inscest_cli, email_cli, datcadi_cli, datalt_cli, datanasc_cli, tipopessoa_cli, tipofor_cli, ativoinativo_cli, cliforn_cli FROM clientes WHERE cliforn_cli = ? ");
+            sql.append("SELECT codigo_cli, cgccpf_cli AS cpf_cnpj_cli, nome_cli, nomefan_cli, cidade_cli, uf_cli, fone_cli AS telefone_cli, celular_cli, inscest_cli, email_cli, datcadi_cli, datalt_cli, datanasc_cli, tipopessoa_cli, tipofor_cli, ativoinativo_cli, cliforn_cli FROM clientes WHERE 1=1 ");
+
+            List<Object> paramsList = new java.util.ArrayList<>();
+            if ("C".equalsIgnoreCase(cliforn_cli)) {
+                sql.append("AND (UPPER(cliforn_cli) = 'C' OR UPPER(cliforn_cli) = 'A' OR cliforn_cli IS NULL OR cliforn_cli = '') ");
+            } else if ("F".equalsIgnoreCase(cliforn_cli)) {
+                sql.append("AND (UPPER(cliforn_cli) = 'F' OR UPPER(cliforn_cli) = 'A' OR cliforn_cli IS NULL OR cliforn_cli = '') ");
+            } else if (cliforn_cli != null && !cliforn_cli.trim().isEmpty() && !"ALL".equalsIgnoreCase(cliforn_cli)) {
+                sql.append("AND cliforn_cli = ? ");
+                paramsList.add(cliforn_cli);
+            }
+
             if (search != null && !search.trim().isEmpty()) {
-                sql.append("AND (nome_cli LIKE ? OR cgccpf_cli LIKE ? OR CAST(codigo_cli AS CHAR) LIKE ?) ");
+                sql.append("AND (nome_cli LIKE ? OR nomefan_cli LIKE ? OR cgccpf_cli LIKE ? OR CAST(codigo_cli AS CHAR) LIKE ?) ");
+                String searchPattern = "%" + search.trim() + "%";
+                paramsList.add(searchPattern);
+                paramsList.add(searchPattern);
+                paramsList.add(searchPattern);
+                paramsList.add(searchPattern);
             }
             if (tipopessoa != null && !tipopessoa.trim().isEmpty()) {
                 sql.append("AND tipopessoa_cli = ? ");
-            }
-            if (cidade != null && !cidade.trim().isEmpty()) {
-                sql.append("AND cidade_cli LIKE ? ");
-            }
-            if (uf != null && !uf.trim().isEmpty()) {
-                sql.append("AND uf_cli = ? ");
-            }
-            if (tipofor != null) {
-                sql.append("AND tipofor_cli = ? ");
-            }
-            if (status != null && !status.trim().isEmpty()) {
-                if ("ativo".equalsIgnoreCase(status) || "a".equalsIgnoreCase(status)) {
-                    sql.append("AND UPPER(ativoinativo_cli) = 'A' ");
-                } else if ("inativo".equalsIgnoreCase(status)) {
-                    sql.append("AND (ativoinativo_cli IS NULL OR ativoinativo_cli = '') ");
-                }
-            }
-            sql.append("ORDER BY nome_cli ASC LIMIT 200");
-
-            List<Object> paramsList = new java.util.ArrayList<>();
-            paramsList.add(cliforn_cli);
-            if (search != null && !search.trim().isEmpty()) {
-                paramsList.add("%" + search + "%");
-                paramsList.add("%" + search + "%");
-                paramsList.add("%" + search + "%");
-            }
-            if (tipopessoa != null && !tipopessoa.trim().isEmpty()) {
                 paramsList.add(tipopessoa);
             }
             if (cidade != null && !cidade.trim().isEmpty()) {
-                paramsList.add("%" + cidade + "%");
+                sql.append("AND cidade_cli LIKE ? ");
+                paramsList.add("%" + cidade.trim() + "%");
             }
             if (uf != null && !uf.trim().isEmpty()) {
-                paramsList.add(uf);
+                sql.append("AND uf_cli = ? ");
+                paramsList.add(uf.trim());
             }
             if (tipofor != null) {
+                sql.append("AND tipofor_cli = ? ");
                 paramsList.add(tipofor);
             }
             if (status != null && !status.trim().isEmpty()) {
-                // filtro de status aplicado diretamente no SQL (usando literais/IS NULL), sem parâmetro adicional
+                if ("ativo".equalsIgnoreCase(status) || "a".equalsIgnoreCase(status)) {
+                    sql.append("AND (UPPER(ativoinativo_cli) = 'A' OR ativoinativo_cli IS NULL OR ativoinativo_cli = '') ");
+                } else if ("inativo".equalsIgnoreCase(status) || "i".equalsIgnoreCase(status)) {
+                    sql.append("AND UPPER(ativoinativo_cli) = 'I' ");
+                }
             }
+            sql.append("ORDER BY nome_cli ASC LIMIT 5000");
 
             Object[] params = paramsList.toArray();
             List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql.toString(), params);
@@ -113,12 +110,12 @@ public class ClienteController {
         // Busca cliente por ID (apenas números para evitar conflito com outras rotas como /total)
         @GetMapping("/{id:\\d+}")
         public Map<String, Object> buscarClientePorId(@PathVariable("id") Long id,
-            @RequestParam(defaultValue = "C") String cliforn_cli) {
+            @RequestParam(required = false) String cliforn_cli) {
         try {
             logger.debug("buscarClientePorId id={} cliforn_cli={}", id, cliforn_cli);
             // Return full row so frontend receives all possible fields used by the form
-            String sql = "SELECT * FROM clientes WHERE cliforn_cli = ? AND codigo_cli = ?";
-            Map<String, Object> map = jdbcTemplate.queryForMap(sql, cliforn_cli, id);
+            String sql = "SELECT * FROM clientes WHERE codigo_cli = ?";
+            Map<String, Object> map = jdbcTemplate.queryForMap(sql, id);
 
             // Add common aliases expected by frontend for compatibility
             if (map.containsKey("cgccpf_cli") && (map.get("cpf_cnpj_cli") == null || map.get("cpf_cnpj_cli").toString().trim().isEmpty())) {
@@ -342,6 +339,64 @@ public class ClienteController {
         return rows;
     }
 
+    // Verifica se um cliente pode ser excluído (não possui lançamentos vinculados em contas a receber)
+    @GetMapping("/{id:\\d+}/can-delete")
+    public ResponseEntity<Map<String, Object>> verificarExclusaoCliente(@PathVariable Long id) {
+        Map<String, Object> response = new java.util.HashMap<>();
+        try {
+            Integer total = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM receber WHERE codigo_rec = ?", Integer.class, id);
+            boolean canDelete = total == null || total == 0;
+            response.put("canDelete", canDelete);
+            response.put("totalLancamentos", total != null ? total : 0);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Erro ao verificar exclusão para cliente {}: {}", id, e.getMessage(), e);
+            response.put("canDelete", false);
+            response.put("erro", e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    // Exclui um cliente (apenas se não houver lançamentos vinculados)
+    @DeleteMapping("/{id:\\d+}")
+    public ResponseEntity<Map<String, Object>> excluirCliente(@PathVariable Long id) {
+        Map<String, Object> response = new java.util.HashMap<>();
+        try {
+            Integer totalLancamentos = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM receber WHERE codigo_rec = ?", Integer.class, id);
+            if (totalLancamentos != null && totalLancamentos > 0) {
+                response.put("sucesso", false);
+                response.put("canDelete", false);
+                response.put("erro", "Cliente possui lançamentos em contas a receber e não pode ser excluído");
+                return ResponseEntity.ok(response);
+            }
+            List<Map<String, Object>> cliente = jdbcTemplate.queryForList(
+                "SELECT nome_cli, nomefan_cli FROM clientes WHERE cliforn_cli = 'C' AND codigo_cli = ?", id);
+            if (cliente.isEmpty()) {
+                response.put("sucesso", false);
+                response.put("canDelete", false);
+                response.put("erro", "Cliente não encontrado");
+                return ResponseEntity.ok(response);
+            }
+            insertClientesAudit(String.valueOf(id), "DELETE", cliente, 1);
+            int rows = jdbcTemplate.update("DELETE FROM clientes WHERE cliforn_cli = 'C' AND codigo_cli = ?", id);
+            response.put("sucesso", rows > 0);
+            response.put("canDelete", true);
+            response.put("rowsAffected", rows);
+            if (rows > 0) {
+                response.put("mensagem", "Cliente excluído com sucesso");
+            }
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Erro ao excluir cliente {}: {}", id, e.getMessage(), e);
+            response.put("sucesso", false);
+            response.put("canDelete", false);
+            response.put("erro", e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
     // Análise financeira resumida (pode ser expandida depois)
     @GetMapping("/{codigoCliente}/analise-financeira")
     public Map<String, Object> getAnaliseFinanceira(@PathVariable String codigoCliente) {
@@ -467,6 +522,7 @@ public class ClienteController {
             // Normalizar documento: remover pontos, barras, traços antes de persistir
             cgccpf_cli = digitsOnly(cgccpf_cli);
             String tipopessoa_cli = getPayloadValue(payload, "tipopessoa_cli") != null ? getPayloadValue(payload, "tipopessoa_cli").toString() : "J";
+            tipopessoa_cli = normalizeTipoPessoa(tipopessoa_cli);
             
             // Determinar cliforn_cli com base no payload ou no tipo de cadastro
             // Prioridade: valor explícito em payload (ex.: cliforn_cli='F') -> respeitar e normalizar.
@@ -503,9 +559,10 @@ public class ClienteController {
             String bairro_cli = truncateString(getPayloadValue(payload, "bairro_cli"), 50);
             String cidade_cli = truncateString(getPayloadValue(payload, "cidade_cli"), 50);
             String uf_cli = truncateString(getPayloadValue(payload, "uf_cli"), 2);
-            String cep_cli = truncateString(getPayloadValue(payload, "cep_cli"), 8);
-            String latitude_cli = truncateString(getPayloadValue(payload, "latitude_cli"), 20);
-            String longitude_cli = truncateString(getPayloadValue(payload, "longitude_cli"), 20);
+            String cep_cli = digitsOnly(getPayloadValue(payload, "cep_cli") != null ? getPayloadValue(payload, "cep_cli").toString() : null);
+            cep_cli = truncateString(cep_cli, 8);
+            String latitude_cli = parseCoordinate(getPayloadValue(payload, "latitude_cli"));
+            String longitude_cli = parseCoordinate(getPayloadValue(payload, "longitude_cli"));
             // Telefones: armazenar somente o número (sem prefixo) com máximo de 9 caracteres (ajuste DB)
             String fone1_cli = truncateString(getPayloadValue(payload, "fone1_cli"), 9);
             String celular_cli = truncateString(getPayloadValue(payload, "celular_cli"), 9);
@@ -563,16 +620,34 @@ public class ClienteController {
             pref1_cli = truncateString(pref1_cli, 2);
             prefcel_cli = truncateString(prefcel_cli, 2);
             pref_cli = truncateString(pref_cli, 2);
-            String regiao_cli = truncateString(getPayloadValue(payload, "regiao_cli"), 10);
+            String regiao_cli = truncateString(getPayloadValue(payload, "regiao_cli"), 3);
             Boolean etiquetas_cli = toBoolean(getPayloadValue(payload, "etiquetas_cli"));
             String email_cli = truncateString(getPayloadValue(payload, "email_cli"), 100);
             // Campos da aba Cobrança
             String condpag_cli = truncateString(getPayloadValue(payload, "condpag_cli"), 3);
-            String codbco_cli = truncateString(getPayloadValue(payload, "codbco_cli"), 5);
+            String codbco_cli = truncateString(getPayloadValue(payload, "codbco_cli"), 3);
             String prefcob_cli = truncateString(getPayloadValue(payload, "prefcob_cli"), 3);
-            String fonecob_cli = truncateString(getPayloadValue(payload, "fonecob_cli"), 15);
+            String fonecob_cli = truncateString(getPayloadValue(payload, "fonecob_cli"), 9);
             String ramalcob_cli = truncateString(getPayloadValue(payload, "ramalcob_cli"), 4);
-            String numctada_cli = truncateString(getPayloadValue(payload, "numctada_cli"), 20);
+            String numctada_cli = truncateString(getPayloadValue(payload, "numctada_cli"), 14);
+
+            // CAMPOS ABA COBRANÇA — endereço de cobrança e condições (colunas existentes na tabela clientes)
+            String logra1_cli = truncateString(getPayloadValue(payload, "logra1_cli"), 100);
+            String bairro1_cli = truncateString(getPayloadValue(payload, "bairro1_cli"), 50);
+            String cidade1_cli = truncateString(getPayloadValue(payload, "cidade1_cli"), 50);
+            String uf1_cli = truncateString(getPayloadValue(payload, "uf1_cli"), 2);
+            String cep1_cli = digitsOnly(getPayloadValue(payload, "cep1_cli") != null ? getPayloadValue(payload, "cep1_cli").toString() : null);
+            cep1_cli = truncateString(cep1_cli, 8);
+            String datalt_cli = toISODate(getPayloadValue(payload, "datalt_cli"));
+            String tipcob_cli = truncateString(getPayloadValue(payload, "tipcob_cli"), 2);
+            String vcto_cli = truncateString(getPayloadValue(payload, "vcto_cli"), 2);
+            String contatos_cli = truncateString(getPayloadValue(payload, "contatos_cli"), 20);
+            String comissao_cli = parseDecimal(getPayloadValue(payload, "comissao_cli"));
+            String comissaoavi_cli = parseDecimal(getPayloadValue(payload, "comissaoavi_cli"));
+            String despesa_cli = parseDecimal(getPayloadValue(payload, "despesa_cli"));
+            String trib_cli = truncateString(getPayloadValue(payload, "trib_cli"), 2);
+            String cargamedia_cli = parseDecimal(getPayloadValue(payload, "cargamedia_cli"));
+            Boolean issret_cli = toBoolean(getPayloadValue(payload, "issret_cli"));
             // `atualizado_cli` é um checkbox no frontend: deve ser salvo como 1 (verdadeiro) ou 0 (falso)
             Integer atualizado_cli = null;
             try {
@@ -636,15 +711,15 @@ public class ClienteController {
             String pai_cli = truncateString(getPayloadValue(payload, "pai_cli"), 50);
             String mae_cli = truncateString(getPayloadValue(payload, "mae_cli"), 50);
             String orgemis_cli = truncateString(getPayloadValue(payload, "orgemis_cli"), 6);
-            String natural_cli = truncateString(getPayloadValue(payload, "natural_cli"), 30);
+            String natural_cli = truncateString(getPayloadValue(payload, "natural_cli"), 20);
             String sexo_cli = truncateString(getPayloadValue(payload, "sexo_cli"), 1);
-            // Normalizar datas para CHAR(8) YYYYMMDD
-            String datanasc_cli = normalizeToYYYYMMDD(truncateString(getPayloadValue(payload, "datanasc_cli"), 10));
-            String conjuge_cli = truncateString(getPayloadValue(payload, "conjuge_cli"), 100);
+            // Coluna datanasc_cli é DATE: normalizar para YYYY-MM-DD
+            String datanasc_cli = toISODate(truncateString(getPayloadValue(payload, "datanasc_cli"), 10));
+            String conjuge_cli = truncateString(getPayloadValue(payload, "conjuge_cli"), 50);
+            // dtnasconj_cli é decimal(8,0): manter YYYYMMDD numérico
             String dtnasconj_cli = normalizeToYYYYMMDD(truncateString(getPayloadValue(payload, "dtnasconj_cli"), 10));
-            String cpfconj_cli = truncateString(getPayloadValue(payload, "cpfconj_cli"), 14);
-            cpfconj_cli = digitsOnly(cpfconj_cli);
-            String ideconj_cli = truncateString(getPayloadValue(payload, "ideconj_cli"), 20);
+            String cpfconj_cli = digitsOnly(truncateString(getPayloadValue(payload, "cpfconj_cli"), 11));
+            String ideconj_cli = truncateString(getPayloadValue(payload, "ideconj_cli"), 11);
             
             Double limcre_cli = 0.0;
             try {
@@ -652,6 +727,11 @@ public class ClienteController {
             } catch (Exception e) {
                 logger.debug("Erro ao converter limcre_cli: {}", e.getMessage());
             }
+
+            // CAMPOS ABA CRÉDITO (aliases do frontend resolvidos em getPayloadValue)
+            String percdesc_cli = parseDecimal(getPayloadValue(payload, "percdesc_cli"));
+            Boolean fatliq_cli = toBoolean(getPayloadValue(payload, "fatliq_cli"));
+            Boolean nfeavista_cli = toBoolean(getPayloadValue(payload, "nfeavista_cli"));
             
             // Determinar se este payload é uma tentativa de UPDATE (codigo_cli fornecido e existe)
             boolean isUpdate = false;
@@ -729,7 +809,9 @@ public class ClienteController {
                             "cons_vend_cod_ven = ?, agemaq_cli = ?, cons_loca_cod_ven = ?, ageloc_cli = ?, " +
                             "codativ1_cli = ?, codativ2_cli = ?, codativ3_cli = ?, codativ4_cli = ?, " +
                                 "ident_cli = ?, civil_cli = ?, prof_cli = ?, pai_cli = ?, mae_cli = ?, orgemis_cli = ?, natural_cli = ?, sexo_cli = ?, datanasc_cli = ?, " +
-                                    "conjuge_cli = ?, dtnasconj_cli = ?, cpfconj_cli = ?, ideconj_cli = ?, condpag_cli = ?, codbco_cli = ?, prefcob_cli = ?, fonecob_cli = ?, ramalcob_cli = ?, numctada_cli = ? " +
+                                    "conjuge_cli = ?, dtnasconj_cli = ?, cpfconj_cli = ?, ideconj_cli = ?, condpag_cli = ?, codbco_cli = ?, prefcob_cli = ?, fonecob_cli = ?, ramalcob_cli = ?, numctada_cli = ?, " +
+                                    "logra1_cli = ?, bairro1_cli = ?, cidade1_cli = ?, uf1_cli = ?, cep1_cli = ?, datalt_cli = ?, tipcob_cli = ?, vcto_cli = ?, contatos_cli = ?, " +
+                                    "comissao_cli = ?, comissaoavi_cli = ?, despesa_cli = ?, trib_cli = ?, cargamedia_cli = ?, issret_cli = ?, percdesc_cli = ?, fatliq_cli = ?, nfeavista_cli = ? " +
                             "WHERE cliforn_cli = ? AND codigo_cli = ?";
 
                     Object[] updateParams = new Object[] {
@@ -744,6 +826,8 @@ public class ClienteController {
                             codativ1_cli, codativ2_cli, codativ3_cli, codativ4_cli,
                                 ident_cli, civil_cli, prof_cli, pai_cli, mae_cli, orgemis_cli, natural_cli, sexo_cli, datanasc_cli,
                                     conjuge_cli, dtnasconj_cli, cpfconj_cli, ideconj_cli, condpag_cli, codbco_cli, prefcob_cli, fonecob_cli, ramalcob_cli, numctada_cli,
+                                    logra1_cli, bairro1_cli, cidade1_cli, uf1_cli, cep1_cli, datalt_cli, tipcob_cli, vcto_cli, contatos_cli,
+                                    comissao_cli, comissaoavi_cli, despesa_cli, trib_cli, cargamedia_cli, issret_cli, percdesc_cli, fatliq_cli, nfeavista_cli,
                                     cliforn_cli_valor, codigo_cli
                     };
 
@@ -781,7 +865,9 @@ public class ClienteController {
                     "cons_vend_cod_ven, agemaq_cli, cons_loca_cod_ven, ageloc_cli, " +
                     "codativ1_cli, codativ2_cli, codativ3_cli, codativ4_cli, " +
                     "ident_cli, civil_cli, prof_cli, pai_cli, mae_cli, orgemis_cli, natural_cli, sexo_cli, datanasc_cli, " +
-                    "conjuge_cli, dtnasconj_cli, cpfconj_cli, ideconj_cli, condpag_cli, codbco_cli, prefcob_cli, fonecob_cli, ramalcob_cli, numctada_cli";
+                    "conjuge_cli, dtnasconj_cli, cpfconj_cli, ideconj_cli, condpag_cli, codbco_cli, prefcob_cli, fonecob_cli, ramalcob_cli, numctada_cli, " +
+                    "logra1_cli, bairro1_cli, cidade1_cli, uf1_cli, cep1_cli, datalt_cli, tipcob_cli, vcto_cli, contatos_cli, " +
+                    "comissao_cli, comissaoavi_cli, despesa_cli, trib_cli, cargamedia_cli, issret_cli, percdesc_cli, fatliq_cli, nfeavista_cli";
 
                 Object[] params = new Object[] {
                     cliforn_cli_valor, codigo_cli, nome_cli, nomefan_cli, cgccpf_cli, tipopessoa_cli,
@@ -794,7 +880,9 @@ public class ClienteController {
                     cons_vend_cod_ven, agemaq_cli, cons_loca_cod_ven, ageloc_cli,
                     codativ1_cli, codativ2_cli, codativ3_cli, codativ4_cli,
                     ident_cli, civil_cli, prof_cli, pai_cli, mae_cli, orgemis_cli, natural_cli, sexo_cli, datanasc_cli,
-                    conjuge_cli, dtnasconj_cli, cpfconj_cli, ideconj_cli, condpag_cli, codbco_cli, prefcob_cli, fonecob_cli, ramalcob_cli, numctada_cli
+                    conjuge_cli, dtnasconj_cli, cpfconj_cli, ideconj_cli, condpag_cli, codbco_cli, prefcob_cli, fonecob_cli, ramalcob_cli, numctada_cli,
+                    logra1_cli, bairro1_cli, cidade1_cli, uf1_cli, cep1_cli, datalt_cli, tipcob_cli, vcto_cli, contatos_cli,
+                    comissao_cli, comissaoavi_cli, despesa_cli, trib_cli, cargamedia_cli, issret_cli, percdesc_cli, fatliq_cli, nfeavista_cli
                 };
 
                 // Construir SQL dinamicamente com placeholders que batem com params.length
@@ -969,6 +1057,17 @@ public class ClienteController {
         if (payload.containsKey(withHyphen)) {
             return payload.get(withHyphen);
         }
+        // Aliases do frontend (camelCase/hífen) para nomes de coluna reais
+        String alias = resolveAlias(fieldName);
+        if (alias != null) {
+            if (payload.containsKey(alias)) {
+                return payload.get(alias);
+            }
+            String aliasHyphen = alias.replace("_", "-");
+            if (payload.containsKey(aliasHyphen)) {
+                return payload.get(aliasHyphen);
+            }
+        }
         // Verifica mapas aninhados comuns (ex.: endereco, cobranca, credito)
         String[] nestedKeys = new String[] {"endereco", "endereço", "address", "cobranca", "cobrança", "credito", "billing"};
         for (String nk : nestedKeys) {
@@ -985,6 +1084,83 @@ public class ClienteController {
         }
 
         return null;
+    }
+
+    // Mapeia nomes de campos usados pelo frontend (camelCase/hífen) para colunas reais do banco
+    private String resolveAlias(String columnName) {
+        switch (columnName) {
+        case "limcre_cli": return "limiteCredito";
+        case "condpag_cli": return "condPag";
+        case "percdesc_cli": return "desconto";
+        case "fatliq_cli": return "faturarLiquido";
+        case "nfeavista_cli": return "naNfeAvista";
+        case "revenda_cli": return "clirevenda-cli";
+        case "cons_pecas_cod_ven": return "vendedor-cli";
+        case "cons_servi_cod_ven": return "vendedor1-cli";
+        case "cons_vend_cod_ven": return "vendedor2-cli";
+        case "cons_loca_cod_ven": return "vendedor3-cli";
+        default: return null;
+        }
+    }
+
+    // Normaliza tipopessoa para a convenção do ERP: 'J' (jurídica/CNPJ) ou 'F' (física/CPF).
+    // Aceita valores legados do frontend ('c'=CNPJ, 'f'=CPF), maiúsculas/minúsculas e textos.
+    private String normalizeTipoPessoa(String value) {
+        if (value == null) return "J";
+        String v = value.trim().toUpperCase();
+        if (v.equals("J") || v.equals("CNPJ") || v.equals("PJ") || v.equals("C")) return "J";
+        if (v.equals("F") || v.equals("CPF") || v.equals("PF")) return "F";
+        return v.length() == 1 ? v : "J";
+    }
+
+    // Converte data (DD/MM/YYYY, YYYY-MM-DD ou YYYYMMDD) para YYYY-MM-DD (formato DATE do MariaDB)
+    private String toISODate(Object value) {
+        if (value == null) return null;
+        String s = value.toString().trim();
+        if (s.isEmpty()) return null;
+        if (s.contains("/")) {
+            String[] parts = s.split("/");
+            if (parts.length == 3 && parts[2].length() == 4) {
+                return parts[2] + "-" + parts[1] + "-" + parts[0];
+            }
+            return null;
+        }
+        String digits = s.replaceAll("\\D", "");
+        if (digits.length() == 8 && s.matches("\\d{8}")) {
+            return digits.substring(0, 4) + "-" + digits.substring(4, 6) + "-" + digits.substring(6, 8);
+        }
+        if (s.matches("\\d{4}-\\d{2}-\\d{2}")) {
+            return s;
+        }
+        return null;
+    }
+
+    // Converte valor de coordenada para número com 6 casas decimais (colunas decimal(10,6))
+    private String parseCoordinate(Object value) {
+        if (value == null) return null;
+        try {
+            String s = value.toString().trim().replace(",", ".");
+            if (s.isEmpty()) return null;
+            double d = Double.parseDouble(s);
+            return String.format("%.6f", d);
+        } catch (Exception e) {
+            logger.debug("parseCoordinate error for value {}: {}", value, e.getMessage());
+            return null;
+        }
+    }
+
+    // Converte valores monetários/percentuais para número com 2 casas decimais
+    private String parseDecimal(Object value) {
+        if (value == null) return null;
+        try {
+            String s = value.toString().trim().replace(",", ".");
+            if (s.isEmpty()) return null;
+            double d = Double.parseDouble(s);
+            return String.format("%.2f", d);
+        } catch (Exception e) {
+            logger.debug("parseDecimal error for value {}: {}", value, e.getMessage());
+            return null;
+        }
     }
 
     // Método auxiliar para truncar strings com segurança

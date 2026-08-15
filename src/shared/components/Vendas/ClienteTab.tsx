@@ -16,7 +16,8 @@ interface ClienteTabProps {
   onSelectOrcamento?: (num: number) => void,
   onClientChange?: () => void,
   activeTab?: string,
-  readOnly?: boolean
+  readOnly?: boolean,
+  isEditing?: boolean
 }
 
 const formatCPF = (v: string) => {
@@ -81,7 +82,8 @@ export const ClienteTab: React.FC<ClienteTabProps> = ({
   onSelectOrcamento,
   onClientChange,
   activeTab,
-  readOnly = false
+  readOnly = false,
+  isEditing = false
 }) => {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -511,13 +513,40 @@ export const ClienteTab: React.FC<ClienteTabProps> = ({
                 render={({ field }) => (
                   <input
                     {...field}
-                    readOnly={readOnly || (field.value && field.value !== '0' && field.value !== 0)}
-                    className={`orcamento-field__input orcamento-field__input--highlight ${(readOnly || (field.value && field.value !== '0' && field.value !== 0)) ? 'orcamento-field__input--readonly' : ''}`}
+                    readOnly={readOnly || isEditing}
+                    inputMode="numeric"
+                    onChange={(e) => {
+                      field.onChange(e.target.value.replace(/\D/g, ''));
+                    }}
+                    className={`orcamento-field__input orcamento-field__input--highlight ${(readOnly || isEditing) ? 'orcamento-field__input--readonly' : ''}`}
                     onKeyDown={(e) => {
-                      if (readOnly) return;
+                      if (readOnly || isEditing) return;
                       if (e.key === 'F4') {
                         e.preventDefault();
+                        e.stopPropagation();
                         setShowOrcamentoModal(true);
+                        return;
+                      }
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const codigo = String(field.value || '').replace(/\D/g, '');
+                        if (!codigo) return;
+                        fetch(`${API_BASE_URL}/v1/orcamentos/${codigo}`)
+                          .then(resp => {
+                            if (!resp.ok) {
+                              if (resp.status === 404) {
+                                alert('Orçamento/Pedido não encontrado.');
+                              }
+                              return null;
+                            }
+                            return resp.json();
+                          })
+                          .then(data => {
+                            if (data && data.success && onSelectOrcamento) {
+                              onSelectOrcamento(Number(codigo));
+                            }
+                          })
+                          .catch(() => alert('Erro ao buscar orçamento/pedido.'));
                       }
                     }}
                   />

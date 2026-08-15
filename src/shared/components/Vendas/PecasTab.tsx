@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useMemo, useRef } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { ColDef } from 'ag-grid-community';
-import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { ItemOrcamento } from './OrcamentoTypes';
 import Localizar from 'components/Localizar';
@@ -337,7 +336,7 @@ export const PecasTab: React.FC<PecasTabProps> = ({
       if (tipo === 'S') {
         endpoint = '/api/servico/manutencao/tipo-tmo'; // Full list or lookup
       } else {
-        endpoint = '/api/v1/produtos/lookup?size=500'; // Larger set for modal
+        endpoint = '/api/v1/produtos/lookup?size=5000'; // Larger set for modal
       }
       const response = await fetch(endpoint);
       const result = await response.json();
@@ -1303,10 +1302,11 @@ export const PecasTab: React.FC<PecasTabProps> = ({
               <button
                 onClick={async () => {
                   if (!vendaPerdidaItem || !vendaPerdidaMotivo) return;
-                  const itemKey = (vendaPerdidaItem.FAB_ORPP || '') + '_' + (vendaPerdidaItem.CODIGO_ORPP || '');
                   const updated = itens.map(item => {
-                    const key = (item.FAB_ORPP || '') + '_' + (item.CODIGO_ORPP || '');
-                    return key === itemKey
+                    const isTarget = (item.REQUIS_ORPP && vendaPerdidaItem.REQUIS_ORPP)
+                      ? String(item.REQUIS_ORPP) === String(vendaPerdidaItem.REQUIS_ORPP)
+                      : item === vendaPerdidaItem;
+                    return isTarget
                       ? { ...item, QTPERD_ORPP: vendaPerdidaQtde, CODIGO_MPER: vendaPerdidaMotivo, MOTIVO_ORPP: vendaPerdidaMotivo }
                       : item;
                   });

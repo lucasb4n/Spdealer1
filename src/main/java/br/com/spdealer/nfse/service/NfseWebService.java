@@ -73,22 +73,7 @@ public class NfseWebService {
             List<Map<String, Object>> itens = buscarNotasDet(filial, emissao, tipoDb, serie, numero);
             Map<String, Object> empresa = buscarFilial(filial);
 
-            // Complementa dados da filial com CodTribMunicipio_fil e CodigoCnae_fil da masfil
-            try {
-                String codigoFilStr = String.format("%03d", filial);
-                String sqlMas = "SELECT CodTribMunicipio_fil, CodigoCnae_fil FROM masfil WHERE codigo_fil = ?";
-                List<Map<String, Object>> rowsMas = jdbcTemplate.queryForList(sqlMas, codigoFilStr);
-                if (rowsMas.isEmpty()) {
-                    rowsMas = jdbcTemplate.queryForList(sqlMas, filial);
-                }
-                if (!rowsMas.isEmpty()) {
-                    Map<String, Object> mas = rowsMas.get(0);
-                    empresa.put("CodTribMunicipio_fil", mas.get("CodTribMunicipio_fil"));
-                    empresa.put("CodigoCnae_fil", mas.get("CodigoCnae_fil"));
-                }
-            } catch (Exception e) {
-                log.warn("Erro ao complementar dados com masfil", e);
-            }
+            complementarDadosMasfil(empresa, filial);
 
             String loteXml = gerarLoteRpsXml(nota, itens, empresa);
             loteXml = assinarRps(loteXml, filial);
@@ -147,6 +132,16 @@ public class NfseWebService {
             throw new RuntimeException("Filial nao encontrada");
         }
         return rows.get(0);
+    }
+
+    private void complementarDadosMasfil(Map<String, Object> empresa, Integer filial) {
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+                "SELECT CodTribMunicipio_fil, CodigoCnae_fil FROM masfil WHERE codigo_fil = ?",
+                new Object[]{filial});
+        if (!rows.isEmpty()) {
+            empresa.put("CodTribMunicipio_fil", rows.get(0).get("CodTribMunicipio_fil"));
+            empresa.put("CodigoCnae_fil", rows.get(0).get("CodigoCnae_fil"));
+        }
     }
 
     private String gerarLoteRpsXml(Map<String, Object> nota, List<Map<String, Object>> itens, Map<String, Object> empresa) {
@@ -234,7 +229,7 @@ public class NfseWebService {
         rpsBody.append("            <IssRetido>2</IssRetido>\n");
         rpsBody.append("            <ItemListaServico>0101</ItemListaServico>\n");
         rpsBody.append("            <CodigoCnae>").append(padLeft(escapeXml(cnae), 7, '0')).append("</CodigoCnae>\n");
-        rpsBody.append("            <CodigoTributacaoMunicipio>").append(padLeft(escapeXml(codTribMun), 9, '0')).append("</CodigoTributacaoMunicipio>\n");
+        rpsBody.append("            <CodigoTributacaoMunicipio>").append(escapeXml(codTribMun)).append("</CodigoTributacaoMunicipio>\n");
         rpsBody.append("            <Discriminacao>").append(escapeXml(discriminacao)).append("</Discriminacao>\n");
         rpsBody.append("            <CodigoMunicipio>").append(codMun).append("</CodigoMunicipio>\n");
         rpsBody.append("            <CodigoPais>1058</CodigoPais>\n");
@@ -348,6 +343,7 @@ public class NfseWebService {
         Map<String, Object> nota = buscarNotaCab(filial, emissao, tipoDb, serie, numero);
         List<Map<String, Object>> itens = buscarNotasDet(filial, emissao, tipoDb, serie, numero);
         Map<String, Object> empresa = buscarFilial(filial);
+        complementarDadosMasfil(empresa, filial);
 
         String loteXml = gerarLoteRpsXml(nota, itens, empresa);
         String xmlAssinado = assinarRps(loteXml, filial);
@@ -371,6 +367,7 @@ public class NfseWebService {
         Map<String, Object> nota = buscarNotaCab(filial, emissao, tipoDb, serie, numero);
         List<Map<String, Object>> itens = buscarNotasDet(filial, emissao, tipoDb, serie, numero);
         Map<String, Object> empresa = buscarFilial(filial);
+        complementarDadosMasfil(empresa, filial);
 
         return gerarLoteRpsXml(nota, itens, empresa);
     }

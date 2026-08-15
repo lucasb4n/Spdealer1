@@ -113,6 +113,41 @@ public class DataDuplicadaUtil {
     }
 
     /**
+     * Remove chaves que não correspondem a colunas reais da tabela,
+     * evitando erros de SQL quando o frontend envia campos extras/alias.
+     * 
+     * @param tabela Nome da tabela
+     * @param dados Dados a serem filtrados
+     * @param jdbcTemplate Template JDBC
+     * @return Map apenas com colunas existentes na tabela
+     */
+    private static Map<String, Object> filtrarColunasExistentes(
+            String tabela,
+            Map<String, Object> dados,
+            JdbcTemplate jdbcTemplate) {
+        
+        if (dados == null || dados.isEmpty()) return dados;
+        
+        try {
+            String sql = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?";
+            List<String> colunas = jdbcTemplate.queryForList(sql, String.class, tabela);
+            
+            Map<String, Object> filtrado = new HashMap<>();
+            for (Map.Entry<String, Object> entrada : dados.entrySet()) {
+                if (entrada.getKey() != null && colunas.contains(entrada.getKey())) {
+                    filtrado.put(entrada.getKey(), entrada.getValue());
+                } else {
+                    System.err.println("[DataDuplicadaUtil] Ignorando campo inexistente '" + entrada.getKey() + "' na tabela " + tabela);
+                }
+            }
+            return filtrado;
+        } catch (Exception e) {
+            System.err.println("Erro ao filtrar colunas da tabela " + tabela + ": " + e.getMessage());
+            return dados;
+        }
+    }
+
+    /**
      * Converte data para formato legado DDMMAAAA
      */
     public static String converterParaFormatoLegado(String data) {
@@ -191,6 +226,7 @@ public class DataDuplicadaUtil {
             JdbcTemplate jdbcTemplate) {
         
         Map<String, Object> dadosCompletos = prepararCamposDataDuplicados(tabela, dados, jdbcTemplate);
+        dadosCompletos = filtrarColunasExistentes(tabela, dadosCompletos, jdbcTemplate);
         
         StringBuilder sql = new StringBuilder("INSERT INTO ").append(tabela).append(" (");
         StringBuilder valores = new StringBuilder("VALUES (");
@@ -210,7 +246,6 @@ public class DataDuplicadaUtil {
         }
         
         sql.append(") ").append(valores).append(")");
-        
         return new Object[]{sql.toString(), parametros};
     }
 
@@ -230,6 +265,7 @@ public class DataDuplicadaUtil {
             JdbcTemplate jdbcTemplate) {
         
         Map<String, Object> dadosCompletos = prepararCamposDataDuplicados(tabela, dados, jdbcTemplate);
+        dadosCompletos = filtrarColunasExistentes(tabela, dadosCompletos, jdbcTemplate);
         
         StringBuilder sql = new StringBuilder("UPDATE ").append(tabela).append(" SET ");
         Object[] parametros = new Object[dadosCompletos.size()];

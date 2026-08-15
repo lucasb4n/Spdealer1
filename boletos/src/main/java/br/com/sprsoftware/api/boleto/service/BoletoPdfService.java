@@ -1,6 +1,6 @@
 package br.com.sprsoftware.api.boleto.service;
 
-import br.com.sprsoftware.api.boleto.model.Autoriza;
+import br.com.sprsoftware.api.boleto.model.Boleto;
 import br.com.sprsoftware.api.boleto.repository.AutorizaRepository;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -119,7 +119,7 @@ public class BoletoPdfService {
             + "LIMIT 1";
 
     public byte[] gerarPdf(Long autorizaId) throws Exception {
-        Autoriza autoriza = autorizaRepository.findById(autorizaId)
+        Boleto autoriza = autorizaRepository.findById(autorizaId)
                 .orElseThrow(() -> new RuntimeException("Registro nao encontrado: " + autorizaId));
 
         MapSqlParameterSource params = new MapSqlParameterSource();

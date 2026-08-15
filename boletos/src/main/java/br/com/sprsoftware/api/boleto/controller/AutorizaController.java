@@ -1,6 +1,6 @@
 package br.com.sprsoftware.api.boleto.controller;
 
-import br.com.sprsoftware.api.boleto.model.Autoriza;
+import br.com.sprsoftware.api.boleto.model.Boleto;
 import br.com.sprsoftware.api.boleto.service.AutorizaService;
 import br.com.sprsoftware.api.boleto.service.BancoServiceFactory;
 import br.com.sprsoftware.api.boleto.service.BoletoPdfService;
@@ -38,7 +38,7 @@ public class AutorizaController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
-        Page<Autoriza> result = service.listar(banco, sucesso, numapo, inicio, fim, page, size);
+        Page<Boleto> result = service.listar(banco, sucesso, numapo, inicio, fim, page, size);
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("content", result.getContent());
         response.put("totalElements", result.getTotalElements());
@@ -50,7 +50,7 @@ public class AutorizaController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
-        Optional<Autoriza> opt = service.buscarPorId(id);
+        Optional<Boleto> opt = service.buscarPorId(id);
         if (!opt.isPresent()) {
             return ResponseEntity.notFound().build();
         }

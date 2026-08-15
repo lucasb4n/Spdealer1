@@ -96,7 +96,7 @@ public class VendaPerdidaService {
         String depto = getString(header, "DPPECAS_ORP");
         if (depto == null || depto.trim().isEmpty()) depto = DEP_PADRAO;
 
-        String datahr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String datahr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHmmss"));
         String tipocli = getString(header, "TIPOCLI_ORP");
         if (tipocli == null) tipocli = "F";
         String cgccpf = getString(header, "CGCCPF_CLI");
@@ -114,9 +114,8 @@ public class VendaPerdidaService {
             deleteVenpderPorItem(numeroP, fab, codigo, depto, vendedor);
         }
 
-        jdbc.update("UPDATE orcampp SET MOTIVO_ORPP = ?, QTPERD_ORPP = COALESCE(QTREC_ORPP, 0), " +
-            "CODIGO_MPER = ?, FECHADO_ORPP = 2 WHERE NUMERO_ORPP = ? AND REQUIS_ORPP = ?",
-            motivo, motivo, numeroP, String.format("%08d", seq));
+        jdbc.update("UPDATE orcampp SET MOTIVO_ORPP = ?, FECHADO_ORPP = 2 WHERE NUMERO_ORPP = ? AND REQUIS_ORPP = ?",
+            motivo, numeroP, String.format("%08d", seq));
 
         boolean venpderExiste = checkVenpderExiste(datahr, vendedor, depto, numeroP, fab, codigo);
         if (!venpderExiste) {
@@ -166,8 +165,7 @@ public class VendaPerdidaService {
                 newQtalocKar = qtalocKar.add(qtsol.subtract(qtdev).subtract(qtalocOrpp));
                 newQtalocOrpp = qtsol.subtract(qtdev);
                 newQtfalta = ZERO;
-                jdbc.update("UPDATE orcampp SET MOTIVO_ORPP = NULL, QTPERD_ORPP = 0, " +
-                    "CODIGO_MPER = NULL, QTFALTA_ORPP = 0, ALOCADO_ORPP = 'S', " +
+                jdbc.update("UPDATE orcampp SET MOTIVO_ORPP = NULL, QTFALTA_ORPP = 0, ALOCADO_ORPP = 'S', " +
                     "FECHADO_ORPP = 0 WHERE NUMERO_ORPP = ? AND REQUIS_ORPP = ?",
                     numeroP, String.format("%08d", seq));
             } else {
@@ -177,13 +175,11 @@ public class VendaPerdidaService {
                 newQtfalta = wkQtde;
 
                 if (newQtalocOrpp.compareTo(ZERO) == 0) {
-                    jdbc.update("UPDATE orcampp SET MOTIVO_ORPP = NULL, QTPERD_ORPP = 0, " +
-                        "CODIGO_MPER = NULL, QTFALTA_ORPP = ?, ALOCADO_ORPP = ' ', " +
+                    jdbc.update("UPDATE orcampp SET MOTIVO_ORPP = NULL, QTFALTA_ORPP = ?, ALOCADO_ORPP = ' ', " +
                         "FECHADO_ORPP = 0 WHERE NUMERO_ORPP = ? AND REQUIS_ORPP = ?",
                         newQtfalta, numeroP, String.format("%08d", seq));
                 } else {
-                    jdbc.update("UPDATE orcampp SET MOTIVO_ORPP = NULL, QTPERD_ORPP = 0, " +
-                        "CODIGO_MPER = NULL, QTFALTA_ORPP = ?, QTALOC_ORPP = ?, ALOCADO_ORPP = 'S', " +
+                    jdbc.update("UPDATE orcampp SET MOTIVO_ORPP = NULL, QTFALTA_ORPP = ?, QTALOC_ORPP = ?, ALOCADO_ORPP = 'S', " +
                         "FECHADO_ORPP = 0 WHERE NUMERO_ORPP = ? AND REQUIS_ORPP = ?",
                         newQtfalta, newQtalocOrpp, numeroP, String.format("%08d", seq));
                 }
@@ -230,15 +226,16 @@ public class VendaPerdidaService {
                 "SELECT COUNT(*) FROM orcampp WHERE NUMERO_ORPP = ? AND " +
                 "(FECHADO_ORPP IS NULL OR FECHADO_ORPP < 2)", Integer.class, numeroP) == 0;
 
+            String nota6 = stripStr(numeroP, 6);
             if (todosPerdidos) {
                 jdbc.update("UPDATE orcamp SET FECHADO_ORP = 2, TIPO_ORP = 'O', NOTA_ORP = ? " +
                     "WHERE NUMERO_ORP = ? AND FILIAL_ORP = ?",
-                    numeroP, numeroP, filialP);
+                    nota6, numeroP, filialP);
             } else {
                 String notaAtual = jdbc.queryForObject(
                     "SELECT NOTA_ORP FROM orcamp WHERE NUMERO_ORP = ? AND FILIAL_ORP = ?",
                     String.class, numeroP, filialP);
-                if (notaAtual != null && notaAtual.trim().equals(numeroP)) {
+                if (notaAtual != null && (notaAtual.trim().equals(numeroP) || notaAtual.trim().equals(nota6))) {
                     jdbc.update("UPDATE orcamp SET FECHADO_ORP = 0, NOTA_ORP = NULL " +
                         "WHERE NUMERO_ORP = ? AND FILIAL_ORP = ?", numeroP, filialP);
                 } else {
@@ -326,16 +323,38 @@ public class VendaPerdidaService {
                                 BigDecimal qtnatend, BigDecimal precusto, BigDecimal precopub,
                                 BigDecimal precogar, String item, String motivo,
                                 String modelo, BigDecimal remcusto, int seq) {
+        String datahr12 = stripStr(datahr, 12);
+        String vendedor10 = stripStr(vendedor, 10);
+        String cgc14 = stripStr(cgccpf != null ? cgccpf.replaceAll("\\D", "") : null, 14);
+
         jdbc.update(
             "INSERT INTO vendper (DEP_PER, DATAHR_PER, VENDEDOR_PER, DEPTO_PER, TIPOSER_PER, " +
             "OS_PER, FAB_PER, PRODUTO_PER, DESCR_PER, TIPOPESSOA_PER, CGCCPF_PER, " +
             "QTNATEND_PER, PRECUSTO_PER, PRECOPUB_PER, PRECOGAR_PER, REMCUSTO_PER, " +
             "ITEM_PER, MOTIVO_PER, MODELO_PER, SEQ_PER) " +
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            dep, datahr, vendedor, depto, tiposer, os, fab, produto,
-            descr, tipopessoa, cgccpf,
-            qtnatend, precusto, precopub, precogar, remcusto,
-            item, motivo, modelo, String.format("%03d", seq));
+            stripStr(dep, 3),
+            datahr12,
+            vendedor10,
+            stripStr(depto, 3),
+            stripStr(tiposer, 2),
+            stripStr(os, 8),
+            stripStr(fab, 1),
+            stripStr(produto, 30),
+            stripStr(descr, 50),
+            stripStr(tipopessoa, 1),
+            cgc14,
+            val(qtnatend), val(precusto), val(precopub), val(precogar), val(remcusto),
+            stripStr(item, 30),
+            stripStr(motivo, 3),
+            stripStr(modelo, 15),
+            String.format("%03d", seq));
+    }
+
+    private String stripStr(String s, int maxLen) {
+        if (s == null) return null;
+        String trimmed = s.trim();
+        return trimmed.length() > maxLen ? trimmed.substring(0, maxLen) : trimmed;
     }
 
     private BigDecimal calcularRemcusto(BigDecimal precusto) {

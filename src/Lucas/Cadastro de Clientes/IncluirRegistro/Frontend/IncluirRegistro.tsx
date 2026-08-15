@@ -5,6 +5,7 @@ import CustomerHeader from './components/juridica/CustomerHeader'
 import Tabs from './Tabs'
 import { useNavigate, useLocation } from 'react-router-dom'
 import axios from 'axios'
+import { API_BASE_URL } from 'services/apiConfig'
 
 const IncluirRegistro: React.FC = () => {
   const navigate = useNavigate()
@@ -38,7 +39,7 @@ const IncluirRegistro: React.FC = () => {
     const load = async () => {
       if (!editId) return
       try {
-        const res = await axios.get(`/api/clientes/${editId}`)
+        const res = await axios.get(`${API_BASE_URL}/clientes/${editId}`)
         const r = res.data || {}
 
         setData((prev: any) => {
@@ -65,14 +66,15 @@ const IncluirRegistro: React.FC = () => {
             mappedJuridica[hy] = normalized
           })
 
-          // Garantir que tipopessoa seja mapeado para habilitar seleção correta (c -> CPF, f -> CNPJ)
+          // Garantir que tipopessoa seja mapeado para habilitar seleção correta
+          // Convenção do ERP: 'J' = jurídica/CNPJ, 'F' = física/CPF (legado: 'c' = CNPJ, 'f' = CPF)
           const tpRaw = (r.tipopessoa_cli || r.tipopessoa || r.tipo || '')
           const tp = String(tpRaw).trim().toLowerCase()
-          if (tp === 'c' || tp === 'cpf' || tp === 'pf') {
-            mappedJuridica.tipopessoa_cli = 'c'
+          if (tp === 'f' || tp === 'cpf' || tp === 'pf') {
+            mappedJuridica.tipopessoa_cli = 'F'
             mappedJuridica.tipo = 'CPF'
-          } else if (tp === 'f' || tp === 'cnpj' || tp === 'pj') {
-            mappedJuridica.tipopessoa_cli = 'f'
+          } else if (tp === 'j' || tp === 'cnpj' || tp === 'pj' || tp === 'c') {
+            mappedJuridica.tipopessoa_cli = 'J'
             mappedJuridica.tipo = 'CNPJ'
           } else {
             // mantem qualquer valor já presente ou fallback
@@ -128,10 +130,18 @@ const IncluirRegistro: React.FC = () => {
             if (v === true || v === 1) return true
             if (typeof v === 'string') {
               const s = v.trim().toLowerCase()
-              return s === '1' || s === 'true' || s === 's' || s === 't' || s === 'sim'
+              // convenção do ERP: 'A' (ativo), 'S'/'sim', '1'
+              return s === '1' || s === 'true' || s === 's' || s === 't' || s === 'sim' || s === 'a' || s === 'y' || s === 'yes'
             }
             return false
           }
+
+          // Mapear colunas reais de revenda/consultores para os nomes usados nos campos do formulário (edição)
+          mappedJuridica['clirevenda-cli'] = mappedJuridica['clirevenda-cli'] || toBool(r.revenda_cli)
+          mappedJuridica['vendedor-cli'] = mappedJuridica['vendedor-cli'] || r.cons_pecas_cod_ven || ''
+          mappedJuridica['vendedor1-cli'] = mappedJuridica['vendedor1-cli'] || r.cons_servi_cod_ven || ''
+          mappedJuridica['vendedor2-cli'] = mappedJuridica['vendedor2-cli'] || r.cons_vend_cod_ven || ''
+          mappedJuridica['vendedor3-cli'] = mappedJuridica['vendedor3-cli'] || r.cons_loca_cod_ven || ''
 
           mappedCredito.ativo = mappedCredito.ativo || toBool(r.ativoinativo_cli) || toBool(r.ativo) || false
           mappedCredito.desconto = mappedCredito.desconto || r.percdesc_cli || r.percdesc || ''
@@ -141,9 +151,9 @@ const IncluirRegistro: React.FC = () => {
           mappedCredito.limiteCredito = mappedCredito.limiteCredito || r.limite_credito || r.limiteCredito || r.limcre_cli || r.limcre || ''
           mappedCredito.saldoDisponivel = mappedCredito.saldoDisponivel || r.limite_disponivel || r.limiteDisponivel || r.limite_disponivel || ''
           mappedCredito.condPag = mappedCredito.condPag || r.condpag_cli || r.condpag || r.condicao_pagamento || ''
-          mappedCredito.naNfeAvista = mappedCredito.naNfeAvista || toBool(r.nanfeavista_cli) || toBool(r.naNfeAvista) || toBool(r.na_nfe_avista) || mappedCredito.naNfeAvista || false
+          mappedCredito.naNfeAvista = mappedCredito.naNfeAvista || toBool(r.nfeavista_cli) || toBool(r.nanfeavista_cli) || toBool(r.naNfeAvista) || toBool(r.na_nfe_avista) || mappedCredito.naNfeAvista || false
           mappedCredito.vencimento = mappedCredito.vencimento || toIsoDate(r.vcto_cli) || toIsoDate(r.vcto) || toIsoDate(r.vencimento) || ''
-          mappedCredito.faturarLiquido = mappedCredito.faturarLiquido || toBool(r.faturar_liquido_cli) || toBool(r.faturarLiquido) || false
+          mappedCredito.faturarLiquido = mappedCredito.faturarLiquido || toBool(r.fatliq_cli) || toBool(r.faturar_liquido_cli) || toBool(r.faturarLiquido) || false
           mappedCredito.obsSpc = mappedCredito.obsSpc || r.obs_spc_cli || r.obsSpc || r.observacoes_spc || ''
           mappedCredito.referenciasBancos = mappedCredito.referenciasBancos || r.referencias_bancos_cli || r.referencias_bancos || r.referenciasBancos || ''
           mappedCredito.referenciasComerciais = mappedCredito.referenciasComerciais || r.referencias_comerciais_cli || r.referencias_comerciais || r.referenciasComerciais || ''
@@ -193,10 +203,10 @@ const IncluirRegistro: React.FC = () => {
           delete payload.compl_cli
         }
         // usar PUT para atualização quando estamos no modo edição
-        await axios.put(`/api/clientes/${editId}`, payload)
+        await axios.put(`${API_BASE_URL}/clientes/${editId}`, payload)
         alert('Cliente atualizado com sucesso')
       } else {
-        const res = await axios.post('/api/clientes', payload)
+        const res = await axios.post(`${API_BASE_URL}/clientes`, payload)
         // se criado, navegar para edição do novo registro
         if (res && res.data && res.data.codigo_cli) {
           navigate(`/cadastros/clientes/incluir-registro?editId=${res.data.codigo_cli}`)

@@ -40,6 +40,8 @@ public class AsaasIntegrationService implements BancoIntegrationService {
         String docNumeros = StrUtils.somenteNumeros(documento);
         if (docNumeros == null || docNumeros.length() < 11) {
             documento = "11222333000181";
+        } else {
+            documento = docNumeros;
         }
 
         String customerId = buscarOuCriarCustomer(documento, nome, endereco);

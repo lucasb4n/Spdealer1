@@ -72,9 +72,12 @@ public class ContasPagarController {
                     p.status_pag,
                     p.dpto_pag,
                     p.notaent_pag,
-                    f.nome_cli AS fornecedor_nome
+                    p.tipopessoa_pag,
+                    f.nome_cli AS fornecedor_nome,
+                    b.nomefan_bco
                 FROM pagar p
                 LEFT JOIN clientes f ON f.cliforn_cli = 'F' AND f.codigo_cli = p.codigo_pag
+                LEFT JOIN bancos b ON p.banco_pag = b.codigo_bco
                 WHERE (p.status_pag IS NULL OR p.status_pag = '')
                 """);
 
@@ -177,6 +180,7 @@ public class ContasPagarController {
                     parcela_pag,
                     tipodoc_pag,
                     tpcob_pag,
+                    tipopessoa_pag,
                     cgccpf_pag,
                     dtmovi_pag,      -- Campo principal
                     dtemissi_pag,    -- Campo principal
@@ -236,19 +240,26 @@ public class ContasPagarController {
             Map<String, Object> dadosCompletos = new HashMap<>(dados);
             dadosCompletos.putIfAbsent("filial_pag", "001");
             dadosCompletos.putIfAbsent("parcela_pag", "001");
-            dadosCompletos.putIfAbsent("status_pag", "A");
-            dadosCompletos.putIfAbsent("vlrpag_pag", 0);
-            dadosCompletos.putIfAbsent("vlrdesc_pag", 0);
-            dadosCompletos.putIfAbsent("vlracre_pag", 0);
 
-            // Calcular saldo automaticamente
-            double valorTotal = ((Number) dadosCompletos.getOrDefault("vlrdup_pag", 0)).doubleValue();
-            double valorPago = ((Number) dadosCompletos.getOrDefault("vlrpag_pag", 0)).doubleValue();
-            double desconto = ((Number) dadosCompletos.getOrDefault("vlrdesc_pag", 0)).doubleValue();
-            double acrescimo = ((Number) dadosCompletos.getOrDefault("vlracre_pag", 0)).doubleValue();
+            // cgccpf_pag é decimal — remover máscaras (pontos, barras, traços)
+            if (dadosCompletos.get("cgccpf_pag") != null) {
+                String cpfCnpj = String.valueOf(dadosCompletos.get("cgccpf_pag")).replaceAll("\\D", "");
+                dadosCompletos.put("cgccpf_pag", cpfCnpj);
+            }
+
+            // Calcular saldo automaticamente (valores null são tratados como 0)
+            double valorTotal = valorNumerico(dadosCompletos.get("vlrdup_pag"));
+            double valorPago = valorNumerico(dadosCompletos.get("vlrpag_pag"));
+            double desconto = valorNumerico(dadosCompletos.get("vlrdesc_pag"));
+            double acrescimo = valorNumerico(dadosCompletos.get("vlracre_pag"));
             
             double saldo = Math.max(0, valorTotal + acrescimo - valorPago - desconto);
             dadosCompletos.put("vlrsal_pag", saldo);
+
+            // Normalizar campos opcionais para o padrão do banco (NULL quando não informado)
+            normalizarValoresNulos(dadosCompletos);
+            // Deriva tipopessoa_pag (F/J) pela quantidade de dígitos do documento quando não enviado
+            derivarTipopessoa(dadosCompletos);
 
             // Usar função genérica para inserir com datas duplicadas
             Object[] sqlResult = DataDuplicadaUtil.gerarInsertComDatasDuplicadas("pagar", dadosCompletos, jdbcTemplate);
@@ -286,18 +297,33 @@ public class ContasPagarController {
             @PathVariable Integer id, 
             @RequestBody Map<String, Object> dados) {
         try {
-            // Recalcular saldo se valores foram alterados
+            // Recalcular saldo se valores foram alterados (valores null tratados como 0)
             if (dados.containsKey("vlrdup_pag") || dados.containsKey("vlrpag_pag") || 
                 dados.containsKey("vlrdesc_pag") || dados.containsKey("vlracre_pag")) {
                 
-                double valorTotal = ((Number) dados.getOrDefault("vlrdup_pag", 0)).doubleValue();
-                double valorPago = ((Number) dados.getOrDefault("vlrpag_pag", 0)).doubleValue();
-                double desconto = ((Number) dados.getOrDefault("vlrdesc_pag", 0)).doubleValue();
-                double acrescimo = ((Number) dados.getOrDefault("vlracre_pag", 0)).doubleValue();
+                double valorTotal = valorNumerico(dados.get("vlrdup_pag"));
+                double valorPago = valorNumerico(dados.get("vlrpag_pag"));
+                double desconto = valorNumerico(dados.get("vlrdesc_pag"));
+                double acrescimo = valorNumerico(dados.get("vlracre_pag"));
                 
                 double saldo = Math.max(0, valorTotal + acrescimo - valorPago - desconto);
                 dados.put("vlrsal_pag", saldo);
             }
+
+            // cgccpf_pag é decimal — remover máscaras (pontos, barras, traços)
+            if (dados.get("cgccpf_pag") != null) {
+                String cpfCnpj = String.valueOf(dados.get("cgccpf_pag")).replaceAll("\\D", "");
+                if (cpfCnpj.isEmpty()) {
+                    dados.put("cgccpf_pag", null);
+                } else {
+                    dados.put("cgccpf_pag", cpfCnpj);
+                }
+            }
+
+            // Normalizar campos opcionais para o padrão do banco (NULL quando não informado)
+            normalizarValoresNulos(dados);
+            // Deriva tipopessoa_pag (F/J) pela quantidade de dígitos do documento
+            derivarTipopessoa(dados);
 
             // Usar função genérica para atualizar com datas duplicadas
             Object[] sqlResult = DataDuplicadaUtil.gerarUpdateComDatasDuplicadas(
@@ -579,6 +605,75 @@ public class ContasPagarController {
                 "sucesso", false,
                 "erro", "Erro ao atualizar: " + e.getMessage()
             ));
+        }
+    }
+
+    /**
+     * Converte valor numérico de forma segura, tratando null/vazio como 0
+     */
+    private double valorNumerico(Object valor) {
+        if (valor == null) return 0;
+        if (valor instanceof String) {
+            String s = (String) valor;
+            if (s.trim().isEmpty()) return 0;
+            try { return Double.parseDouble(s.trim()); } catch (NumberFormatException e) { return 0; }
+        }
+        if (valor instanceof Number) {
+            return ((Number) valor).doubleValue();
+        }
+        try { return Double.parseDouble(valor.toString().trim()); } catch (NumberFormatException e) { return 0; }
+    }
+
+    /**
+     * Deriva tipopessoa_pag quando não informado, usando a quantidade de
+     * dígitos do documento: 11 = F (pessoa física), 14 = J (jurídica).
+     * Mantém o padrão dos registros existentes (F/J preenchido).
+     */
+    private void derivarTipopessoa(Map<String, Object> dados) {
+        Object tipo = dados.get("tipopessoa_pag");
+        boolean tipoVazio = tipo == null
+                || (tipo instanceof String && ((String) tipo).trim().isEmpty());
+        if (!tipoVazio) return;
+
+        Object doc = dados.get("cgccpf_pag");
+        if (doc == null) return;
+        String limpo = String.valueOf(doc).replaceAll("\\D", "");
+        if (limpo.length() == 11) {
+            dados.put("tipopessoa_pag", "F");
+        } else if (limpo.length() >= 14) {
+            dados.put("tipopessoa_pag", "J");
+        }
+    }
+
+    /**
+     * Normaliza campos opcionais para o padrão do banco:
+     * campos monetários com valor nulo/vazio/0 são salvos como NULL
+     * (conforme registros existentes), nunca como 0.
+     * dpto_pag vazio também é salvo como NULL.
+     */
+    private void normalizarValoresNulos(Map<String, Object> dados) {
+        String[] camposMonetarios = {
+            "vlrdev_pag", "vlrpag_pag", "vlracre_pag", "vlrdesc_pag",
+            "vlrir_pag", "vlriss_pag", "vlrpis_pag", "vlrcofins_pag", "vlrcsll_pag"
+        };
+        for (String campo : camposMonetarios) {
+            if (dados.containsKey(campo)) {
+                Object valor = dados.get(campo);
+                boolean vazio = (valor == null)
+                        || (valor instanceof String && ((String) valor).trim().isEmpty())
+                        || (valor instanceof Number && ((Number) valor).doubleValue() == 0);
+                if (vazio) {
+                    dados.put(campo, null);
+                }
+            }
+        }
+        if (dados.containsKey("dpto_pag")) {
+            Object valor = dados.get("dpto_pag");
+            boolean vazio = (valor == null)
+                    || (valor instanceof String && ((String) valor).trim().isEmpty());
+            if (vazio) {
+                dados.put("dpto_pag", null);
+            }
         }
     }
 }

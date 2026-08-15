@@ -2,8 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  faFileInvoiceDollar,
+  faPlus,
   faPencil,
   faBan,
+  faExclamationTriangle,
 } from '@fortawesome/free-solid-svg-icons';
 import { AgGridTable } from 'components/AgGridTable/AgGridTable';
 import PagarFormModal from 'components/Modal/PagarFormModal';
@@ -21,6 +24,67 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
+`;
+
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 20px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+`;
+
+const Title = styled.h1`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 28px;
+  color: #1f2937;
+  margin: 0;
+
+  svg {
+    color: #dc2626;
+  }
+`;
+
+const HeaderActions = styled.div`
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+`;
+
+const Button = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #dc2626;
+  color: white;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: #b91c1c;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 `;
 
 // ============= TIPOS =============
@@ -44,6 +108,7 @@ interface ContaPagar {
   cgccpf_pag?: string;
   tpcob_pag?: string;
   banco_pag?: string;
+  nomefan_bco?: string; // Nome do banco (via JOIN)
   dtemissi_pag?: string;
   dtmovi_pag?: string;
   dtvenci_pag?: string;
@@ -247,6 +312,98 @@ const FooterInfo = styled.div`
   padding: 0 20px 20px;
 `;
 
+const ConfirmOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1200;
+  animation: fadeIn 0.2s ease-in-out;
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+`;
+
+const ConfirmContainer = styled.div`
+  background: white;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 480px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+`;
+
+const ConfirmHeader = styled.div`
+  padding: 16px 20px;
+  background-color: #fee2e2;
+  border-bottom: 1px solid #fca5a5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #991b1b;
+`;
+
+const ConfirmBody = styled.div`
+  padding: 20px;
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.5;
+`;
+
+const ConfirmCard = styled.div`
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+`;
+
+const ConfirmFooter = styled.div`
+  padding: 14px 20px;
+  background-color: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+`;
+
+const BtnCancelModal = styled.button`
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #374151;
+  font-weight: 600;
+  cursor: pointer;
+  &:hover { background: #f3f4f6; }
+`;
+
+const BtnConfirmModal = styled.button`
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  background: #ef4444;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  &:hover { background: #dc2626; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+`;
+
 // ============= COMPONENTE PRINCIPAL =============
 const PagarListPage: React.FC = () => {
   // ============= ESTADOS =============
@@ -279,6 +436,11 @@ const PagarListPage: React.FC = () => {
   const [selectedConta, setSelectedConta] = useState<ContaPagar | null>(null);
   const [departamentos, setDepartamentos] = useState<Array<{ codigo: string; descricao: string }>>([]);
   const [tiposDocumento, setTiposDocumento] = useState<Array<{ codigo: string; descricao: string }>>([]);
+
+  // Confirmation Modal
+  const [showConfirmCancelModal, setShowConfirmCancelModal] = useState(false);
+  const [contaParaCancelar, setContaParaCancelar] = useState<ContaPagar | null>(null);
+  const [isCanceling, setIsCanceling] = useState(false);
 
   // ============= LIFECYCLE =============
   useEffect(() => {
@@ -602,37 +764,51 @@ const PagarListPage: React.FC = () => {
 
   // ============= HANDLERS - MODAL =============
 
+  const handleNewConta = () => {
+    setModalMode('create');
+    setSelectedConta(null);
+    setIsModalOpen(true);
+  };
+
   const handleEditConta = (conta: ContaPagar) => {
     setModalMode('edit');
     setSelectedConta(conta);
     setIsModalOpen(true);
   };
 
-  const handleCancelarConta = async (conta: ContaPagar) => {
-    const confirmed = window.confirm(
-      'Tem certeza que deseja cancelar esta conta?'
-    );
-    if (confirmed) {
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/pagar/${conta.pagar_id}`,
-          {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              ...conta,
-              status_pag: 'C',
-            }),
-          }
-        );
-        if (response.ok) {
-          loadContas();
-          alert('Conta cancelada com sucesso!');
+  const handleCancelarConta = (conta: ContaPagar) => {
+    setContaParaCancelar(conta);
+    setShowConfirmCancelModal(true);
+  };
+
+  const confirmarCancelamento = async () => {
+    if (!contaParaCancelar) return;
+    setIsCanceling(true);
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/pagar/${contaParaCancelar.pagar_id}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...contaParaCancelar,
+            status_pag: 'C',
+          }),
         }
-      } catch (error) {
-        console.error('Erro ao cancelar conta:', error);
-        alert('Erro ao cancelar conta');
+      );
+      if (response.ok) {
+        setShowConfirmCancelModal(false);
+        setContaParaCancelar(null);
+        loadContas();
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        alert(errorData.mensagem || 'Erro ao cancelar conta');
       }
+    } catch (error) {
+      console.error('Erro ao cancelar conta:', error);
+      alert('Erro ao cancelar conta');
+    } finally {
+      setIsCanceling(false);
     }
   };
 
@@ -829,6 +1005,11 @@ const PagarListPage: React.FC = () => {
       cellRenderer: (params: any) => params.data?.notaent_pag === 'TOTAIS:' ? '' : params.value,
     },
     {
+      field: 'nomefan_bco',
+      headerName: 'Banco',
+      width: 140,
+    },
+    {
       field: 'dpto_pag',
       headerName: 'Departamento',
       width: 140,
@@ -989,6 +1170,19 @@ const PagarListPage: React.FC = () => {
   return (
     <Container>
 
+      {/* HEADER */}
+      <Header>
+        <Title>
+          <FontAwesomeIcon icon={faFileInvoiceDollar} />
+          Contas a Pagar
+        </Title>
+        <HeaderActions>
+          <Button onClick={handleNewConta}>
+            <FontAwesomeIcon icon={faPlus} />
+            Nova Conta
+          </Button>
+        </HeaderActions>
+      </Header>
 
       {/* KPI CARDS - VENCIDOS + A VENCER */}
       <KPISection>
@@ -1081,7 +1275,7 @@ const PagarListPage: React.FC = () => {
         Total: {filteredContas.length} registro(s)
       </FooterInfo>
 
-      {/* MODAL */}
+      {/* MODAL EDIT / CREATE */}
       {isModalOpen && (
         <PagarFormModal
           mode={modalMode}
@@ -1089,6 +1283,34 @@ const PagarListPage: React.FC = () => {
           onClose={handleCloseModal}
           onSave={handleSaveConta}
         />
+      )}
+
+      {/* MODAL DE CONFIRMAÇÃO DE CANCELAMENTO */}
+      {showConfirmCancelModal && contaParaCancelar && (
+        <ConfirmOverlay onClick={() => setShowConfirmCancelModal(false)}>
+          <ConfirmContainer onClick={e => e.stopPropagation()}>
+            <ConfirmHeader>
+              <FontAwesomeIcon icon={faExclamationTriangle} style={{ color: '#dc2626' }} />
+              Confirmar Cancelamento
+            </ConfirmHeader>
+            <ConfirmBody>
+              <p style={{ margin: 0 }}>Tem certeza que deseja cancelar esta conta a pagar?</p>
+              <ConfirmCard>
+                <div><strong>Documento:</strong> {contaParaCancelar.notaent_pag || contaParaCancelar.numdup_pag || contaParaCancelar.pagar_id}</div>
+                <div><strong>Fornecedor:</strong> {contaParaCancelar.fornecedor_nome || contaParaCancelar.codigo_pag}</div>
+                <div><strong>Valor Saldo:</strong> {formatarMoeda(contaParaCancelar.vlrsal_pag ?? contaParaCancelar.vlrdup_pag)}</div>
+              </ConfirmCard>
+            </ConfirmBody>
+            <ConfirmFooter>
+              <BtnCancelModal onClick={() => setShowConfirmCancelModal(false)}>
+                Voltar
+              </BtnCancelModal>
+              <BtnConfirmModal onClick={confirmarCancelamento} disabled={isCanceling}>
+                {isCanceling ? 'Cancelando...' : 'Sim, Cancelar Conta'}
+              </BtnConfirmModal>
+            </ConfirmFooter>
+          </ConfirmContainer>
+        </ConfirmOverlay>
       )}
     </Container>
   );

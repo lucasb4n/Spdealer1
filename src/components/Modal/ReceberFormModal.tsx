@@ -26,6 +26,7 @@ interface ContaReceber {
   dtvenci_rec: string;
   dtpagi_rec: string;
   banco_rec: string;
+  codigo_bol?: string; // Código do boleto
   nossonumero_rec: string;
   vlrdup_rec: number;
   vlrdesc_rec: number;
@@ -556,6 +557,7 @@ const ReceberFormModal: React.FC<ReceberFormModalProps> = ({
     dtvenci_rec: '',
     dtpagi_rec: '',
     banco_rec: '',
+    codigo_bol: '',
     nossonumero_rec: '',
     vlrdup_rec: 0,
     vlrdesc_rec: 0,
@@ -588,6 +590,16 @@ const ReceberFormModal: React.FC<ReceberFormModalProps> = ({
   const [departamentos, setDepartamentos] = useState<any[]>([]);
   const [tiposCobranca, setTiposCobranca] = useState<any[]>([]);
   const [bancos, setBancos] = useState<any[]>([]);
+
+  // ============= ESTADO - PESQUISA DE CLIENTE (F4) =============
+  const [showClienteModal, setShowClienteModal] = useState(false);
+  const [clientes, setClientes] = useState<any[]>([]);
+  const [loadingClientes, setLoadingClientes] = useState(false);
+  const [clienteSearch, setClienteSearch] = useState('');
+  const [clienteSort, setClienteSort] = useState<{
+    field: string;
+    dir: 'asc' | 'desc';
+  }>({ field: 'nome_cli', dir: 'asc' });
 
   // ============= LIFECYCLE =============
   // 1. PRIMEIRO: Carregar listas dinâmicas ao montar (SEMPRE)
@@ -870,6 +882,67 @@ const ReceberFormModal: React.FC<ReceberFormModalProps> = ({
     }
   };
 
+  // ============= PESQUISA DE CLIENTE (F4) =============
+  const openClienteModal = async () => {
+    setShowClienteModal(true);
+    setLoadingClientes(true);
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/clientes?cliforn_cli=C&limit=5000`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        const list = Array.isArray(data) ? data : data.data ?? [];
+        // Filtrar apenas clientes (cliforn_cli = 'C' ou 'A')
+        setClientes(
+          list.filter(
+            (c: any) =>
+              !c.cliforn_cli ||
+              String(c.cliforn_cli).toUpperCase() === 'C' ||
+              String(c.cliforn_cli).toUpperCase() === 'A'
+          )
+        );
+      } else {
+        setClientes([]);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar clientes:', error);
+      setClientes([]);
+    } finally {
+      setLoadingClientes(false);
+    }
+  };
+
+  const handleClienteSelect = (row: any) => {
+    if (!row) return;
+    handleInputChange('codigo_rec', String(row.codigo_cli || ''));
+    handleInputChange('cgccpf_rec', String(row.cgccpf_cli || row.cpf_cnpj_cli || '').replace(/\D/g, ''));
+    setShowClienteModal(false);
+    setClienteSearch('');
+  };
+
+  const handleClienteSort = (field: string) => {
+    setClienteSort(prev => ({
+      field,
+      dir: prev.field === field && prev.dir === 'asc' ? 'desc' : 'asc',
+    }));
+  };
+
+  const getClientesOrdenados = () => {
+    const term = clienteSearch.toLowerCase().trim();
+    const filtered = clientes.filter((c: any) => {
+      if (!term) return true;
+      return String(c.nome_cli || '').toLowerCase().includes(term);
+    });
+    const { field, dir } = clienteSort;
+    return [...filtered].sort((a: any, b: any) => {
+      const va = String(a[field] ?? '').toLocaleLowerCase();
+      const vb = String(b[field] ?? '').toLocaleLowerCase();
+      const cmp = va.localeCompare(vb, 'pt-BR', { numeric: true });
+      return dir === 'asc' ? cmp : -cmp;
+    });
+  };
+
   // ============= RENDER =============
   const title =
     mode === 'create' ? 'Nova Conta a Receber' : 'Editar Contas a Receber';
@@ -942,7 +1015,14 @@ const ReceberFormModal: React.FC<ReceberFormModalProps> = ({
                 maxLength={7}
                 value={formData.codigo_rec || ''}
                 onChange={e => handleInputChange('codigo_rec', e.target.value)}
-                placeholder="Código"
+                onKeyDown={e => {
+                  if (e.key === 'F4') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openClienteModal();
+                  }
+                }}
+                placeholder="Código (F4 pesquisa)"
                 $error={!!errors.codigo_rec}
               />
               {errors.codigo_rec && (
@@ -1234,7 +1314,7 @@ const ReceberFormModal: React.FC<ReceberFormModalProps> = ({
                 <option value="">Selecione...</option>
                 {bancos.map((banco: any) => {
                   const val = banco.codigo || banco.codigo_bco || banco.id || banco.cod;
-                  const label = banco.descricao || banco.nomefan_bco || banco.nome || String(val);
+                  const label = banco.descricao || banco.nome_bco || banco.nomefan_bco || banco.nome || String(val);
                   return (
                     <option key={val} value={val}>
                       {label}
@@ -1253,6 +1333,18 @@ const ReceberFormModal: React.FC<ReceberFormModalProps> = ({
                   handleInputChange('nossonumero_rec', e.target.value)
                 }
                 placeholder="Nosso número"
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label>Cód. Boleto</Label>
+              <Input
+                type="text"
+                value={formData.codigo_bol || ''}
+                onChange={e =>
+                  handleInputChange('codigo_bol', e.target.value)
+                }
+                placeholder="Código do boleto"
               />
             </FormGroup>
 
@@ -1441,11 +1533,208 @@ const ReceberFormModal: React.FC<ReceberFormModalProps> = ({
             </HelpContent>
           </HelpPopup>
         </>
+)}
+
+      {/* MODAL PESQUISA DE CLIENTE (F4) */}
+      {showClienteModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.6)',
+            zIndex: 2000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          onClick={() => setShowClienteModal(false)}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 12,
+              width: '90vw',
+              maxWidth: 700,
+              maxHeight: '80vh',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div
+              style={{
+                padding: '1rem 1.25rem',
+                borderBottom: '1px solid #e5e7eb',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <h3
+                style={{
+                  margin: 0,
+                  fontSize: '1rem',
+                  fontWeight: 700,
+                  color: '#1e293b',
+                }}
+              >
+                Pesquisar Cliente
+              </h3>
+              <button
+                onClick={() => setShowClienteModal(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '1.5rem',
+                  cursor: 'pointer',
+                  color: '#64748b',
+                  lineHeight: 1,
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <div style={{ padding: '0 1.25rem' }}>
+              <div
+                style={{
+                  marginBottom: '12px',
+                  marginTop: '12px',
+                  display: 'flex',
+                  gap: '8px',
+                  alignItems: 'center',
+                }}
+              >
+                <input
+                  type="text"
+                  placeholder="🔍 Pesquisar por nome..."
+                  value={clienteSearch}
+                  onChange={e => setClienteSearch(e.target.value)}
+                  style={{
+                    flex: 1,
+                    padding: '10px 12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                  }}
+                />
+                {clienteSearch && (
+                  <button
+                    onClick={() => setClienteSearch('')}
+                    style={{
+                      padding: '10px 16px',
+                      background: '#f3f4f6',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                    }}
+                  >
+                    Limpar
+                  </button>
+                )}
+              </div>
+              {loadingClientes ? (
+                <div style={{ padding: '20px', textAlign: 'center', color: '#6b7280' }}>
+                  Carregando clientes...
+                </div>
+              ) : (
+                <>
+                  <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '10px' }}>
+                    {clientes.length > 0
+                      ? `Exibindo ${getClientesOrdenados().length} de ${clientes.length} cliente(s)`
+                      : 'Nenhum cliente encontrado'}
+                  </div>
+                  <table
+                    style={{
+                      width: '100%',
+                      borderCollapse: 'collapse',
+                      fontSize: '14px',
+                    }}
+                  >
+                    <thead>
+                      <tr style={{ background: '#f3f4f6', color: '#374151' }}>
+                        <th
+                          onClick={() => handleClienteSort('codigo_cli')}
+                          style={{ padding: '8px 12px', textAlign: 'left', width: 110, cursor: 'pointer', userSelect: 'none', textDecoration: clienteSort.field === 'codigo_cli' ? 'underline' : 'none' }}
+                          title="Clique para ordenar"
+                        >
+                          Código {clienteSort.field === 'codigo_cli' && (clienteSort.dir === 'asc' ? '▲' : '▼')}
+                        </th>
+                        <th
+                          onClick={() => handleClienteSort('nome_cli')}
+                          style={{ padding: '8px 12px', textAlign: 'left', cursor: 'pointer', userSelect: 'none', textDecoration: clienteSort.field === 'nome_cli' ? 'underline' : 'none' }}
+                          title="Clique para ordenar"
+                        >
+                          Nome {clienteSort.field === 'nome_cli' && (clienteSort.dir === 'asc' ? '▲' : '▼')}
+                        </th>
+                        <th
+                          onClick={() => handleClienteSort('cpf_cnpj_cli')}
+                          style={{ padding: '8px 12px', textAlign: 'left', cursor: 'pointer', userSelect: 'none', textDecoration: clienteSort.field === 'cpf_cnpj_cli' ? 'underline' : 'none' }}
+                          title="Clique para ordenar"
+                        >
+                          Documento {clienteSort.field === 'cpf_cnpj_cli' && (clienteSort.dir === 'asc' ? '▲' : '▼')}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {getClientesOrdenados()
+                        .slice(0, 200)
+                        .map((c: any) => (
+                          <tr
+                            key={c.codigo_cli}
+                            onClick={() => handleClienteSelect(c)}
+                            style={{
+                              cursor: 'pointer',
+                              borderBottom: '1px solid #e5e7eb',
+                            }}
+                            onMouseEnter={e =>
+                              (e.currentTarget.style.background = '#f9fafb')
+                            }
+                            onMouseLeave={e =>
+                              (e.currentTarget.style.background = 'transparent')
+                            }
+                          >
+                            <td style={{ padding: '8px 12px' }}>{c.codigo_cli}</td>
+                            <td style={{ padding: '8px 12px' }}>{c.nome_cli}</td>
+                            <td style={{ padding: '8px 12px' }}>{c.cpf_cnpj_cli || c.cgccpf_cli || ''}</td>
+                          </tr>
+                        ))}
+                      {getClientesOrdenados().length === 0 && (
+                        <tr>
+                          <td
+                            colSpan={3}
+                            style={{ padding: '20px', textAlign: 'center', color: '#ef4444' }}
+                          >
+                            Nenhum cliente encontrado
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </>
+              )}
+            </div>
+            <div
+              style={{
+                padding: '0.75rem 1.25rem',
+                borderTop: '1px solid #e5e7eb',
+                textAlign: 'right',
+                fontSize: '13px',
+                color: '#6b7280',
+              }}
+            >
+              Clique em um cliente para selecionar
+            </div>
+          </div>
+        </div>
       )}
     </ModalOverlay>
   );
 };
-
 export default ReceberFormModal;
 
 

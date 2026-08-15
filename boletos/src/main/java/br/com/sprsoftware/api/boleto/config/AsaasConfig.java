@@ -21,7 +21,7 @@ public class AsaasConfig {
         try {
             Map<String, Object> row = jdbcTemplate.queryForMap(
                     "SELECT apikey, ambiente " +
-                    "FROM bancos WHERE codigo_bco = '461' LIMIT 1");
+                    "FROM bancos WHERE codigo_bco IN ('461', '003') OR nomefan_bco LIKE '%ASAAS%' ORDER BY FIELD(codigo_bco, '461', '003') LIMIT 1");
 
             String apiKey = toString(row.get("apikey"));
             String ambiente = toString(row.get("ambiente"));

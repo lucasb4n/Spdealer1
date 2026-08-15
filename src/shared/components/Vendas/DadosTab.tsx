@@ -2,7 +2,6 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Controller } from 'react-hook-form';
 import { AgGridReact } from 'ag-grid-react';
 import { ColDef, GridApi } from 'ag-grid-community';
-import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { Parcela, TIPO_ORP_OPTIONS, ItemOrcamento } from './OrcamentoTypes';
 import Localizar from 'components/Localizar';
@@ -40,6 +39,7 @@ interface DadosTabProps {
   numero?: string;
   itens?: ItemOrcamento[];
   onRecalcularItensPorNivel?: (percNiv: number) => void;
+  onVirarPedido?: () => void;
 }
 
 const formatCurrency = (value: number | null | undefined): string => {
@@ -77,6 +77,7 @@ export const DadosTab: React.FC<DadosTabProps> = ({
   numero,
   itens,
   onRecalcularItensPorNivel,
+  onVirarPedido,
 }) => {
   const [showOrcamentoModal, setShowOrcamentoModal] = useState(false);
   const [orcamentoListData, setOrcamentoListData] = useState<any[]>([]);
@@ -770,7 +771,7 @@ export const DadosTab: React.FC<DadosTabProps> = ({
                 </svg>
                 Imprimir
               </button>
-              <button type="button" className="orcamento-btn orcamento-btn--secondary" style={{ background: '#d97706', color: '#fff' }}>
+              <button type="button" className="orcamento-btn orcamento-btn--secondary" style={{ background: '#d97706', color: '#fff' }} onClick={onVirarPedido} disabled={disabled}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
                 </svg>

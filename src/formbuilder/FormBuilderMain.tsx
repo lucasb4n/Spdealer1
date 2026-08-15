@@ -19,7 +19,6 @@ import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { AgGridReact } from 'ag-grid-react';
-import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { ContextMenu } from './components/ContextMenu';
 import DayPilotCalendarWrapper, { CalendarEvent } from './components/DayPilotCalendarWrapper';
@@ -1835,7 +1834,6 @@ export const FormBuilderMain: React.FC = () => {
 import React, { useState, useEffect, useMemo } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { Modal } from 'react-bootstrap';
-import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import './${capitalizedName}.css';
 

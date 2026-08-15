@@ -108,21 +108,7 @@ export class ClientesService {
       }
 
       const response = await axios.get(`${API_BASE_URL}/clientes?${params.toString()}`);
-
-      // Calcular status para cada cliente
-      const clientesComStatus = await Promise.all(
-        response.data.map(async (cliente: Cliente) => ({
-          ...cliente,
-          status: await this.calculateClienteStatus(cliente.codigo_cli)
-        }))
-      );
-
-      // Filtrar por status se especificado
-      if (filter?.status) {
-        return clientesComStatus.filter(cliente => cliente.status === filter.status);
-      }
-
-      return clientesComStatus;
+      return response.data;
     } catch (error) {
       console.error('Erro ao buscar clientes:', error);
       throw new Error('Falha ao carregar clientes');

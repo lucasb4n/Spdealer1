@@ -14,9 +14,9 @@ public class AsaasApiClient {
     private boolean mockMode;
 
     public AsaasApiClient(String apiKey, String ambiente) {
-        this.apiKey = apiKey;
-        this.mockMode = StrUtils.isNullOrEmpty(apiKey);
-        if ("producao".equalsIgnoreCase(ambiente)) {
+        this.apiKey = apiKey != null ? apiKey.trim() : null;
+        this.mockMode = StrUtils.isNullOrEmpty(this.apiKey);
+        if (ambiente != null && ("producao".equalsIgnoreCase(ambiente.trim()) || "p".equalsIgnoreCase(ambiente.trim()) || "prod".equalsIgnoreCase(ambiente.trim()))) {
             baseUrl = URL_PRODUCAO;
         } else {
             baseUrl = URL_SANDBOX;
@@ -27,6 +27,7 @@ public class AsaasApiClient {
         LinkedHashMap<String, String> h = new LinkedHashMap<>();
         h.put("access_token", apiKey);
         h.put("Content-Type", "application/json");
+        h.put("User-Agent", "SPDealer");
         return h;
     }
 
@@ -34,7 +35,12 @@ public class AsaasApiClient {
         HttpRequest.Response resp = new HttpRequest(baseUrl + path)
                 .method("GET")
                 .headers(getHeaders())
+                .timeout(5000)
                 .send();
+        if (resp.getCode() >= 400) {
+            String errorMsg = parseAsaasError(resp.getBody());
+            throw new RuntimeException(errorMsg);
+        }
         return resp.getBody();
     }
 
@@ -43,7 +49,12 @@ public class AsaasApiClient {
                 .method("POST")
                 .headers(getHeaders())
                 .body(body)
+                .timeout(5000)
                 .send();
+        if (resp.getCode() >= 400) {
+            String errorMsg = parseAsaasError(resp.getBody());
+            throw new RuntimeException(errorMsg);
+        }
         return resp.getBody();
     }
 
@@ -52,7 +63,34 @@ public class AsaasApiClient {
                 .method("DELETE")
                 .headers(getHeaders())
                 .send();
+        if (resp.getCode() >= 400) {
+            String errorMsg = parseAsaasError(resp.getBody());
+            throw new RuntimeException(errorMsg);
+        }
         return resp.getBody();
+    }
+
+    private String parseAsaasError(String responseBody) {
+        if (responseBody == null || responseBody.trim().isEmpty()) {
+            return "Erro sem resposta da API Asaas";
+        }
+        try {
+            Map<String, Object> map = JsonUtils.toMap(responseBody);
+            Object errorsObj = map.get("errors");
+            if (errorsObj instanceof List && !((List<?>) errorsObj).isEmpty()) {
+                Object first = ((List<?>) errorsObj).get(0);
+                if (first instanceof Map) {
+                    Map<?, ?> errMap = (Map<?, ?>) first;
+                    String desc = (String) errMap.get("description");
+                    String code = (String) errMap.get("code");
+                    if (desc != null && !desc.trim().isEmpty()) {
+                        return "Erro Asaas (" + (code != null ? code : "ERRO") + "): " + desc;
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return "Erro Asaas: " + responseBody;
     }
 
     public Map<String, Object> criarCustomer(String nome, String cpfCnpj, String endereco) throws Exception {
@@ -83,7 +121,7 @@ public class AsaasApiClient {
         if (externalReference != null) {
             body.put("externalReference", externalReference);
         }
-        String json = post("/lean/payments", JsonUtils.serialize(body));
+        String json = post("/payments", JsonUtils.serialize(body));
         return JsonUtils.toMap(json);
     }
 

@@ -29,6 +29,8 @@ interface ContaReceber {
   dtvenci_rec: string;
   dtpagi_rec: string;
   banco_rec: string;
+  codigo_bol?: string; // Código do boleto
+  nomefan_bco?: string; // Nome do banco (via JOIN receber.banco_rec = bancos.codigo_bco)
   nossonumero_rec: string;
   vlrdup_rec: number;
   vlrdesc_rec: number;
@@ -49,6 +51,7 @@ interface ContaReceber {
   status_rec: string;
   cliente_nome?: string;
   nivel_cliente?: string; // Diamante, Ouro, Prata, Bronze
+  codigo_banco?: string; // Campo para obter o código do banco
 }
 
 // ============= STYLED COMPONENTS =============
@@ -881,6 +884,28 @@ const ReceberListPage: React.FC = () => {
       filter: true
     },
     {
+      field: 'codigo_banco',
+      headerName: 'Cód. Banco',
+      width: 120,
+      editable: true,
+      cellEditor: 'agRichSelectCellEditor',
+      cellEditorParams: {
+        values: [
+          '001',
+          '001-BB',
+          '001-CEF',
+          '001-ITAU',
+          '001-BRADESCO',
+          '001-SANTANDER',
+        ],
+      },
+      onCellEditingStopped: (params: any) => {
+        if (params.newValue && params.newValue !== params.oldValue) {
+          handleUpdateBanco(params.data, params.newValue);
+        }
+      },
+    },
+    {
       field: 'banco_rec',
       headerName: 'Banco',
       width: 140,
@@ -901,6 +926,17 @@ const ReceberListPage: React.FC = () => {
           handleUpdateBanco(params.data, params.newValue);
         }
       },
+    },
+    {
+      field: 'nomefan_bco',
+      headerName: 'Banco',
+      width: 140,
+    },
+    {
+      field: 'codigo_bol',
+      headerName: 'Cód. Boleto',
+      width: 120,
+      editable: true,
     },
     {
       field: 'dtmovi_rec',

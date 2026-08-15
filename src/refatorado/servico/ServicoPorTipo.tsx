@@ -383,7 +383,7 @@ export const ServicoPorTipo: React.FC = () => {
       )}
 
       <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, overflow: 'hidden' }}>
-        <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+        <div style={{ maxHeight: 240, overflowY: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 14 }}>
           <thead>
             <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>

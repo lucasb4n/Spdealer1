@@ -8,7 +8,11 @@ public class StrUtils {
 
     public static String somenteNumeros(String s) {
         if (s == null) return null;
-        return s.replaceAll("[^0-9]", "");
+        String res = s.replaceAll("[^0-9]", "");
+        if (res.length() == 13) {
+            res = "0" + res;
+        }
+        return res;
     }
 
     public static String defaultIfEmpty(String s, String def) {

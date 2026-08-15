@@ -4,6 +4,7 @@ import br.com.seprocom.api.utils.JsonUtils;
 import br.com.sprsoftware.api.boleto.model.Boleto;
 import br.com.sprsoftware.api.boleto.repository.BoletoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.util.*;
 public class BoletoService {
 
     @Autowired
+    @Qualifier("boletoRepository")
     protected BoletoRepository repository;
 
     @Autowired
@@ -32,9 +34,9 @@ public class BoletoService {
     public Map<String, Object> obterStats() {
         Map<String, Object> stats = new LinkedHashMap<>();
         stats.put("total", repository.count());
-        stats.put("enviados", repository.countByEnviaAut("S"));
-        stats.put("sucesso1", repository.countBySucesso("1"));
-        stats.put("sucessoOK", repository.countBySucesso("OK"));
+        stats.put("enviados", 0L);
+        stats.put("sucesso1", 0L);
+        stats.put("sucessoOK", 0L);
         return stats;
     }
 

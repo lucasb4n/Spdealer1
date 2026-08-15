@@ -50,6 +50,7 @@ public class ContasReceberController {
                     r.dtvenci_rec,     -- Campo principal
                     r.dtpagi_rec,      -- Campo principal
                     r.banco_rec,
+                    r.codigo_bol,
                     r.nossonumero_rec,
                     r.vlrdup_rec,
                     r.vlrdesc_rec,
@@ -165,6 +166,7 @@ public class ContasReceberController {
                     dtpagi_rec,      -- Campo principal
                     banco_rec,
                     nossonumero_rec,
+                    codigo_bol,
                     vlrdup_rec,
                     vlrdesc_rec,
                     vlracre_rec,
@@ -223,6 +225,12 @@ public class ContasReceberController {
             dadosCompletos.putIfAbsent("vlrdesc_rec", 0);
             dadosCompletos.putIfAbsent("vlracre_rec", 0);
 
+            // cgccpf_rec é decimal — remover máscaras (pontos, barras, traços)
+            if (dadosCompletos.get("cgccpf_rec") != null) {
+                String cpfCnpj = String.valueOf(dadosCompletos.get("cgccpf_rec")).replaceAll("\\D", "");
+                dadosCompletos.put("cgccpf_rec", cpfCnpj);
+            }
+
             // Calcular saldo automaticamente
             double valorTotal = ((Number) dadosCompletos.getOrDefault("vlrdup_rec", 0)).doubleValue();
             double valorPago = ((Number) dadosCompletos.getOrDefault("vlrpag_rec", 0)).doubleValue();
@@ -279,6 +287,16 @@ public class ContasReceberController {
                 
                 double saldo = Math.max(0, valorTotal + acrescimo - valorPago - desconto);
                 dados.put("vlrsal_rec", saldo);
+            }
+
+            // cgccpf_rec é decimal — remover máscaras (pontos, barras, traços)
+            if (dados.get("cgccpf_rec") != null) {
+                String cpfCnpj = String.valueOf(dados.get("cgccpf_rec")).replaceAll("\\D", "");
+                if (cpfCnpj.isEmpty()) {
+                    dados.put("cgccpf_rec", null);
+                } else {
+                    dados.put("cgccpf_rec", cpfCnpj);
+                }
             }
 
             // Usar função genérica para atualizar com datas duplicadas

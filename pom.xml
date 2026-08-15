@@ -212,6 +212,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
+                            <overwrite>true</overwrite>
                             <!-- copy the frontend build output into classes/static so it becomes part of the WAR -->
                             <outputDirectory>${project.build.directory}/classes/static</outputDirectory>
                             <resources>
@@ -252,6 +253,15 @@
                 </executions>
             </plugin>
 
+            <!-- Compiler Plugin: source/target 17 sem release flag -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>17</source>
+                    <target>17</target>
+                </configuration>
+            </plugin>
             <!-- Spring Boot Plugin: gera JAR e WAR -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AgGridReact } from 'ag-grid-react';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { maskDate, maskMoney } from '../../utils/maskUtils';
 import ModalBuscaF4 from './ModalBuscaF4';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -207,7 +208,7 @@ const OrdemCompraFormPage: React.FC = () => {
 
   const pinnedBottom: any[] = useMemo(
     () => [{ fab: '', codigo: 'TOTAIS', nome: `${totItens} item(ns)`, preco: totValor, qtde: totUnidades }],
-    [itens]
+    [totItens, totValor, totUnidades]
   );
 
   const columnDefs: any[] = useMemo(
@@ -220,7 +221,7 @@ const OrdemCompraFormPage: React.FC = () => {
         field: 'preco',
         width: 140,
         editable: true,
-        valueFormatter: (p: any) => (p.value !== undefined && p.value !== null ? formatMoney(parseNum(p.value)) : ''),
+        valueFormatter: (p: any) => (p && p.value !== undefined && p.value !== null ? formatMoney(parseNum(p.value)) : ''),
       },
       { headerName: 'Qtde', field: 'qtde', width: 100, editable: true, sortable: true },
       {
@@ -228,10 +229,11 @@ const OrdemCompraFormPage: React.FC = () => {
         width: 80,
         cellStyle: { display: 'flex', justifyContent: 'center', alignItems: 'center' },
         cellRenderer: (params: any) => {
+          if (!params || !params.data || params.data.codigo === 'TOTAIS') return null;
           const data = params.data;
-          if (!data || data.codigo === 'TOTAIS') return null;
           return (
             <button
+              type="button"
               title="Apagar item"
               onClick={() => removeItem(data)}
               style={{
@@ -253,7 +255,7 @@ const OrdemCompraFormPage: React.FC = () => {
         },
       },
     ],
-    [itens]
+    []
   );
 
   const handleSave = async () => {
@@ -654,7 +656,7 @@ const OrdemCompraFormPage: React.FC = () => {
       </fieldset>
 
       {/* ============ AG GRID ============ */}
-      <div style={{ border: '1px solid #cbd5e1', borderRadius: 8, overflow: 'hidden', background: '#fff', marginBottom: 14 }}>
+      <div style={{ border: '1px solid #cbd5e1', borderRadius: 8, overflow: 'hidden', background: '#fff', marginBottom: 14, minHeight: 320 }}>
         <div className="ag-theme-alpine" style={{ height: 320, width: '100%' }}>
           <AgGridReact
             rowData={itens}
@@ -662,7 +664,7 @@ const OrdemCompraFormPage: React.FC = () => {
             defaultColDef={{ resizable: true, filter: true }}
             pinnedBottomRowData={pinnedBottom}
             onCellValueChanged={onCellValueChanged}
-            domLayout="normal"
+            overlayNoRowsTemplate='<span style="padding: 10px; color: #64748b;">Nenhum item adicionado à ordem.</span>'
           />
         </div>
       </div>

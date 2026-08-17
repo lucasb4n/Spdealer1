@@ -62,10 +62,17 @@ public class OrcamentoService {
 
         BigDecimal qtFaltaEfetiva = qtFalta;
         if (qtSol != null && qtSol.compareTo(ZERO) > 0) {
-            if (qtdeKar == null || qtdeKar.compareTo(ZERO) == 0) {
+            if (qtdeKar == null || qtdeKar.compareTo(ZERO) <= 0) {
+                // Sem estoque no Kardex (0 ou null): falta total solicitada
                 qtFaltaEfetiva = qtSol;
-            } else if (disponivel.compareTo(qtSol) < 0) {
+            } else if (qtSol.compareTo(qtdeKar) > 0) {
+                // Quantidade pedida maior que a quantidade da peça no Kardex: calcula a diferença
+                qtFaltaEfetiva = qtSol.subtract(qtdeKar);
+            } else if (qtSol.compareTo(disponivel) > 0) {
+                // Quantidade pedida maior que a disponível (com alocação): calcula a diferença disponível
                 qtFaltaEfetiva = qtSol.subtract(disponivel);
+            } else {
+                qtFaltaEfetiva = ZERO;
             }
         }
 

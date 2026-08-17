@@ -468,6 +468,7 @@ public class OrcamentoController {
 
             String sql = """
                 UPDATE orcamp SET
+                    TIPO_ORP = ?,
                     DTEMI_ORP = ?,
                     CGCCPF_CLI = ?,
                     NOME_CLI = ?,
@@ -499,6 +500,7 @@ public class OrcamentoController {
             }
 
             jdbcTemplate.update(sql,
+                tipoOrpUpdate,
                 dataOrc,
                 cgcCpf,
                 data.get("NOME_CLI") != null ? data.get("NOME_CLI") : data.get("NOME_ORP"),

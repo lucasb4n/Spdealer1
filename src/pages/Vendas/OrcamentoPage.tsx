@@ -440,6 +440,7 @@ export default function OrcamentoPage() {
       }
 
       setValue('TIPO_ORP', 'P');
+      alert('Status alterado para Pedido! Clique no botão "Gravar" para salvar e gerar os registros em pecfal.');
     } catch (err) {
       alert('Erro ao consultar o valor disponível do cliente.');
       console.error(err);

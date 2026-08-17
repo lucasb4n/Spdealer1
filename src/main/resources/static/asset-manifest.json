@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/static/css/main.d3c88c3f.css",
-    "main.js": "/static/js/main.626ac12e.js",
+    "main.js": "/static/js/main.fa129223.js",
     "static/js/206.15d8569e.chunk.js": "/static/js/206.15d8569e.chunk.js",
     "index.html": "/index.html",
     "static/media/rtc-calculator.svg": "/static/media/rtc-calculator.9527bbcc5ba75104a262a5f1e19e0cfe.svg"
   },
   "entrypoints": [
     "static/css/main.d3c88c3f.css",
-    "static/js/main.626ac12e.js"
+    "static/js/main.fa129223.js"
   ]
 }

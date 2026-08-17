@@ -278,16 +278,19 @@ public class OrdemCompraController {
      * Lista todas as ordens de compra com seus itens para a tela de manutenção.
      */
     @GetMapping("/ordens")
-    public ResponseEntity<?> listOrdens(@RequestParam(required = false) String search) {
+    public ResponseEntity<?> listOrdens(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String dtInicial,
+            @RequestParam(required = false) String dtFinal) {
         StringBuilder sql = new StringBuilder(
             "SELECT TRIM(c.empre_cpr) AS empre, TRIM(c.origem_cpr) AS origem, TRIM(c.nrordem_cpr) AS nrordem, " +
-            "TRIM(c.fornec_cpr) AS fornecCodigo, COALESCE(TRIM(cli.nome_cli), c.fornec_cpr) AS fornecedor, " +
-            "c.dtpedidoi_cpr AS dtpedidoi, c.dtpedido_cpr AS dtpedido, " +
-            "c.vlrtot_cpr AS valorTotal, " +
-            "TRIM(c.consultor_cpr) AS consultor, COALESCE(TRIM(v.nome_ven), c.consultor_cpr) AS vendedor, " +
+            "TRIM(c.fornec_cpr) AS fornecCodigo, COALESCE(MAX(TRIM(cli.nome_cli)), c.fornec_cpr) AS fornecedor, " +
+            "MAX(c.dtpedidoi_cpr) AS dtpedidoi, MAX(c.dtpedido_cpr) AS dtpedido, " +
+            "MAX(c.vlrtot_cpr) AS valorTotal, " +
+            "TRIM(c.consultor_cpr) AS consultor, COALESCE(MAX(TRIM(v.nome_ven)), c.consultor_cpr) AS vendedor, " +
             "TRIM(c.tipo_cpr) AS tipo, TRIM(c.efetivado_cpr) AS efetivado " +
             "FROM compras c " +
-            "LEFT JOIN clientes cli ON TRIM(cli.codigo_cli) = TRIM(c.fornec_cpr) " +
+            "LEFT JOIN clientes cli ON TRIM(cli.codigo_cli) = TRIM(c.fornec_cpr) AND cli.cliforn_cli = 'F' " +
             "LEFT JOIN masven v ON CAST(v.cod_ven AS CHAR) = CAST(c.consultor_cpr AS CHAR) " +
             "WHERE 1=1 "
         );
@@ -299,7 +302,25 @@ public class OrdemCompraController {
             params.add(like);
             params.add(like);
         }
-        sql.append("ORDER BY c.dtpedidoi_cpr DESC, c.nrordem_cpr DESC");
+
+        if (dtInicial != null && !dtInicial.trim().isEmpty()) {
+            java.sql.Date dIni = parseFlexibleDate(dtInicial);
+            if (dIni != null) {
+                sql.append("AND c.dtpedidoi_cpr >= ? ");
+                params.add(dIni);
+            }
+        }
+
+        if (dtFinal != null && !dtFinal.trim().isEmpty()) {
+            java.sql.Date dFin = parseFlexibleDate(dtFinal);
+            if (dFin != null) {
+                sql.append("AND c.dtpedidoi_cpr <= ? ");
+                params.add(dFin);
+            }
+        }
+
+        sql.append("GROUP BY c.empre_cpr, c.origem_cpr, c.nrordem_cpr, c.fornec_cpr, c.consultor_cpr, c.tipo_cpr, c.efetivado_cpr ");
+        sql.append("ORDER BY MAX(c.dtpedidoi_cpr) DESC, c.nrordem_cpr DESC");
         try {
             List<Map<String, Object>> ordens = jdbc.queryForList(sql.toString(), params.toArray());
             for (Map<String, Object> o : ordens) {
@@ -317,6 +338,31 @@ public class OrdemCompraController {
         } catch (Exception e) {
             logger.error("Erro ao listar ordens de compra", e);
             return ResponseEntity.status(500).body(Map.of("error", "Erro ao listar ordens de compra: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Busca dados do fornecedor especificamente onde cliforn_cli = 'F'.
+     */
+    @GetMapping("/fornecedor-info")
+    public ResponseEntity<?> fornecedorInfo(@RequestParam String codigo) {
+        if (codigo == null || codigo.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Código do fornecedor é obrigatório."));
+        }
+        try {
+            List<Map<String, Object>> rows = jdbc.queryForList(
+                "SELECT TRIM(codigo_cli) AS codigo, TRIM(nome_cli) AS nome, TRIM(cgccpf_cli) AS documento " +
+                "FROM clientes WHERE TRIM(codigo_cli) = ? AND cliforn_cli = 'F'",
+                codigo.trim());
+            if (rows.isEmpty()) {
+                return ResponseEntity.ok(Map.of("found", false));
+            }
+            Map<String, Object> res = rows.get(0);
+            res.put("found", true);
+            return ResponseEntity.ok(res);
+        } catch (Exception e) {
+            logger.error("Erro ao buscar fornecedor", e);
+            return ResponseEntity.status(500).body(Map.of("error", "Erro ao buscar fornecedor: " + e.getMessage()));
         }
     }
 
@@ -339,8 +385,8 @@ public class OrdemCompraController {
                 "TRIM(c.obsospe_cpr) AS obsospe, TRIM(c.obs_cpr) AS obs, TRIM(c.efetivado_cpr) AS efetivado, " +
                 "TRIM(c.estoque_cpr) AS estoque, TRIM(c.tipo_cpr) AS tipo, c.vlrtot_cpr AS vlrtot " +
                 "FROM compras c " +
-                "LEFT JOIN clientes cli ON TRIM(cli.codigo_cli) = TRIM(c.fornec_cpr) " +
-                "LEFT JOIN clientes cli2 ON TRIM(cli2.codigo_cli) = TRIM(c.cliente_cpr) " +
+                "LEFT JOIN clientes cli ON TRIM(cli.codigo_cli) = TRIM(c.fornec_cpr) AND cli.cliforn_cli = 'F' " +
+                "LEFT JOIN clientes cli2 ON TRIM(cli2.codigo_cli) = TRIM(c.cliente_cpr) AND cli2.cliforn_cli = 'C' " +
                 "WHERE c.empre_cpr = ? AND c.origem_cpr = ? AND c.nrordem_cpr = ?",
                 empre, origem, nrordem);
 

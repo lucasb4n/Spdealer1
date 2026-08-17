@@ -1,7 +1,21 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faEdit, faTrash, faChevronDown, faChevronRight, faSearch } from '@fortawesome/free-solid-svg-icons';
+import {
+  faPlus,
+  faEdit,
+  faTrash,
+  faChevronDown,
+  faChevronRight,
+  faSearch,
+  faBoxes,
+  faFileInvoice,
+  faDollarSign,
+  faSort,
+  faSortUp,
+  faSortDown,
+  faUndo,
+} from '@fortawesome/free-solid-svg-icons';
 
 interface ItemOrdem {
   fab: string;
@@ -27,6 +41,9 @@ interface OrdemCompra {
   efetivado?: string;
   itens?: ItemOrdem[];
 }
+
+type SortField = 'nrordem' | 'fornecedor' | 'dtpedidoi' | 'valorTotal' | 'vendedor' | 'tipo';
+type SortDirection = 'asc' | 'desc';
 
 const formatMoney = (n: any): string => {
   const num = Number(n);
@@ -61,6 +78,8 @@ const getUrgenciaLabel = (tipo?: string) => {
 const ManutencaoOrdemCompraPage: React.FC = () => {
   const navigate = useNavigate();
   const [busca, setBusca] = useState('');
+  const [dtInicial, setDtInicial] = useState('');
+  const [dtFinal, setDtFinal] = useState('');
   const [ordens, setOrdens] = useState<OrdemCompra[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,25 +87,44 @@ const ManutencaoOrdemCompraPage: React.FC = () => {
   const [ordemExcluir, setOrdemExcluir] = useState<OrdemCompra | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  // AG-Grid style header sorting state
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+
   const fetchOrdens = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const url = busca.trim()
-        ? `/api/compras/ordens?search=${encodeURIComponent(busca.trim())}`
-        : '/api/compras/ordens';
+      const params = new URLSearchParams();
+      if (busca.trim()) params.append('search', busca.trim());
+      if (dtInicial.trim()) params.append('dtInicial', dtInicial.trim());
+      if (dtFinal.trim()) params.append('dtFinal', dtFinal.trim());
+
+      const url = `/api/compras/ordens${params.toString() ? '?' + params.toString() : ''}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
-      const list = Array.isArray(json) ? json : json.data || [];
-      setOrdens(list);
+      const rawList: OrdemCompra[] = Array.isArray(json) ? json : json.data || [];
+
+      // Deduplicate orders by unique key (empre_origem_nrordem)
+      const seen = new Set<string>();
+      const uniqueList: OrdemCompra[] = [];
+      for (const item of rawList) {
+        const key = `${item.empre}_${item.origem}_${item.nrordem}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          uniqueList.push(item);
+        }
+      }
+
+      setOrdens(uniqueList);
     } catch (e: any) {
       setError(e?.message || 'Erro ao carregar ordens de compra');
       setOrdens([]);
     } finally {
       setLoading(false);
     }
-  }, [busca]);
+  }, [busca, dtInicial, dtFinal]);
 
   useEffect(() => {
     fetchOrdens();
@@ -125,11 +163,89 @@ const ManutencaoOrdemCompraPage: React.FC = () => {
     }
   };
 
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else {
+        setSortField(null);
+        setSortDirection('asc');
+      }
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const handleClearFilters = () => {
+    setBusca('');
+    setDtInicial('');
+    setDtFinal('');
+  };
+
+  // KPIs Calculations
+  const kpis = useMemo(() => {
+    let totalPecasUni = 0;
+    let totalOrdens = ordens.length;
+    let totalValor = 0;
+
+    for (const o of ordens) {
+      totalValor += Number(o.valorTotal) || 0;
+      if (o.itens && Array.isArray(o.itens)) {
+        for (const item of o.itens) {
+          totalPecasUni += Number(item.qtde) || 0;
+        }
+      }
+    }
+
+    return { totalPecasUni, totalOrdens, totalValor };
+  }, [ordens]);
+
+  // Sorted Ordens List
+  const sortedOrdens = useMemo(() => {
+    if (!sortField) return ordens;
+    return [...ordens].sort((a, b) => {
+      let aVal: any = a[sortField];
+      let bVal: any = b[sortField];
+
+      if (sortField === 'dtpedidoi') {
+        aVal = a.dtpedidoi || a.dtpedido || '';
+        bVal = b.dtpedidoi || b.dtpedido || '';
+      } else if (sortField === 'valorTotal') {
+        aVal = Number(aVal) || 0;
+        bVal = Number(bVal) || 0;
+      } else {
+        aVal = String(aVal || '').toLowerCase();
+        bVal = String(bVal || '').toLowerCase();
+      }
+
+      if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [ordens, sortField, sortDirection]);
+
+  const renderSortIcon = (field: SortField) => {
+    if (sortField !== field) return <FontAwesomeIcon icon={faSort} style={{ opacity: 0.3, marginLeft: 6, fontSize: 11 }} />;
+    return sortDirection === 'asc' ? (
+      <FontAwesomeIcon icon={faSortUp} style={{ marginLeft: 6, color: '#1e4e79', fontSize: 12 }} />
+    ) : (
+      <FontAwesomeIcon icon={faSortDown} style={{ marginLeft: 6, color: '#1e4e79', fontSize: 12 }} />
+    );
+  };
+
   return (
     <div className="sp-page" style={{ height: '100%', overflowY: 'auto', padding: 16 }}>
       {/* Page Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h1 style={{ margin: 0, fontSize: 20, color: '#1e4e79' }}>Manutenção de Ordem de Compra</h1>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 20, color: '#1e4e79', fontWeight: 700 }}>
+            Manutenção de Ordem de Compra
+          </h1>
+          <span style={{ fontSize: 12, color: '#64748b' }}>
+            Gerenciamento e acompanhamento de ordens de compra e peças
+          </span>
+        </div>
         <button
           onClick={() => navigate('/pecas/compras/manutencao-ordem-compra/nova')}
           style={{
@@ -144,16 +260,138 @@ const ManutencaoOrdemCompraPage: React.FC = () => {
             alignItems: 'center',
             gap: 8,
             fontSize: 14,
+            boxShadow: '0 2px 4px rgba(30,78,121,0.2)',
           }}
         >
           <FontAwesomeIcon icon={faPlus} /> + Nova Ordem
         </button>
       </div>
 
-      {/* Filter Box */}
+      {/* KPI Cards Header */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, marginBottom: 16 }}>
+        {/* KPI 1: Peças Uni */}
+        <div
+          style={{
+            background: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderRadius: 10,
+            padding: '14px 18px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 14,
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          }}
+        >
+          <div
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 10,
+              background: '#eff6ff',
+              color: '#2563eb',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 18,
+            }}
+          >
+            <FontAwesomeIcon icon={faBoxes} />
+          </div>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '.5px' }}>
+              Peças Uni
+            </div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: '#0f172a', lineHeight: 1.2 }}>
+              {kpis.totalPecasUni.toLocaleString('pt-BR')}
+            </div>
+            <div style={{ fontSize: 11, color: '#94a3b8' }}>Unidades de Peças</div>
+          </div>
+        </div>
+
+        {/* KPI 2: Ordens */}
+        <div
+          style={{
+            background: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderRadius: 10,
+            padding: '14px 18px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 14,
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          }}
+        >
+          <div
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 10,
+              background: '#f0fdf4',
+              color: '#16a34a',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 18,
+            }}
+          >
+            <FontAwesomeIcon icon={faFileInvoice} />
+          </div>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '.5px' }}>
+              Ordens
+            </div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: '#0f172a', lineHeight: 1.2 }}>
+              {kpis.totalOrdens.toLocaleString('pt-BR')}
+            </div>
+            <div style={{ fontSize: 11, color: '#94a3b8' }}>Ordens de Pedido</div>
+          </div>
+        </div>
+
+        {/* KPI 3: Valor Total */}
+        <div
+          style={{
+            background: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderRadius: 10,
+            padding: '14px 18px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 14,
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          }}
+        >
+          <div
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 10,
+              background: '#faf5ff',
+              color: '#9333ea',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 18,
+            }}
+          >
+            <FontAwesomeIcon icon={faDollarSign} />
+          </div>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '.5px' }}>
+              Valor Total
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: '#0f172a', lineHeight: 1.2 }}>
+              {formatMoney(kpis.totalValor)}
+            </div>
+            <div style={{ fontSize: 11, color: '#94a3b8' }}>Total das Ordens</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter Box with Date Filter */}
       <div
         style={{
           display: 'flex',
+          flexWrap: 'wrap',
           gap: 12,
           marginBottom: 16,
           background: '#f8fafc',
@@ -163,13 +401,13 @@ const ManutencaoOrdemCompraPage: React.FC = () => {
           alignItems: 'flex-end',
         }}
       >
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>
+        <div style={{ flex: '1 1 260px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <label style={{ fontSize: 11, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '.4px' }}>
             Buscar por Número, Fornecedor ou Código
           </label>
           <input
             type="text"
-            placeholder="Digite para filtrar ordens de compra..."
+            placeholder="Digite para buscar ordens de compra..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             onKeyDown={(e) => {
@@ -179,38 +417,102 @@ const ManutencaoOrdemCompraPage: React.FC = () => {
               padding: '8px 12px',
               border: '1px solid #cbd5e1',
               borderRadius: 6,
-              fontSize: 14,
+              fontSize: 13,
               outline: 'none',
               background: '#fff',
             }}
           />
         </div>
-        <button
-          onClick={fetchOrdens}
-          style={{
-            background: '#1e4e79',
-            color: '#fff',
-            border: 'none',
-            padding: '8px 20px',
-            borderRadius: 6,
-            fontWeight: 600,
-            fontSize: 14,
-            cursor: 'pointer',
-            height: 38,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-          }}
-        >
-          <FontAwesomeIcon icon={faSearch} /> Buscar
-        </button>
+
+        <div style={{ width: 150, display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <label style={{ fontSize: 11, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '.4px' }}>
+            Data Inicial
+          </label>
+          <input
+            type="date"
+            value={dtInicial}
+            onChange={(e) => setDtInicial(e.target.value)}
+            style={{
+              padding: '7px 10px',
+              border: '1px solid #cbd5e1',
+              borderRadius: 6,
+              fontSize: 13,
+              outline: 'none',
+              background: '#fff',
+            }}
+          />
+        </div>
+
+        <div style={{ width: 150, display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <label style={{ fontSize: 11, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '.4px' }}>
+            Data Final
+          </label>
+          <input
+            type="date"
+            value={dtFinal}
+            onChange={(e) => setDtFinal(e.target.value)}
+            style={{
+              padding: '7px 10px',
+              border: '1px solid #cbd5e1',
+              borderRadius: 6,
+              fontSize: 13,
+              outline: 'none',
+              background: '#fff',
+            }}
+          />
+        </div>
+
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={fetchOrdens}
+            style={{
+              background: '#1e4e79',
+              color: '#fff',
+              border: 'none',
+              padding: '8px 18px',
+              borderRadius: 6,
+              fontWeight: 600,
+              fontSize: 13,
+              cursor: 'pointer',
+              height: 36,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+            }}
+          >
+            <FontAwesomeIcon icon={faSearch} /> Buscar
+          </button>
+
+          {(busca || dtInicial || dtFinal) && (
+            <button
+              onClick={handleClearFilters}
+              title="Limpar filtros"
+              style={{
+                background: '#e2e8f0',
+                color: '#475569',
+                border: 'none',
+                padding: '8px 14px',
+                borderRadius: 6,
+                fontWeight: 600,
+                fontSize: 13,
+                cursor: 'pointer',
+                height: 36,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+              }}
+            >
+              <FontAwesomeIcon icon={faUndo} /> Limpar
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Feedback Messages */}
       {loading && <div style={{ padding: 12, color: '#64748b', fontSize: 14 }}>Carregando ordens de compra...</div>}
       {error && <div style={{ padding: 12, color: '#dc2626', fontSize: 14 }}>Erro: {error}</div>}
 
-      {/* Main Table */}
+      {/* Main Table with AG-Grid Header Properties */}
       {!loading && !error && (
         <div
           style={{
@@ -223,26 +525,113 @@ const ManutencaoOrdemCompraPage: React.FC = () => {
         >
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 13 }}>
             <thead>
-              <tr style={{ background: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>
+              <tr style={{ background: '#f8fafc', borderBottom: '2px solid #cbd5e1', userSelect: 'none' }}>
                 <th style={{ padding: '12px 14px', width: 30 }}></th>
-                <th style={{ padding: '12px 14px', fontWeight: 700, color: '#334155' }}>Número</th>
-                <th style={{ padding: '12px 14px', fontWeight: 700, color: '#334155' }}>Fornecedor</th>
-                <th style={{ padding: '12px 14px', fontWeight: 700, color: '#334155' }}>Data Emissão</th>
-                <th style={{ padding: '12px 14px', fontWeight: 700, color: '#334155', textAlign: 'right' }}>
-                  Valor Total
+                <th
+                  onClick={() => handleSort('nrordem')}
+                  style={{
+                    padding: '12px 14px',
+                    fontWeight: 700,
+                    color: '#334155',
+                    fontSize: 12,
+                    textTransform: 'uppercase',
+                    letterSpacing: '.4px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Número {renderSortIcon('nrordem')}
                 </th>
-                <th style={{ padding: '12px 14px', fontWeight: 700, color: '#334155' }}>Vendedor</th>
-                <th style={{ padding: '12px 14px', fontWeight: 700, color: '#334155', textAlign: 'center' }}>
-                  Urgência
+                <th
+                  onClick={() => handleSort('fornecedor')}
+                  style={{
+                    padding: '12px 14px',
+                    fontWeight: 700,
+                    color: '#334155',
+                    fontSize: 12,
+                    textTransform: 'uppercase',
+                    letterSpacing: '.4px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Fornecedor {renderSortIcon('fornecedor')}
                 </th>
-                <th style={{ padding: '12px 14px', fontWeight: 700, color: '#334155', textAlign: 'center', width: 100 }}>
+                <th
+                  onClick={() => handleSort('dtpedidoi')}
+                  style={{
+                    padding: '12px 14px',
+                    fontWeight: 700,
+                    color: '#334155',
+                    fontSize: 12,
+                    textTransform: 'uppercase',
+                    letterSpacing: '.4px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Data Emissão {renderSortIcon('dtpedidoi')}
+                </th>
+                <th
+                  onClick={() => handleSort('valorTotal')}
+                  style={{
+                    padding: '12px 14px',
+                    fontWeight: 700,
+                    color: '#334155',
+                    fontSize: 12,
+                    textTransform: 'uppercase',
+                    letterSpacing: '.4px',
+                    textAlign: 'right',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Valor Total {renderSortIcon('valorTotal')}
+                </th>
+                <th
+                  onClick={() => handleSort('vendedor')}
+                  style={{
+                    padding: '12px 14px',
+                    fontWeight: 700,
+                    color: '#334155',
+                    fontSize: 12,
+                    textTransform: 'uppercase',
+                    letterSpacing: '.4px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Vendedor {renderSortIcon('vendedor')}
+                </th>
+                <th
+                  onClick={() => handleSort('tipo')}
+                  style={{
+                    padding: '12px 14px',
+                    fontWeight: 700,
+                    color: '#334155',
+                    fontSize: 12,
+                    textTransform: 'uppercase',
+                    letterSpacing: '.4px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Urgência {renderSortIcon('tipo')}
+                </th>
+                <th
+                  style={{
+                    padding: '12px 14px',
+                    fontWeight: 700,
+                    color: '#334155',
+                    fontSize: 12,
+                    textTransform: 'uppercase',
+                    letterSpacing: '.4px',
+                    textAlign: 'center',
+                    width: 100,
+                  }}
+                >
                   Ações
                 </th>
               </tr>
             </thead>
             <tbody>
-              {ordens.length > 0 ? (
-                ordens.map((ordem) => {
+              {sortedOrdens.length > 0 ? (
+                sortedOrdens.map((ordem) => {
                   const rowKey = `${ordem.empre}_${ordem.origem}_${ordem.nrordem}`;
                   const isExpanded = expandedKey === rowKey;
                   const urg = getUrgenciaLabel(ordem.tipo);
@@ -332,7 +721,7 @@ const ManutencaoOrdemCompraPage: React.FC = () => {
                         </td>
                       </tr>
 
-                      {/* Expandable Detail Panel for Items */}
+                      {/* Unitary Expandable Detail Panel for Items */}
                       {isExpanded && (
                         <tr style={{ background: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>
                           <td colSpan={8} style={{ padding: '12px 24px 16px 42px' }}>

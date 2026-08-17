@@ -124,9 +124,11 @@
 .sp-field--natureza  { grid-column: span 3; }
 .sp-field--tf        { grid-column: span 2; }
 .sp-field--unimed    { grid-column: span 2; }
-.sp-field--peso      { grid-column: span 1; }
-.sp-field--modelo    { grid-column: span 3; }
-.sp-field--grfuncao  { grid-column: span 4; }
+.sp-field--peso      { grid-column: span 2; }
+.sp-field--estmin-dados { grid-column: span 3; }
+.sp-field--estmax-dados { grid-column: span 3; }
+.sp-field--modelo    { grid-column: span 4; }
+.sp-field--grfuncao  { grid-column: span 6; }
 .sp-field--acesc     { grid-column: span 1; }
 .sp-field--estini    { grid-column: span 1; }
 

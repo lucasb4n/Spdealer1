@@ -11,8 +11,8 @@ print("==================================================")
 print("     🚀 DEPLOY SPDEALER -> PRODUÇÃO (192.168.10.70)")
 print("==================================================")
 
-SCRIPT_DIR = "/home/lucas/desenvolvimento/seprocom/spdealer"
-REMOTE_HOST = "192.168.10.70"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+REMOTE_HOST = "100.116.217.83"
 REMOTE_USER = "root"
 REMOTE_PASS = "k15720"
 REMOTE_WEBAPPS = "/usr/local/tomcat10/webapps"
@@ -63,7 +63,7 @@ print("✓ Static assets copiados")
 
 # 3. Backend Maven Build
 print("\n[3/5] Compilando Backend Maven (JDK 17)...")
-res = subprocess.run("mvn clean package -DskipTests", shell=True, cwd=SCRIPT_DIR, env=env)
+res = subprocess.run("mvn package -DskipTests", shell=True, cwd=SCRIPT_DIR, env=env)
 if res.returncode != 0:
     print("❌ Erro ao compilar Backend Maven")
     sys.exit(1)

@@ -519,6 +519,32 @@ const EstoqueForm: React.FC<EstoqueFormProps> = ({ onSave, onCancel, isEditing, 
                     />
                   </div>
 
+                  <div className="sp-field sp-field--estmin-dados">
+                    <label className="sp-field__label">Est. Mínimo</label>
+                    <input
+                      className="sp-field__input"
+                      type="number"
+                      step="1"
+                      min="0"
+                      value={form.estmin_kar}
+                      onChange={e => handleChange('estmin_kar', e.target.value)}
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div className="sp-field sp-field--estmax-dados">
+                    <label className="sp-field__label">Est. Máximo</label>
+                    <input
+                      className="sp-field__input"
+                      type="number"
+                      step="1"
+                      min="0"
+                      value={form.estmax_kar}
+                      onChange={e => handleChange('estmax_kar', e.target.value)}
+                      placeholder="0"
+                    />
+                  </div>
+
                   
 
                   <div className="sp-field sp-field--modelo">

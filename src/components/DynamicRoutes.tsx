@@ -20,6 +20,8 @@ const NfeSaidaPage = lazy(() => import('../pages/Financeiro/NfeSaidaPage'));
   const ManutencaoTipoTmoForm = lazy(() => import('../pages/Servico/Manutencao/ManutencaoTipoTmoForm'));
   const ManutencaoGrupoReparoList = lazy(() => import('../pages/Servico/Manutencao/ManutencaoGrupoReparoList'));
   const ServicoPorTipo = lazy(() => import('../refatorado/servico/ServicoPorTipo'));
+  const ManutencaoOrdemCompraPage = lazy(() => import('../pages/Compras/ManutencaoOrdemCompraPage'));
+  const OrdemCompraFormPage = lazy(() => import('../pages/Compras/OrdemCompraFormPage'));
 // const FlowRunnerPage = lazy(() => import('../refatorado/flow/FlowRunnerPage')); // TODO: módulo não existe
 
 // Dicionário: path → component (keys normalized to lowercase)
@@ -39,6 +41,8 @@ const routeMap: Record<string, React.LazyExoticComponent<React.ComponentType<any
   '/parametros/programas-permissoes': MenuAdminForm,
   '/vendas/orcamento': OrcamentoPage,
   '/pecas/compras/entrada-mercadoria': EntradaMercadoriaPage,
+  '/pecas/compras/manutencao-ordem-compra': ManutencaoOrdemCompraPage,
+  '/pecas/compras/manutencao-ordem-compra/nova': OrdemCompraFormPage,
   '/servico/manutencao/tipo-tmo': ManutencaoTipoTmoList,
   '/servico/manutencao/tipo-tmo/cad': ManutencaoTipoTmoForm,
   '/servico/manutencao/grupo-reparo': ManutencaoGrupoReparoList,

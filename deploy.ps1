@@ -26,7 +26,7 @@ except ImportError:
     import paramiko
 
 # Configurações do Deploy
-REMOTE_HOST = "192.168.10.70"
+REMOTE_HOST = "100.116.217.83"
 REMOTE_PORT = 22
 REMOTE_USER = "root"
 REMOTE_PASSWORDS = ["k15720", "senhak15720"]

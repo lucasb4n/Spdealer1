@@ -191,6 +191,25 @@ const OrdemCompraFormPage: React.FC = () => {
 
   const setF = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
+  const handleFornecedorBlur = async () => {
+    const code = form.fornecCodigo.trim();
+    if (!code) {
+      setForm((f) => ({ ...f, fornecNome: '' }));
+      return;
+    }
+    try {
+      const res = await fetch(`/api/compras/fornecedor-info?codigo=${encodeURIComponent(code)}`);
+      const j = await res.json();
+      if (j && j.found) {
+        setForm((f) => ({ ...f, fornecCodigo: j.codigo, fornecNome: j.nome }));
+      } else {
+        setForm((f) => ({ ...f, fornecNome: 'FORNECEDOR NÃO ENCONTRADO (cliforn_cli = F)' }));
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   const handleSelectFornecedor = (row: any) => {
     setForm((f) => ({ ...f, fornecNome: row.nome || '', fornecCodigo: row.codigo || '' }));
   };
@@ -504,22 +523,35 @@ const OrdemCompraFormPage: React.FC = () => {
               placeholder="dd/mm/aaaa"
             />
           </Campo>
-          <Campo label="Cod. Fornecedor" width={380}>
+          <Campo label="Cod. Fornecedor" width={480}>
             <div style={{ display: 'flex', gap: 6 }}>
               <input
-                style={readOnlyStyle()}
-                value={form.fornecNome}
-                readOnly
-                placeholder="F4 para pesquisar"
-                title={form.fornecNome}
+                style={inputStyle(110)}
+                value={form.fornecCodigo}
+                maxLength={5}
+                onChange={(e) => setF('fornecCodigo', e.target.value)}
+                onBlur={handleFornecedorBlur}
                 onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleFornecedorBlur();
+                  }
                   if (e.key === 'F4') {
                     e.preventDefault();
                     setModal('fornecedor');
                   }
                 }}
+                placeholder="Código"
+              />
+              <input
+                style={{ ...readOnlyStyle(), flex: 1 }}
+                value={form.fornecNome}
+                readOnly
+                placeholder="Nome do Fornecedor (F4)"
+                title={form.fornecNome}
               />
               <button
+                type="button"
                 title="Pesquisar fornecedor (F4)"
                 onClick={() => setModal('fornecedor')}
                 style={{ background: '#e2e8f0', border: 'none', borderRadius: 6, padding: '0 12px', cursor: 'pointer', fontWeight: 700, fontSize: 12, color: '#334155' }}

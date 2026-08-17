@@ -4,6 +4,7 @@ import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { maskDate, maskMoney } from '../../utils/maskUtils';
 import ModalBuscaF4 from './ModalBuscaF4';
+import ModalPecasFaltantes from './ModalPecasFaltantes';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 
@@ -112,6 +113,7 @@ const OrdemCompraFormPage: React.FC = () => {
   const [vendedores, setVendedores] = useState<any[]>([]);
   const [itens, setItens] = useState<ItemOrdem[]>([]);
   const [modal, setModal] = useState<'fornecedor' | 'cliente' | 'produto' | null>(null);
+  const [modalPecasOpen, setModalPecasOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<Msg | null>(null);
 
@@ -136,6 +138,19 @@ const OrdemCompraFormPage: React.FC = () => {
 
   const handleSelectCliente = (row: any) => {
     setForm((f) => ({ ...f, clienteNome: row.nome || '', clienteCodigo: row.codigo || '' }));
+  };
+
+  const handleAddPecasFaltantes = (selectedPecas: any[]) => {
+    const newItems: ItemOrdem[] = selectedPecas.map((row) => ({
+      fab: (row.fab || '').trim(),
+      codigo: (row.codigo || '').trim(),
+      nome: (row.nome || '').trim(),
+      qtde: parseNum(row.qtde) > 0 ? parseNum(row.qtde) : 1,
+      preco: parseNum(row.preco) || 0,
+      ospe: 'PE',
+      serie: '',
+    }));
+    setItens((prev) => [...prev, ...newItems]);
   };
 
   const handleSelectProduto = async (row: any) => {
@@ -647,11 +662,12 @@ const OrdemCompraFormPage: React.FC = () => {
             + Adicionar item
           </button>
           <button
-            onClick={() => setMsg({ type: 'error', text: 'Lógica de peças faltantes ainda não implementada.' })}
+            onClick={() => setModalPecasOpen(true)}
             style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fcd34d', padding: '10px 18px', borderRadius: 6, fontWeight: 600, cursor: 'pointer', height: 36 }}
           >
             Traz Peças Faltantes Selecionadas
           </button>
+
         </div>
       </fieldset>
 
@@ -709,6 +725,11 @@ const OrdemCompraFormPage: React.FC = () => {
         open={modal === 'produto'}
         onClose={() => setModal(null)}
         onSelect={f4Props.produto.onSelect}
+      />
+      <ModalPecasFaltantes
+        open={modalPecasOpen}
+        onClose={() => setModalPecasOpen(false)}
+        onSelectItems={handleAddPecasFaltantes}
       />
     </div>
   );

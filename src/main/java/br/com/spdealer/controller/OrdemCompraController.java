@@ -221,6 +221,72 @@ public class OrdemCompraController {
         }
     }
 
+    /**
+     * Lista peças faltantes da tabela pecfal com suporte a busca e filtro por período de datas (fab, codigo, nome, qtde).
+     */
+    @GetMapping("/pecas-faltantes")
+    public ResponseEntity<?> listPecasFaltantes(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String dtInicial,
+            @RequestParam(required = false) String dtFinal) {
+        StringBuilder sql = new StringBuilder(
+            "SELECT TRIM(FAL_FAB) AS fab, " +
+            "TRIM(FAL_CODPROD) AS codigo, " +
+            "TRIM(FAL_DESCR) AS nome, " +
+            "COALESCE(FAL_QTDE, 0) AS qtde, " +
+            "FAL_DATA AS data " +
+            "FROM pecfal WHERE 1=1 "
+        );
+        List<Object> params = new ArrayList<>();
+
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append("AND (UPPER(FAL_DESCR) LIKE ? OR UPPER(FAL_CODPROD) LIKE ? OR UPPER(FAL_FAB) LIKE ?) ");
+            String like = "%" + search.trim().toUpperCase() + "%";
+            params.add(like);
+            params.add(like);
+            params.add(like);
+        }
+
+        if (dtInicial != null && !dtInicial.trim().isEmpty()) {
+            java.sql.Date dIni = parseFlexibleDate(dtInicial);
+            if (dIni != null) {
+                sql.append("AND FAL_DATA >= ? ");
+                params.add(dIni);
+            }
+        }
+
+        if (dtFinal != null && !dtFinal.trim().isEmpty()) {
+            java.sql.Date dFin = parseFlexibleDate(dtFinal);
+            if (dFin != null) {
+                sql.append("AND FAL_DATA <= ? ");
+                params.add(dFin);
+            }
+        }
+
+        sql.append("ORDER BY FAL_DATA DESC, FAL_CODPROD ");
+
+        try {
+            List<Map<String, Object>> rows = jdbc.queryForList(sql.toString(), params.toArray());
+            return ResponseEntity.ok(rows);
+        } catch (Exception e) {
+            logger.error("Erro ao consultar pecfal", e);
+            return ResponseEntity.status(500).body(Map.of("error", "Erro ao consultar peças faltantes: " + e.getMessage()));
+        }
+    }
+
+    private java.sql.Date parseFlexibleDate(String raw) {
+        if (raw == null || raw.trim().isEmpty()) return null;
+        String s = raw.trim();
+        try {
+            if (s.contains("-")) {
+                return java.sql.Date.valueOf(LocalDate.parse(s, DateTimeFormatter.ISO_LOCAL_DATE));
+            }
+            return java.sql.Date.valueOf(LocalDate.parse(s, DATE_BR));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     // ===================== HELPERS =====================
 
     private String safeTrim(Object value) {

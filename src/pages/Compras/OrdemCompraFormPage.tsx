@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { maskDate, maskMoney } from '../../utils/maskUtils';
@@ -74,8 +75,21 @@ const Campo: React.FC<{ label: string; width?: number; style?: React.CSSProperti
   </div>
 );
 
+const formatDateBr = (isoOrBr: string): string => {
+  if (!isoOrBr) return '';
+  const s = String(isoOrBr).trim();
+  if (s.includes('-')) {
+    const parts = s.split('T')[0].split('-');
+    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  return s;
+};
+
 const OrdemCompraFormPage: React.FC = () => {
   const navigate = useNavigate();
+  const { empre, origem, nrordem } = useParams<{ empre?: string; origem?: string; nrordem?: string }>();
+  const isEdit = Boolean(empre && origem && nrordem);
+
 
   const [form, setForm] = useState({
     origem: 'N',
@@ -118,10 +132,55 @@ const OrdemCompraFormPage: React.FC = () => {
   const [msg, setMsg] = useState<Msg | null>(null);
 
   useEffect(() => {
+    if (isEdit) return;
     const d = new Date();
     const pad = (n: number) => String(n).padStart(2, '0');
     setForm((f) => ({ ...f, dtpedido: `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}` }));
-  }, []);
+  }, [isEdit]);
+
+  useEffect(() => {
+    if (!isEdit) return;
+    fetch(`/api/compras/detalhes?empre=${encodeURIComponent(empre!)}&origem=${encodeURIComponent(origem!)}&nrordem=${encodeURIComponent(nrordem!)}`)
+      .then((r) => r.json())
+      .then((j) => {
+        if (j && !j.error) {
+          setForm({
+            origem: j.origem || 'N',
+            dtpedido: j.dtpedidoi ? formatDateBr(j.dtpedidoi) : '',
+            dtprev: j.dtprevi ? formatDateBr(j.dtprevi) : '',
+            condpag: j.condpag || '',
+            fornecNome: j.fornecNome || j.fornecCodigo || '',
+            fornecCodigo: j.fornecCodigo || '',
+            codcobranca: j.codcobranca || '',
+            clienteNome: j.clienteNome || j.clienteCodigo || '',
+            clienteCodigo: j.clienteCodigo || '',
+            classe: j.classe || '',
+            consultor: j.consultor || '',
+            modelo: j.modelo || '',
+            obsospe: j.obsospe || 'SO',
+            tipo: j.tipo || 'N',
+            estoque: j.estoque || '',
+            efetivado: j.efetivado || '',
+            obs: j.obs || '',
+          });
+          if (Array.isArray(j.itens)) {
+            setItens(
+              j.itens.map((it: any) => ({
+                fab: it.fab || '',
+                codigo: it.codigo || '',
+                nome: it.nome || '',
+                qtde: Number(it.qtde) || 0,
+                preco: Number(it.preco) || 0,
+                ospe: it.ospe || 'OS',
+                serie: it.serie || '',
+              }))
+            );
+          }
+        }
+      })
+      .catch(() => {});
+  }, [isEdit, empre, origem, nrordem]);
+
 
   useEffect(() => {
     fetch('/api/tabelas-auxiliares/vendedores')
@@ -278,6 +337,7 @@ const OrdemCompraFormPage: React.FC = () => {
     setMsg(null);
     try {
       const payload = {
+        ...(isEdit ? { empre, origem, nrordem } : {}),
         origem: form.origem,
         dtpedido: form.dtpedido,
         dtprev: form.dtprev,
@@ -303,8 +363,8 @@ const OrdemCompraFormPage: React.FC = () => {
           serie: i.serie,
         })),
       };
-      const res = await fetch('/api/compras', {
-        method: 'POST',
+      const res = await fetch(isEdit ? '/api/compras/atualizar' : '/api/compras', {
+        method: isEdit ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
@@ -313,8 +373,8 @@ const OrdemCompraFormPage: React.FC = () => {
         setMsg({ type: 'error', text: (j && j.error) || `Erro ${res.status}` });
         return;
       }
-      setMsg({ type: 'success', text: `Ordem de compra ${j.nrordem} salva com sucesso!` });
-      setItens([]);
+      setMsg({ type: 'success', text: `Ordem de compra ${j.nrordem || nrordem} salva com sucesso!` });
+      if (!isEdit) setItens([]);
     } catch (e: any) {
       setMsg({ type: 'error', text: e?.message || 'Erro ao salvar a ordem de compra.' });
     } finally {
@@ -360,7 +420,9 @@ const OrdemCompraFormPage: React.FC = () => {
   return (
     <div className="sp-page" style={{ height: '100%', overflowY: 'auto', padding: 16 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h1 style={{ margin: 0, fontSize: 20, color: '#1e4e79' }}>Nova Ordem de Compra</h1>
+        <h1 style={{ margin: 0, fontSize: 20, color: '#1e4e79' }}>
+          {isEdit ? `Editar Ordem de Compra nº ${nrordem}` : 'Nova Ordem de Compra'}
+        </h1>
         <div style={{ display: 'flex', gap: 10 }}>
           <button
             onClick={() => navigate('/pecas/compras/manutencao-ordem-compra')}
@@ -415,7 +477,7 @@ const OrdemCompraFormPage: React.FC = () => {
             </select>
           </Campo>
           <Campo label="Número" width={140}>
-            <input style={readOnlyStyle()} value="(automático)" readOnly />
+            <input style={readOnlyStyle()} value={isEdit ? (nrordem || '') : '(automático)'} readOnly />
           </Campo>
           <Campo label="Data Emissão" width={140}>
             <input

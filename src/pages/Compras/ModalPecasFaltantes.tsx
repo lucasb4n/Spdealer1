@@ -60,6 +60,22 @@ const ModalPecasFaltantes: React.FC<ModalPecasFaltantesProps> = ({ open, onClose
       { headerName: 'Codigo', field: 'codigo', width: 140, sortable: true, filter: true },
       { headerName: 'Nome', field: 'nome', flex: 1, sortable: true, filter: true },
       { headerName: 'Qtde', field: 'qtde', width: 100, sortable: true, filter: true },
+      {
+        headerName: 'Data',
+        field: 'data',
+        width: 110,
+        sortable: true,
+        filter: true,
+        valueFormatter: (p: any) => {
+          if (!p || !p.value) return '';
+          const s = String(p.value).trim();
+          if (s.includes('-')) {
+            const parts = s.split('T')[0].split('-');
+            if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+          }
+          return s;
+        },
+      },
     ],
     []
   );

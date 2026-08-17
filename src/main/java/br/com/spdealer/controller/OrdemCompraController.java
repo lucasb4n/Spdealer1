@@ -274,6 +274,202 @@ public class OrdemCompraController {
         }
     }
 
+    /**
+     * Lista todas as ordens de compra com seus itens para a tela de manutenção.
+     */
+    @GetMapping("/ordens")
+    public ResponseEntity<?> listOrdens(@RequestParam(required = false) String search) {
+        StringBuilder sql = new StringBuilder(
+            "SELECT TRIM(c.empre_cpr) AS empre, TRIM(c.origem_cpr) AS origem, TRIM(c.nrordem_cpr) AS nrordem, " +
+            "TRIM(c.fornec_cpr) AS fornecCodigo, COALESCE(TRIM(cli.nome_cli), c.fornec_cpr) AS fornecedor, " +
+            "c.dtpedidoi_cpr AS dtpedidoi, c.dtpedido_cpr AS dtpedido, " +
+            "c.vlrtot_cpr AS valorTotal, " +
+            "TRIM(c.consultor_cpr) AS consultor, COALESCE(TRIM(v.nome_ven), c.consultor_cpr) AS vendedor, " +
+            "TRIM(c.tipo_cpr) AS tipo, TRIM(c.efetivado_cpr) AS efetivado " +
+            "FROM compras c " +
+            "LEFT JOIN clientes cli ON TRIM(cli.codigo_cli) = TRIM(c.fornec_cpr) " +
+            "LEFT JOIN vendedores v ON TRIM(v.cod_ven) = TRIM(c.consultor_cpr) " +
+            "WHERE 1=1 "
+        );
+        List<Object> params = new ArrayList<>();
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append("AND (UPPER(c.nrordem_cpr) LIKE ? OR UPPER(cli.nome_cli) LIKE ? OR UPPER(c.fornec_cpr) LIKE ?) ");
+            String like = "%" + search.trim().toUpperCase() + "%";
+            params.add(like);
+            params.add(like);
+            params.add(like);
+        }
+        sql.append("ORDER BY c.dtpedidoi_cpr DESC, c.nrordem_cpr DESC");
+        try {
+            List<Map<String, Object>> ordens = jdbc.queryForList(sql.toString(), params.toArray());
+            for (Map<String, Object> o : ordens) {
+                String emp = (String) o.get("empre");
+                String orig = (String) o.get("origem");
+                String nr = (String) o.get("nrordem");
+                List<Map<String, Object>> itens = jdbc.queryForList(
+                    "SELECT TRIM(fab_cprm) AS fab, TRIM(produto_cprm) AS codigo, TRIM(descr_cprm) AS nome, " +
+                    "qtde_cprm AS qtde, preco_cprm AS preco, vlrtot_cprm AS vlrtot, TRIM(tipom_cprm) AS ospe, TRIM(serie_cprm) AS serie " +
+                    "FROM comprasm WHERE empre_cprm = ? AND origem_cprm = ? AND nrordem_cprm = ? ORDER BY produto_cprm",
+                    emp, orig, nr);
+                o.put("itens", itens);
+            }
+            return ResponseEntity.ok(ordens);
+        } catch (Exception e) {
+            logger.error("Erro ao listar ordens de compra", e);
+            return ResponseEntity.status(500).body(Map.of("error", "Erro ao listar ordens de compra: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Busca detalhes completos de uma ordem de compra para popular a edição.
+     */
+    @GetMapping("/detalhes")
+    public ResponseEntity<?> getDetalhes(@RequestParam String empre,
+                                         @RequestParam String origem,
+                                         @RequestParam String nrordem) {
+        try {
+            List<Map<String, Object>> rows = jdbc.queryForList(
+                "SELECT TRIM(c.empre_cpr) AS empre, TRIM(c.origem_cpr) AS origem, TRIM(c.nrordem_cpr) AS nrordem, " +
+                "TRIM(c.fornec_cpr) AS fornecCodigo, COALESCE(TRIM(cli.nome_cli), c.fornec_cpr) AS fornecNome, " +
+                "c.dtpedidoi_cpr AS dtpedidoi, c.dtpedido_cpr AS dtpedido, " +
+                "c.dtprevi_cpr AS dtprevi, c.dtprev_cpr AS dtprev, " +
+                "TRIM(c.condpag_cpr) AS condpag, TRIM(c.codcobranca_cpr) AS codcobranca, " +
+                "TRIM(c.cliente_cpr) AS clienteCodigo, COALESCE(TRIM(cli2.nome_cli), c.cliente_cpr) AS clienteNome, " +
+                "TRIM(c.consultor_cpr) AS consultor, TRIM(c.classe_cpr) AS classe, TRIM(c.modelo_cpr) AS modelo, " +
+                "TRIM(c.obsospe_cpr) AS obsospe, TRIM(c.obs_cpr) AS obs, TRIM(c.efetivado_cpr) AS efetivado, " +
+                "TRIM(c.estoque_cpr) AS estoque, TRIM(c.tipo_cpr) AS tipo, c.vlrtot_cpr AS vlrtot " +
+                "FROM compras c " +
+                "LEFT JOIN clientes cli ON TRIM(cli.codigo_cli) = TRIM(c.fornec_cpr) " +
+                "LEFT JOIN clientes cli2 ON TRIM(cli2.codigo_cli) = TRIM(c.cliente_cpr) " +
+                "WHERE c.empre_cpr = ? AND c.origem_cpr = ? AND c.nrordem_cpr = ?",
+                empre, origem, nrordem);
+
+            if (rows.isEmpty()) {
+                return ResponseEntity.status(404).body(Map.of("error", "Ordem de compra não encontrada."));
+            }
+
+            Map<String, Object> ordem = rows.get(0);
+            List<Map<String, Object>> itens = jdbc.queryForList(
+                "SELECT TRIM(fab_cprm) AS fab, TRIM(produto_cprm) AS codigo, TRIM(descr_cprm) AS nome, " +
+                "qtde_cprm AS qtde, preco_cprm AS preco, vlrtot_cprm AS vlrtot, TRIM(tipom_cprm) AS ospe, TRIM(serie_cprm) AS serie " +
+                "FROM comprasm WHERE empre_cprm = ? AND origem_cprm = ? AND nrordem_cprm = ? ORDER BY produto_cprm",
+                empre, origem, nrordem);
+            ordem.put("itens", itens);
+
+            return ResponseEntity.ok(ordem);
+        } catch (Exception e) {
+            logger.error("Erro ao buscar detalhes da ordem de compra", e);
+            return ResponseEntity.status(500).body(Map.of("error", "Erro ao buscar detalhes: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Atualiza uma ordem de compra existente.
+     */
+    @PutMapping("/atualizar")
+    @Transactional(rollbackFor = Exception.class)
+    public ResponseEntity<?> update(HttpSession session, @RequestBody Map<String, Object> body) {
+        try {
+            String empre = safeTrim(body.get("empre"));
+            String origem = safeTrim(body.get("origem"));
+            String nrordem = safeTrim(body.get("nrordem"));
+
+            if (empre == null || origem == null || nrordem == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Empresa, Origem e Número são obrigatórios."));
+            }
+
+            String dtpedido = safeTrim(body.get("dtpedido"));
+            String dtprev = safeTrim(body.get("dtprev"));
+            String condpag = safeTrim(body.get("condpag"));
+            String fornec = safeTrim(body.get("fornec"));
+            String codcobranca = safeTrim(body.get("codcobranca"));
+            String cliente = safeTrim(body.get("cliente"));
+            String consultor = safeTrim(body.get("consultor"));
+            String classe = safeTrim(body.get("classe"));
+            String modelo = safeTrim(body.get("modelo"));
+            String obsospe = safeTrim(body.get("obsospe"));
+            String obs = safeTrim(body.get("obs"));
+            String efetivado = safeTrim(body.get("efetivado"));
+            String estoque = safeTrim(body.get("estoque"));
+            String tipo = safeTrim(body.get("tipo"));
+
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> itens = (List<Map<String, Object>>) body.getOrDefault("itens", new ArrayList<Map<String, Object>>());
+            if (itens.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Adicione ao menos um item à ordem de compra."));
+            }
+
+            BigDecimal total = BigDecimal.ZERO;
+            List<Object[]> itensParams = new ArrayList<>();
+            for (int i = 0; i < itens.size(); i++) {
+                Map<String, Object> item = itens.get(i);
+                String fab = safeTrim(item.get("fab"));
+                String produto = safeTrim(item.get("produto"));
+                String descr = safeTrim(item.get("descr"));
+                BigDecimal qtde = toBigDecimal(item.get("qtde"));
+                BigDecimal preco = toBigDecimal(item.get("preco"));
+                String tipom = safeTrim(item.get("tipom"));
+                String serie = safeTrim(item.get("serie"));
+
+                BigDecimal vlrtot = (preco == null ? BigDecimal.ZERO : preco).multiply(qtde == null ? BigDecimal.ZERO : qtde).setScale(4, RoundingMode.HALF_UP);
+                total = total.add(vlrtot);
+
+                itensParams.add(new Object[] {
+                    empre, origem, nrordem, fab, produto, descr, qtde, preco, vlrtot, tipom, serie
+                });
+            }
+
+            String sqlUpdateHeader = "UPDATE compras SET fornec_cpr = ?, dtpedido_cpr = ?, dtpedidoi_cpr = ?, " +
+                                     "dtprev_cpr = ?, dtprevi_cpr = ?, condpag_cpr = ?, codcobranca_cpr = ?, cliente_cpr = ?, " +
+                                     "consultor_cpr = ?, classe_cpr = ?, modelo_cpr = ?, obsospe_cpr = ?, obs_cpr = ?, " +
+                                     "efetivado_cpr = ?, estoque_cpr = ?, tipo_cpr = ?, vlrtot_cpr = ? " +
+                                     "WHERE empre_cpr = ? AND origem_cpr = ? AND nrordem_cpr = ?";
+            jdbc.update(sqlUpdateHeader,
+                fornec, toLegacyDate(dtpedido), toSqlDate(dtpedido),
+                toLegacyDate(dtprev), toSqlDate(dtprev),
+                trunc(condpag, 30), trunc(codcobranca, 3), trunc(cliente, 100), trunc(consultor, 50),
+                trunc(classe, 20), trunc(modelo, 50), trunc(obsospe, 15), trunc(obs, 100),
+                trunc(efetivado, 1), trunc(estoque, 1), trunc(tipo, 1),
+                total.setScale(4, RoundingMode.HALF_UP),
+                empre, origem, nrordem);
+
+            jdbc.update("DELETE FROM comprasm WHERE empre_cprm = ? AND origem_cprm = ? AND nrordem_cprm = ?", empre, origem, nrordem);
+
+            String sqlItem = "INSERT INTO comprasm (empre_cprm, origem_cprm, nrordem_cprm, fab_cprm, produto_cprm, descr_cprm, " +
+                             "qtde_cprm, preco_cprm, vlrtot_cprm, tipom_cprm, serie_cprm) " +
+                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            for (Object[] params : itensParams) {
+                jdbc.update(sqlItem, params);
+            }
+
+            return ResponseEntity.ok(Map.of("success", true, "nrordem", nrordem));
+        } catch (Exception e) {
+            logger.error("Erro ao atualizar ordem de compra", e);
+            return ResponseEntity.status(500).body(Map.of("error", "Erro ao atualizar ordem de compra: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Exclui uma ordem de compra e seus itens vinculados.
+     */
+    @DeleteMapping("/excluir")
+    @Transactional(rollbackFor = Exception.class)
+    public ResponseEntity<?> delete(@RequestParam String empre,
+                                    @RequestParam String origem,
+                                    @RequestParam String nrordem) {
+        try {
+            jdbc.update("DELETE FROM comprasm WHERE empre_cprm = ? AND origem_cprm = ? AND nrordem_cprm = ?", empre, origem, nrordem);
+            int rows = jdbc.update("DELETE FROM compras WHERE empre_cpr = ? AND origem_cpr = ? AND nrordem_cpr = ?", empre, origem, nrordem);
+            if (rows == 0) {
+                return ResponseEntity.status(404).body(Map.of("error", "Ordem de compra não localizada."));
+            }
+            return ResponseEntity.ok(Map.of("success", true, "message", "Ordem de compra excluída com sucesso."));
+        } catch (Exception e) {
+            logger.error("Erro ao excluir ordem de compra", e);
+            return ResponseEntity.status(500).body(Map.of("error", "Erro ao excluir ordem de compra: " + e.getMessage()));
+        }
+    }
+
     private java.sql.Date parseFlexibleDate(String raw) {
         if (raw == null || raw.trim().isEmpty()) return null;
         String s = raw.trim();

@@ -136,6 +136,7 @@ function App() {
                 <Route path="/pecas/compras/entrada-mercadoria" element={<EntradaMercadoriaPage />} />
                 <Route path="/pecas/compras/manutencao-ordem-compra" element={<ManutencaoOrdemCompraPage />} />
                 <Route path="/pecas/compras/manutencao-ordem-compra/nova" element={<OrdemCompraFormPage />} />
+                <Route path="/pecas/compras/manutencao-ordem-compra/editar/:empre/:origem/:nrordem" element={<OrdemCompraFormPage />} />
                 <Route path="/parametros/geral" element={<ParametrosGerais />} />
                 <Route path="/parametros/configuracoes" element={<ConfiguracoesGeraisModule />} />
                 <Route path="/parametros/tipos-fornecedores" element={<TiposFornecedores />} />

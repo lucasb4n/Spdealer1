@@ -288,7 +288,7 @@ public class OrdemCompraController {
             "TRIM(c.tipo_cpr) AS tipo, TRIM(c.efetivado_cpr) AS efetivado " +
             "FROM compras c " +
             "LEFT JOIN clientes cli ON TRIM(cli.codigo_cli) = TRIM(c.fornec_cpr) " +
-            "LEFT JOIN vendedores v ON TRIM(v.cod_ven) = TRIM(c.consultor_cpr) " +
+            "LEFT JOIN masven v ON CAST(v.cod_ven AS CHAR) = CAST(c.consultor_cpr AS CHAR) " +
             "WHERE 1=1 "
         );
         List<Object> params = new ArrayList<>();

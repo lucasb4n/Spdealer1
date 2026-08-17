@@ -398,7 +398,7 @@ public class OrcamentoController {
             if (itens != null && !itens.isEmpty()) {
                 int seq = 1;
                 for (Map<String, Object> item : itens) {
-                    inserirItem(numeroInt, filial, seq++, item, vendedor);
+                    inserirItem(numeroInt, filial, seq++, item, vendedor, tipoOrpInsert);
                 }
             }
 
@@ -535,7 +535,7 @@ public class OrcamentoController {
             if (itens != null && !itens.isEmpty()) {
                 int seq = 1;
                 for (Map<String, Object> item : itens) {
-                    inserirItem(numero, filial, seq++, item, vendedor);
+                    inserirItem(numero, filial, seq++, item, vendedor, tipoOrpUpdate);
                 }
             }
 
@@ -1177,10 +1177,14 @@ public class OrcamentoController {
     }
 
     private void inserirItem(Integer numeroInt, Integer filialInt, int seq, Map<String, Object> item) {
-        inserirItem(numeroInt, filialInt, seq, item, null);
+        inserirItem(numeroInt, filialInt, seq, item, null, "O");
     }
 
     private void inserirItem(Integer numeroInt, Integer filialInt, int seq, Map<String, Object> item, String vendedor) {
+        inserirItem(numeroInt, filialInt, seq, item, vendedor, "O");
+    }
+
+    private void inserirItem(Integer numeroInt, Integer filialInt, int seq, Map<String, Object> item, String vendedor, String mainTipoOrp) {
         String numeroOrp = padNumero(numeroInt);
         String filial = padFilial(filialInt);
 
@@ -1286,7 +1290,12 @@ public class OrcamentoController {
         );
 
         String tipoOrp = getString(item, "TIPO_ORP");
-        if (tipoOrp == null) tipoOrp = "O";
+        if (tipoOrp == null || tipoOrp.trim().isEmpty()) {
+            tipoOrp = mainTipoOrp;
+        }
+        if (tipoOrp == null || tipoOrp.trim().isEmpty()) {
+            tipoOrp = "O";
+        }
 
         if (fab != null && codigo != null) {
             BigDecimal qtSol = getBigDecimal(item, "QTSOL_ORPP");

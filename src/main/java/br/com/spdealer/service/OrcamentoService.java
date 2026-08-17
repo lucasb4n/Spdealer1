@@ -34,6 +34,23 @@ public class OrcamentoService {
 
         removePecfal(numeroOrp, seq);
 
+        // Se tipoOrp não vier como "P", checar o TIPO_ORP diretamente no cabeçalho do orçamento/pedido (orcamp)
+        String tipoOrpEfetivo = tipoOrp;
+        if (!"P".equalsIgnoreCase(tipoOrpEfetivo)) {
+            try {
+                String numPadded = formatNumPadded(numeroOrp);
+                List<Map<String, Object>> rows = jdbc.queryForList(
+                    "SELECT TIPO_ORP FROM orcamp WHERE NUMERO_ORP = ? OR NUMERO_ORP = ?",
+                    numPadded, numeroOrp);
+                if (!rows.isEmpty()) {
+                    String t = getString(rows.get(0), "TIPO_ORP");
+                    if (t != null && !t.trim().isEmpty()) {
+                        tipoOrpEfetivo = t.trim();
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+
         boolean hasMotivo = motivo != null && !motivo.trim().isEmpty()
                             && !"0".equals(motivo.trim()) && !"".equals(motivo.trim());
         boolean isNovo = novoOrpp != null && !novoOrpp.trim().isEmpty()
@@ -44,8 +61,8 @@ public class OrcamentoService {
         BigDecimal qtalocKar = ZERO;
         try {
             List<Map<String, Object>> karRows = jdbc.queryForList(
-                "SELECT QTDE_KAR, QTALOC_KAR FROM kardex WHERE DEP_KAR = ? AND REGISTRO_KAR = ? AND FAB_KAR = ? AND CODPROD_KAR = ? AND RESTO_KAR = ' '",
-                DEP_PADRAO, REGISTRO_KAR, fab, codigo);
+                "SELECT QTDE_KAR, QTALOC_KAR FROM kardex WHERE (DEP_KAR = ? OR DEP_KAR = '1' OR DEP_KAR = '001') AND REGISTRO_KAR = '01' AND FAB_KAR = ? AND CODPROD_KAR = ? AND (RESTO_KAR = ' ' OR RESTO_KAR IS NULL)",
+                DEP_PADRAO, fab, codigo);
             if (!karRows.isEmpty()) {
                 qtdeKar = getBigDecimal(karRows.get(0), "QTDE_KAR");
                 BigDecimal aloc = getBigDecimal(karRows.get(0), "QTALOC_KAR");
@@ -79,7 +96,7 @@ public class OrcamentoService {
         boolean hasQtFalta = qtFaltaEfetiva != null && qtFaltaEfetiva.compareTo(ZERO) > 0;
 
         if (!hasMotivo && hasQtFalta && !isNovo && isPecfalGer()) {
-            if ("P".equals(tipoOrp)) {
+            if ("P".equalsIgnoreCase(tipoOrpEfetivo)) {
                 generatePecfal(numeroOrp, seq, fab, codigo, qtFaltaEfetiva);
             } else if (pedpen != null && pedpen == 1) {
                 generatePecfal(numeroOrp, seq, fab, codigo, qtFaltaEfetiva);
@@ -183,10 +200,14 @@ public class OrcamentoService {
                 "SELECT PECFAL_GER FROM parametros_gerais LIMIT 1");
             if (!rows.isEmpty()) {
                 Object v = rows.get(0).get("PECFAL_GER");
-                return v != null && ("S".equals(v.toString()) || "1".equals(v.toString()));
+                if (v == null) v = rows.get(0).get("pecfal_ger");
+                if (v != null) {
+                    String s = v.toString().trim();
+                    return "S".equalsIgnoreCase(s) || "1".equals(s) || "TRUE".equalsIgnoreCase(s);
+                }
             }
         } catch (Exception ignored) {}
-        return false;
+        return true;
     }
 
     private String getString(Map<String, Object> map, String key) {

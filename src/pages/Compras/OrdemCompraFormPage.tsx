@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AgGridReact } from 'ag-grid-react';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { maskDate, maskMoney } from '../../utils/maskUtils';
 import ModalBuscaF4 from './ModalBuscaF4';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -659,7 +657,6 @@ const OrdemCompraFormPage: React.FC = () => {
       <div style={{ border: '1px solid #cbd5e1', borderRadius: 8, overflow: 'hidden', background: '#fff', marginBottom: 14 }}>
         <div className="ag-theme-alpine" style={{ height: 320, width: '100%' }}>
           <AgGridReact
-            theme="legacy"
             rowData={itens}
             columnDefs={columnDefs}
             defaultColDef={{ resizable: true, filter: true }}

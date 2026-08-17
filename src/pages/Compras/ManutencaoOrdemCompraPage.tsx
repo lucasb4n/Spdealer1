@@ -232,7 +232,7 @@ const ManutencaoOrdemCompraPage: React.FC = () => {
                   Valor Total
                 </th>
                 <th style={{ padding: '12px 14px', fontWeight: 700, color: '#334155' }}>Vendedor</th>
-                <th style={{ padding: '12px 14px', fontWeight 700, color: '#334155', textAlign: 'center' }}>
+                <th style={{ padding: '12px 14px', fontWeight: 700, color: '#334155', textAlign: 'center' }}>
                   Urgência
                 </th>
                 <th style={{ padding: '12px 14px', fontWeight: 700, color: '#334155', textAlign: 'center', width: 100 }}>

@@ -55,11 +55,8 @@ public class OrdemCompraController {
                 return ResponseEntity.badRequest().body(Map.of("error", "O campo Fornecedor (origem) aceita apenas N ou I."));
             }
 
-            // Gera o próximo número da ordem (por empresa + origem)
-            Integer next = jdbc.queryForObject(
-                "SELECT COALESCE(MAX(CAST(nrordem_cpr AS UNSIGNED)), 0) + 1 FROM compras WHERE empre_cpr = ? AND origem_cpr = ? FOR UPDATE",
-                Integer.class, empre, origem);
-            String nrordem = String.format("%09d", next);
+            // Gera o próximo número da ordem (último número + 1, preservando a largura)
+            String nrordem = proximoNumero(empre, origem, true);
 
             String dtpedido = safeTrim(body.get("dtpedido"));
             String dtprev = safeTrim(body.get("dtprev"));
@@ -234,7 +231,10 @@ public class OrdemCompraController {
             "TRIM(FAL_CODPROD) AS codigo, " +
             "TRIM(FAL_DESCR) AS nome, " +
             "COALESCE(FAL_QTDE, 0) AS qtde, " +
-            "FAL_DATA AS data " +
+            "FAL_DATA AS data, " +
+            "TRIM(FAL_NOME_SOL) AS vendedor, " +
+            "TRIM(FAL_NOME_CLI) AS cliente, " +
+            "TRIM(FAL_PEDIDO) AS pedido " +
             "FROM pecfal WHERE 1=1 "
         );
         List<Object> params = new ArrayList<>();
@@ -338,6 +338,35 @@ public class OrdemCompraController {
         } catch (Exception e) {
             logger.error("Erro ao listar ordens de compra", e);
             return ResponseEntity.status(500).body(Map.of("error", "Erro ao listar ordens de compra: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Calcula o próximo número da ordem de compra (último número + 1).
+     */
+    @GetMapping("/proximo-numero")
+    public ResponseEntity<?> proximoNumero(HttpSession session,
+                                           @RequestParam(required = false) String empre,
+                                           @RequestParam(required = false, defaultValue = "N") String origem) {
+        try {
+            if (empre == null || empre.isEmpty()) {
+                try {
+                    empre = SessionHelper.getEmpresaFromSession(session);
+                } catch (Exception e) {
+                    empre = "001";
+                }
+            }
+            if (origem == null || origem.isEmpty()) {
+                origem = "N";
+            }
+            if (origem.length() > 1) {
+                return ResponseEntity.badRequest().body(Map.of("error", "O campo Fornecedor (origem) aceita apenas N ou I."));
+            }
+            String nrordem = proximoNumero(empre, origem, false);
+            return ResponseEntity.ok(Map.of("success", true, "nrordem", nrordem, "empre", empre, "origem", origem));
+        } catch (Exception e) {
+            logger.error("Erro ao calcular o próximo número da ordem de compra", e);
+            return ResponseEntity.status(500).body(Map.of("error", "Erro ao calcular o próximo número: " + e.getMessage()));
         }
     }
 
@@ -530,6 +559,36 @@ public class OrdemCompraController {
     }
 
     // ===================== HELPERS =====================
+
+    /**
+     * Calcula o próximo número da ordem de compra: pega o número da última ordem
+     * (maior valor numérico por empresa + origem) e soma 1, preservando a largura
+     * do número. Ex.: última ordem "01" -> próxima "02". Sem ordens, inicia em "01".
+     */
+    private String proximoNumero(String empre, String origem, boolean comLock) {
+        StringBuilder sql = new StringBuilder(
+            "SELECT nrordem_cpr AS nrordem FROM compras WHERE empre_cpr = ? AND origem_cpr = ? " +
+            "AND nrordem_cpr IS NOT NULL AND TRIM(nrordem_cpr) <> '' " +
+            "AND nrordem_cpr REGEXP '^[0-9]+$' " +
+            "ORDER BY CAST(nrordem_cpr AS UNSIGNED) DESC, LENGTH(nrordem_cpr) DESC LIMIT 1");
+        if (comLock) {
+            sql.append(" FOR UPDATE");
+        }
+        List<Map<String, Object>> rows = jdbc.queryForList(sql.toString(), empre, origem);
+        if (rows.isEmpty()) {
+            return "01";
+        }
+        String ultimo = String.valueOf(rows.get(0).get("nrordem")).trim();
+        long numero;
+        try {
+            numero = Long.parseLong(ultimo);
+        } catch (NumberFormatException e) {
+            numero = 0L;
+        }
+        long proximo = numero + 1;
+        int largura = Math.max(ultimo.length(), String.valueOf(proximo).length());
+        return String.format("%0" + largura + "d", proximo);
+    }
 
     private String safeTrim(Object value) {
         if (value == null) {

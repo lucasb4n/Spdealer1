@@ -56,14 +56,14 @@ const ModalPecasFaltantes: React.FC<ModalPecasFaltantesProps> = ({ open, onClose
         width: 50,
         resizable: false,
       },
-      { headerName: 'Fab', field: 'fab', width: 90, sortable: true, filter: true },
-      { headerName: 'Codigo', field: 'codigo', width: 140, sortable: true, filter: true },
-      { headerName: 'Nome', field: 'nome', flex: 1, sortable: true, filter: true },
-      { headerName: 'Qtde', field: 'qtde', width: 100, sortable: true, filter: true },
+      { headerName: 'Fab', field: 'fab', width: 80, sortable: true, filter: true },
+      { headerName: 'Codigo', field: 'codigo', width: 130, sortable: true, filter: true },
+      { headerName: 'Nome', field: 'nome', flex: 1, minWidth: 160, sortable: true, filter: true },
+      { headerName: 'Qtde', field: 'qtde', width: 90, sortable: true, filter: true },
       {
         headerName: 'Data',
         field: 'data',
-        width: 110,
+        width: 105,
         sortable: true,
         filter: true,
         valueFormatter: (p: any) => {
@@ -76,6 +76,9 @@ const ModalPecasFaltantes: React.FC<ModalPecasFaltantesProps> = ({ open, onClose
           return s;
         },
       },
+      { headerName: 'Vendedor', field: 'vendedor', width: 130, sortable: true, filter: true },
+      { headerName: 'Cliente', field: 'cliente', width: 150, sortable: true, filter: true },
+      { headerName: 'Pedido', field: 'pedido', width: 100, sortable: true, filter: true },
     ],
     []
   );

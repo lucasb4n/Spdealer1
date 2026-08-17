@@ -130,6 +130,26 @@ const OrdemCompraFormPage: React.FC = () => {
   const [modalPecasOpen, setModalPecasOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<Msg | null>(null);
+  const [proximoNr, setProximoNr] = useState('');
+
+  useEffect(() => {
+    if (isEdit) {
+      setProximoNr('');
+      return;
+    }
+    let cancelled = false;
+    const params = new URLSearchParams();
+    if (form.origem) params.append('origem', form.origem);
+    fetch(`/api/compras/proximo-numero?${params.toString()}`)
+      .then((r) => r.json())
+      .then((j) => {
+        if (!cancelled && j && !j.error && j.nrordem) setProximoNr(String(j.nrordem));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [isEdit, form.origem]);
 
   useEffect(() => {
     if (isEdit) return;
@@ -496,7 +516,7 @@ const OrdemCompraFormPage: React.FC = () => {
             </select>
           </Campo>
           <Campo label="Número" width={140}>
-            <input style={readOnlyStyle()} value={isEdit ? (nrordem || '') : '(automático)'} readOnly />
+            <input style={readOnlyStyle()} value={isEdit ? (nrordem || '') : (proximoNr || '(automático)')} readOnly />
           </Campo>
           <Campo label="Data Emissão" width={140}>
             <input

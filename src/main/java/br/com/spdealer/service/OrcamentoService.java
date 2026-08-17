@@ -36,21 +36,53 @@ public class OrcamentoService {
 
         boolean hasMotivo = motivo != null && !motivo.trim().isEmpty()
                             && !"0".equals(motivo.trim()) && !"".equals(motivo.trim());
-        boolean hasQtFalta = qtFalta != null && qtFalta.compareTo(ZERO) > 0;
         boolean isNovo = novoOrpp != null && !novoOrpp.trim().isEmpty()
                          && !"0".equals(novoOrpp.trim());
 
+        // Consultar o Kardex para verificar quantidade em estoque (QTDE_KAR e QTALOC_KAR)
+        BigDecimal qtdeKar = null;
+        BigDecimal qtalocKar = ZERO;
+        try {
+            List<Map<String, Object>> karRows = jdbc.queryForList(
+                "SELECT QTDE_KAR, QTALOC_KAR FROM kardex WHERE DEP_KAR = ? AND REGISTRO_KAR = ? AND FAB_KAR = ? AND CODPROD_KAR = ? AND RESTO_KAR = ' '",
+                DEP_PADRAO, REGISTRO_KAR, fab, codigo);
+            if (!karRows.isEmpty()) {
+                qtdeKar = getBigDecimal(karRows.get(0), "QTDE_KAR");
+                BigDecimal aloc = getBigDecimal(karRows.get(0), "QTALOC_KAR");
+                if (aloc != null) qtalocKar = aloc;
+            }
+        } catch (Exception ignored) {}
+
+        // Calcular estoque disponível e quantidade faltante efetiva
+        BigDecimal disponivel = ZERO;
+        if (qtdeKar != null && qtdeKar.compareTo(ZERO) > 0) {
+            disponivel = qtdeKar.subtract(qtalocKar);
+            if (disponivel.compareTo(ZERO) < 0) disponivel = ZERO;
+        }
+
+        BigDecimal qtFaltaEfetiva = qtFalta;
+        if (qtSol != null && qtSol.compareTo(ZERO) > 0) {
+            if (qtdeKar == null || qtdeKar.compareTo(ZERO) == 0) {
+                qtFaltaEfetiva = qtSol;
+            } else if (disponivel.compareTo(qtSol) < 0) {
+                qtFaltaEfetiva = qtSol.subtract(disponivel);
+            }
+        }
+
+        boolean hasQtFalta = qtFaltaEfetiva != null && qtFaltaEfetiva.compareTo(ZERO) > 0;
+
         if (!hasMotivo && hasQtFalta && !isNovo && isPecfalGer()) {
             if ("P".equals(tipoOrp)) {
-                generatePecfal(numeroOrp, seq, fab, codigo, qtFalta);
+                generatePecfal(numeroOrp, seq, fab, codigo, qtFaltaEfetiva);
             } else if (pedpen != null && pedpen == 1) {
-                generatePecfal(numeroOrp, seq, fab, codigo, qtFalta);
+                generatePecfal(numeroOrp, seq, fab, codigo, qtFaltaEfetiva);
             }
         }
     }
 
     public void removerPecfalPorOrcamento(String numeroOrp) {
-        jdbc.update("DELETE FROM pecfal WHERE FAL_PEDIDO = ?", numeroOrp);
+        String numPadded = formatNumPadded(numeroOrp);
+        jdbc.update("DELETE FROM pecfal WHERE FAL_PEDIDO = ? OR FAL_PEDIDO = ?", numeroOrp, numPadded);
     }
 
     public void reverterAlocacaoPorOrcamento(String numeroOrp, String dep) {
@@ -81,19 +113,36 @@ public class OrcamentoService {
     }
 
     private void removePecfal(String numeroOrp, int seq) {
-        jdbc.update("DELETE FROM pecfal WHERE FAL_PEDIDO = ? AND FAL_SEQUENCIA = ?",
-            numeroOrp, String.format("%03d", seq));
+        String numPadded = formatNumPadded(numeroOrp);
+        jdbc.update("DELETE FROM pecfal WHERE (FAL_PEDIDO = ? OR FAL_PEDIDO = ?) AND FAL_SEQUENCIA = ?",
+            numeroOrp, numPadded, String.format("%03d", seq));
     }
 
     private void generatePecfal(String numeroOrp, int seq, String fab, String codigo,
                                  BigDecimal qtde) {
+        String numPadded = formatNumPadded(numeroOrp);
         String seqP = String.format("%03d", seq);
         LocalDate hoje = LocalDate.now();
         String hora = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HHmmss"));
 
         List<Map<String, Object>> orc = jdbc.queryForList(
-            "SELECT NOME_CLI FROM orcamp WHERE NUMERO_ORP = ?", numeroOrp);
-        String nomeCli = orc.isEmpty() ? "" : getString(orc.get(0), "NOME_CLI");
+            "SELECT o.NOME_CLI, o.VENDEDOR_ORP, v.NOME_VEN " +
+            "FROM orcamp o " +
+            "LEFT JOIN masven v ON CAST(v.COD_VEN AS CHAR) = CAST(o.VENDEDOR_ORP AS CHAR) " +
+            "WHERE o.NUMERO_ORP = ? OR o.NUMERO_ORP = ?", numPadded, numeroOrp);
+
+        String nomeCli = "";
+        String nomeSol = "";
+        if (!orc.isEmpty()) {
+            Map<String, Object> row = orc.get(0);
+            nomeCli = getString(row, "NOME_CLI");
+            if (nomeCli == null) nomeCli = "";
+            nomeSol = getString(row, "NOME_VEN");
+            if (nomeSol == null || nomeSol.trim().isEmpty()) {
+                nomeSol = getString(row, "VENDEDOR_ORP");
+            }
+            if (nomeSol == null) nomeSol = "";
+        }
 
         List<Map<String, Object>> prod = jdbc.queryForList(
             "SELECT DESCR_EST FROM estoque WHERE FAB_EST = ? AND CODPROD_EST = ?",
@@ -102,12 +151,23 @@ public class OrcamentoService {
 
         jdbc.update(
             "INSERT INTO pecfal (FAL_FILIAL, FAL_DATA, FAL_HORA, FAL_FAB, FAL_CODPROD, " +
-            "FAL_DESCR, FAL_PEDIDO, FAL_SEQUENCIA, FAL_QTDE, FAL_STATUS, FAL_NOME_CLI, " +
+            "FAL_DESCR, FAL_PEDIDO, FAL_SEQUENCIA, FAL_QTDE, FAL_STATUS, FAL_NOME_CLI, FAL_NOME_SOL, " +
             "FAL_ORIGEM_CPR, FAL_SEQUENCIA_CPR, FAL_DEP) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             FILIAL, hoje, hora, fab, codigo, descr,
-            numeroOrp, seqP, qtde, "A", nomeCli,
-            "O", numeroOrp, DEP_PADRAO);
+            numPadded, seqP, qtde, "A", nomeCli, nomeSol,
+            "O", numPadded, DEP_PADRAO);
+    }
+
+    private String formatNumPadded(String numeroOrp) {
+        if (numeroOrp == null) return "";
+        String digits = numeroOrp.replaceAll("\\D", "");
+        if (digits.isEmpty()) return numeroOrp;
+        try {
+            return String.format("%08d", Integer.parseInt(digits));
+        } catch (Exception e) {
+            return numeroOrp;
+        }
     }
 
     private boolean isPecfalGer() {

@@ -1,8 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AgGridReact } from 'ag-grid-react';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { maskDate, maskMoney } from '../../utils/maskUtils';
 import ModalBuscaF4 from './ModalBuscaF4';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
 
 interface ItemOrdem {
   fab: string;
@@ -204,36 +208,48 @@ const OrdemCompraFormPage: React.FC = () => {
   const totValor = itens.reduce((s, i) => s + (i.qtde || 0) * (i.preco || 0), 0);
 
   const pinnedBottom: any[] = useMemo(
-    () => [{ codigo: 'TOTAIS', nome: `${totItens} item(ns)`, qtde: totUnidades, preco: totValor, ospe: '' }],
+    () => [{ fab: '', codigo: 'TOTAIS', nome: `${totItens} item(ns)`, preco: totValor, qtde: totUnidades }],
     [itens]
   );
 
   const columnDefs: any[] = useMemo(
     () => [
-      { headerName: 'Código', field: 'codigo', width: 140, sortable: true },
+      { headerName: 'Fab', field: 'fab', width: 90, sortable: true },
+      { headerName: 'Codigo', field: 'codigo', width: 140, sortable: true },
       { headerName: 'Nome', field: 'nome', flex: 1, sortable: true },
-      { headerName: 'Qtde', field: 'qtde', width: 100, editable: true, sortable: true },
       {
-        headerName: 'Valor Unitário',
+        headerName: 'Valor Uni',
         field: 'preco',
         width: 140,
         editable: true,
-        valueFormatter: (p: any) => formatMoney(parseNum(p.value)),
+        valueFormatter: (p: any) => (p.value !== undefined && p.value !== null ? formatMoney(parseNum(p.value)) : ''),
       },
-      { headerName: 'OS/PE', field: 'ospe', width: 90 },
+      { headerName: 'Qtde', field: 'qtde', width: 100, editable: true, sortable: true },
       {
-        headerName: '',
-        width: 50,
+        headerName: 'Ações',
+        width: 80,
+        cellStyle: { display: 'flex', justifyContent: 'center', alignItems: 'center' },
         cellRenderer: (params: any) => {
           const data = params.data;
           if (!data || data.codigo === 'TOTAIS') return null;
           return (
             <button
-              title="Remover"
+              title="Apagar item"
               onClick={() => removeItem(data)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: 15, padding: 0 }}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#ef4444',
+                fontSize: 14,
+                padding: '4px 8px',
+                borderRadius: 4,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
             >
-              &times;
+              <FontAwesomeIcon icon={faTrash} />
             </button>
           );
         },
@@ -543,8 +559,8 @@ const OrdemCompraFormPage: React.FC = () => {
                 style={inputStyle()}
                 value={produtoForm.codigo}
                 maxLength={30}
-                readOnly
-                placeholder="F4 para pesquisar"
+                onChange={(e) => setProdutoForm((p) => ({ ...p, codigo: e.target.value }))}
+                placeholder="Digite o código ou F4"
                 onKeyDown={(e) => {
                   if (e.key === 'F4') {
                     e.preventDefault();
@@ -575,6 +591,12 @@ const OrdemCompraFormPage: React.FC = () => {
               style={inputStyle()}
               value={produtoForm.qtde}
               onChange={(e) => setProdutoForm((p) => ({ ...p, qtde: e.target.value.replace(/[^0-9]/g, '') }))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addItem();
+                }
+              }}
             />
           </Campo>
           <Campo label="Valor Unitário" width={150}>
@@ -582,6 +604,12 @@ const OrdemCompraFormPage: React.FC = () => {
               style={inputStyle()}
               value={produtoForm.preco}
               onChange={(e) => setProdutoForm((p) => ({ ...p, preco: maskMoney(e.target.value) }))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addItem();
+                }
+              }}
               placeholder="0,00"
             />
           </Campo>

@@ -49,7 +49,7 @@ const inputStyle = (width?: number): React.CSSProperties => ({
   fontSize: 13,
   borderRadius: 6,
   border: '1px solid #cbd5e1',
-  background: '#bebebe',
+  background: '#fff',
   color: '#334155',
   outline: 'none',
   boxSizing: 'border-box',
@@ -57,7 +57,7 @@ const inputStyle = (width?: number): React.CSSProperties => ({
 
 const readOnlyStyle = (width?: number): React.CSSProperties => ({
   ...inputStyle(width),
-  background: '#bebebe',
+  background: '#f8fafc',
   color: '#475569',
 });
 

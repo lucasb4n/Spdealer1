@@ -24,6 +24,8 @@ interface ItemOrdem {
   qtde: number;
   preco: number;
   vlrtot?: number;
+  nrOrdem?: string;
+  dataOrdem?: any;
 }
 
 interface OrdemCompra {
@@ -738,6 +740,8 @@ const ManutencaoOrdemCompraPage: React.FC = () => {
                                       <th style={{ padding: '8px 12px', fontWeight: 700, color: '#475569' }}>Nome</th>
                                       <th style={{ padding: '8px 12px', width: 100, textAlign: 'center', fontWeight: 700, color: '#475569' }}>Qtde</th>
                                       <th style={{ padding: '8px 12px', width: 130, textAlign: 'right', fontWeight: 700, color: '#475569' }}>Valor Uni</th>
+                                      <th style={{ padding: '8px 12px', width: 110, fontWeight: 700, color: '#475569' }}>N° Ordem</th>
+                                      <th style={{ padding: '8px 12px', width: 110, fontWeight: 700, color: '#475569' }}>Data Ordem</th>
                                     </tr>
                                   </thead>
                                   <tbody>
@@ -748,6 +752,8 @@ const ManutencaoOrdemCompraPage: React.FC = () => {
                                         <td style={{ padding: '8px 12px', color: '#334155' }}>{item.nome}</td>
                                         <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 600, color: '#0f172a' }}>{item.qtde}</td>
                                         <td style={{ padding: '8px 12px', textAlign: 'right', color: '#0f172a' }}>{formatMoney(item.preco)}</td>
+                                        <td style={{ padding: '8px 12px', fontWeight: 600, color: '#1e4e79' }}>{item.nrOrdem || '-'}</td>
+                                        <td style={{ padding: '8px 12px', color: '#334155' }}>{item.dataOrdem ? formatDateBr(item.dataOrdem) : '-'}</td>
                                       </tr>
                                     ))}
                                   </tbody>

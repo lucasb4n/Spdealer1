@@ -12,7 +12,7 @@ print("     🚀 DEPLOY SPDEALER -> PRODUÇÃO (192.168.10.70)")
 print("==================================================")
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-REMOTE_HOST = "100.116.217.83"
+REMOTE_HOST = "192.168.10.70"
 REMOTE_USER = "root"
 REMOTE_PASS = "k15720"
 REMOTE_WEBAPPS = "/usr/local/tomcat10/webapps"

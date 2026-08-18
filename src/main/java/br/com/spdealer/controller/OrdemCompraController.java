@@ -139,6 +139,8 @@ public class OrdemCompraController {
                 jdbc.update(sqlItem, params);
             }
 
+            atualizarPecfal(empre, nrordem, dtpedido, itens);
+
             return ResponseEntity.ok(Map.of(
                 "success", true,
                 "nrordem", nrordem,
@@ -235,7 +237,7 @@ public class OrdemCompraController {
             "TRIM(FAL_NOME_SOL) AS vendedor, " +
             "TRIM(FAL_NOME_CLI) AS cliente, " +
             "TRIM(FAL_PEDIDO) AS pedido " +
-            "FROM pecfal WHERE 1=1 "
+            "FROM pecfal WHERE FAL_STATUS = '0' "
         );
         List<Object> params = new ArrayList<>();
 
@@ -328,9 +330,15 @@ public class OrdemCompraController {
                 String orig = (String) o.get("origem");
                 String nr = (String) o.get("nrordem");
                 List<Map<String, Object>> itens = jdbc.queryForList(
-                    "SELECT TRIM(fab_cprm) AS fab, TRIM(produto_cprm) AS codigo, TRIM(descr_cprm) AS nome, " +
-                    "qtde_cprm AS qtde, preco_cprm AS preco, vlrtot_cprm AS vlrtot, TRIM(tipom_cprm) AS ospe, TRIM(serie_cprm) AS serie " +
-                    "FROM comprasm WHERE empre_cprm = ? AND origem_cprm = ? AND nrordem_cprm = ? ORDER BY produto_cprm",
+                    "SELECT TRIM(m.fab_cprm) AS fab, TRIM(m.produto_cprm) AS codigo, TRIM(m.descr_cprm) AS nome, " +
+                    "m.qtde_cprm AS qtde, m.preco_cprm AS preco, m.vlrtot_cprm AS vlrtot, TRIM(m.tipom_cprm) AS ospe, TRIM(m.serie_cprm) AS serie, " +
+                    "MAX(COALESCE(TRIM(p.fal_origem_cpr), '')) AS nrOrdem, MAX(p.fal_data) AS dataOrdem " +
+                    "FROM comprasm m " +
+                    "LEFT JOIN pecfal p ON p.fal_fab = m.fab_cprm AND TRIM(p.fal_codprod) = TRIM(m.produto_cprm) " +
+                    "WHERE m.empre_cprm = ? AND m.origem_cprm = ? AND m.nrordem_cprm = ? " +
+                    "GROUP BY m.empre_cprm, m.origem_cprm, m.nrordem_cprm, m.fab_cprm, m.produto_cprm, m.descr_cprm, " +
+                    "m.qtde_cprm, m.preco_cprm, m.vlrtot_cprm, m.tipom_cprm, m.serie_cprm " +
+                    "ORDER BY m.produto_cprm",
                     emp, orig, nr);
                 o.put("itens", itens);
             }
@@ -517,6 +525,8 @@ public class OrdemCompraController {
                 jdbc.update(sqlItem, params);
             }
 
+            atualizarPecfal(empre, nrordem, dtpedido, itens);
+
             return ResponseEntity.ok(Map.of("success", true, "nrordem", nrordem));
         } catch (Exception e) {
             logger.error("Erro ao atualizar ordem de compra", e);
@@ -542,6 +552,33 @@ public class OrdemCompraController {
         } catch (Exception e) {
             logger.error("Erro ao excluir ordem de compra", e);
             return ResponseEntity.status(500).body(Map.of("error", "Erro ao excluir ordem de compra: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Vincula as peças da ordem de compra aos registros abertos da tabela pecfal:
+     * marca fal_status = 1 (processada), grava o número da ordem em fal_origem_cpr
+     * e a data de emissão (yyyyMMdd) em fal_prev.
+     */
+    private void atualizarPecfal(String empre, String nrordem, String dtpedido, List<Map<String, Object>> itens) {
+        String falPrev = null;
+        Integer legacy = toLegacyDate(dtpedido);
+        if (legacy != null) {
+            falPrev = String.format("%08d", legacy);
+        }
+        for (Map<String, Object> item : itens) {
+            String fab = safeTrim(item.get("fab"));
+            String produto = safeTrim(item.get("produto"));
+            if (fab == null) {
+                fab = "";
+            }
+            if (produto == null) {
+                continue;
+            }
+            jdbc.update(
+                "UPDATE pecfal SET FAL_STATUS = '1', FAL_ORIGEM_CPR = ?, FAL_PREV = ? " +
+                "WHERE FAL_STATUS = '0' AND FAL_FILIAL = ? AND FAL_FAB = ? AND TRIM(FAL_CODPROD) = ?",
+                nrordem, falPrev, empre, fab, produto);
         }
     }
 

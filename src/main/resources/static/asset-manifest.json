@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/spdealer/static/css/main.d3c88c3f.css",
-    "main.js": "/spdealer/static/js/main.3d739bcc.js",
+    "main.js": "/spdealer/static/js/main.1143d7b9.js",
     "static/js/206.15d8569e.chunk.js": "/spdealer/static/js/206.15d8569e.chunk.js",
     "index.html": "/spdealer/index.html",
     "static/media/rtc-calculator.svg": "/spdealer/static/media/rtc-calculator.9527bbcc5ba75104a262a5f1e19e0cfe.svg"
   },
   "entrypoints": [
     "static/css/main.d3c88c3f.css",
-    "static/js/main.3d739bcc.js"
+    "static/js/main.1143d7b9.js"
   ]
 }

@@ -1,5 +1,6 @@
 package br.com.spdealer.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class OrcamentoService {
 
     @Autowired
@@ -61,8 +63,9 @@ public class OrcamentoService {
         BigDecimal qtalocKar = ZERO;
         try {
             List<Map<String, Object>> karRows = jdbc.queryForList(
-                "SELECT QTDE_KAR, QTALOC_KAR FROM kardex WHERE (DEP_KAR = ? OR DEP_KAR = '1' OR DEP_KAR = '001') AND REGISTRO_KAR = '01' AND FAB_KAR = ? AND CODPROD_KAR = ? AND (RESTO_KAR = ' ' OR RESTO_KAR IS NULL)",
-                DEP_PADRAO, fab, codigo);
+                "SELECT COALESCE(QTDE_KAR, 0) AS QTDE_KAR, COALESCE(QTALOC_KAR, 0) AS QTALOC_KAR " +
+                "FROM kardex WHERE FAB_KAR = ? AND CODPROD_KAR = ? AND (DEP_KAR = ? OR DEP_KAR = 1 OR DEP_KAR = '1' OR DEP_KAR = '001') LIMIT 1",
+                fab, codigo, DEP_PADRAO);
             if (!karRows.isEmpty()) {
                 qtdeKar = getBigDecimal(karRows.get(0), "QTDE_KAR");
                 BigDecimal aloc = getBigDecimal(karRows.get(0), "QTALOC_KAR");
@@ -70,27 +73,32 @@ public class OrcamentoService {
             }
         } catch (Exception ignored) {}
 
-        // Calcular estoque disponível e quantidade faltante efetiva
+        // Fallback para a quantidade pedida (qtSol)
+        BigDecimal qtSolEfetiva = qtSol;
+        if (qtSolEfetiva == null || qtSolEfetiva.compareTo(ZERO) <= 0) {
+            if (qtAloc != null && qtAloc.compareTo(ZERO) > 0) qtSolEfetiva = qtAloc;
+            else if (qtFalta != null && qtFalta.compareTo(ZERO) > 0) qtSolEfetiva = qtFalta;
+        }
+
+        // Calcular estoque disponível (qtde_kar - qtaloc_kar)
         BigDecimal disponivel = ZERO;
         if (qtdeKar != null && qtdeKar.compareTo(ZERO) > 0) {
             disponivel = qtdeKar.subtract(qtalocKar);
             if (disponivel.compareTo(ZERO) < 0) disponivel = ZERO;
         }
 
-        BigDecimal qtFaltaEfetiva = qtFalta;
-        if (qtSol != null && qtSol.compareTo(ZERO) > 0) {
+        // Caso a quantidade de uma peça pedida no pedido seja maior que o estoque, a diferença vai para pecfal
+        BigDecimal qtFaltaEfetiva = ZERO;
+        if (qtSolEfetiva != null && qtSolEfetiva.compareTo(ZERO) > 0) {
             if (qtdeKar == null || qtdeKar.compareTo(ZERO) <= 0) {
-                // Sem estoque no Kardex (0 ou null): falta total solicitada
-                qtFaltaEfetiva = qtSol;
-            } else if (qtSol.compareTo(qtdeKar) > 0) {
-                // Quantidade pedida maior que a quantidade da peça no Kardex: calcula a diferença
-                qtFaltaEfetiva = qtSol.subtract(qtdeKar);
-            } else if (qtSol.compareTo(disponivel) > 0) {
-                // Quantidade pedida maior que a disponível (com alocação): calcula a diferença disponível
-                qtFaltaEfetiva = qtSol.subtract(disponivel);
-            } else {
-                qtFaltaEfetiva = ZERO;
+                // Sem estoque no Kardex (0 ou null): falta total pedida
+                qtFaltaEfetiva = qtSolEfetiva;
+            } else if (qtSolEfetiva.compareTo(disponivel) > 0) {
+                // Quantidade pedida maior que a disponível no estoque: diferença vai para pecfal
+                qtFaltaEfetiva = qtSolEfetiva.subtract(disponivel);
             }
+        } else if (qtFalta != null && qtFalta.compareTo(ZERO) > 0) {
+            qtFaltaEfetiva = qtFalta;
         }
 
         boolean hasQtFalta = qtFaltaEfetiva != null && qtFaltaEfetiva.compareTo(ZERO) > 0;
@@ -173,14 +181,36 @@ public class OrcamentoService {
             fab, codigo);
         String descr = prod.isEmpty() ? "" : getString(prod.get(0), "DESCR_EST");
 
-        jdbc.update(
-            "INSERT INTO pecfal (FAL_FILIAL, FAL_DATA, FAL_HORA, FAL_FAB, FAL_CODPROD, " +
-            "FAL_DESCR, FAL_PEDIDO, FAL_SEQUENCIA, FAL_QTDE, FAL_STATUS, FAL_NOME_CLI, FAL_NOME_SOL, " +
-            "FAL_ORIGEM_CPR, FAL_SEQUENCIA_CPR, FAL_DEP) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            FILIAL, hoje, hora, fab, codigo, descr,
-            numPadded, seqP, qtde, "A", nomeCli, nomeSol,
-            "O", numPadded, DEP_PADRAO);
+        java.sql.Date sqlDate = java.sql.Date.valueOf(hoje);
+
+        try {
+            jdbc.update(
+                "INSERT INTO pecfal (FAL_FILIAL, FAL_DATA, FAL_HORA, FAL_FAB, FAL_CODPROD, " +
+                "FAL_DESCR, FAL_PEDIDO, FAL_SEQUENCIA, FAL_QTDE, FAL_STATUS, FAL_NOME_CLI, FAL_NOME_SOL, " +
+                "FAL_ORIGEM_CPR, FAL_SEQUENCIA_CPR, FAL_DEP) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                FILIAL, sqlDate, hora, fab, codigo, descr,
+                numPadded, seqP, qtde, "A", nomeCli, nomeSol,
+                "O", numPadded, DEP_PADRAO);
+        } catch (Exception e1) {
+            log.warn("Erro ao inserir em pecfal completo, executando fallback 1: {}", e1.getMessage());
+            try {
+                jdbc.update(
+                    "INSERT INTO pecfal (FAL_FILIAL, FAL_DATA, FAL_HORA, FAL_FAB, FAL_CODPROD, " +
+                    "FAL_DESCR, FAL_PEDIDO, FAL_SEQUENCIA, FAL_QTDE, FAL_STATUS, FAL_NOME_CLI, FAL_NOME_SOL) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    FILIAL, sqlDate, hora, fab, codigo, descr,
+                    numPadded, seqP, qtde, "A", nomeCli, nomeSol);
+            } catch (Exception e2) {
+                log.warn("Erro no fallback 1 de pecfal, executando fallback essencial: {}", e2.getMessage());
+                jdbc.update(
+                    "INSERT INTO pecfal (FAL_FILIAL, FAL_DATA, FAL_FAB, FAL_CODPROD, " +
+                    "FAL_DESCR, FAL_PEDIDO, FAL_QTDE) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    FILIAL, sqlDate, fab, codigo, descr,
+                    numPadded, qtde);
+            }
+        }
     }
 
     private String formatNumPadded(String numeroOrp) {

@@ -1264,6 +1264,11 @@ public class OrcamentoController {
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """;
 
+        Object qtsolVal = getField.apply("QTSOL_ORPP", "QTSOL_ORP");
+        if (qtsolVal == null || (qtsolVal instanceof Number && ((Number) qtsolVal).doubleValue() <= 0)) {
+            qtsolVal = qtrec != null ? qtrec : getField.apply("QTALOC_ORPP", "QTDE_ORP");
+        }
+
         jdbcTemplate.update(sql,
             filial,
             numeroOrp,
@@ -1273,7 +1278,7 @@ public class OrcamentoController {
             getField.apply("DESCR_ORPP", "DESCR_ORP"),
             getField.apply("QTALOC_ORPP", "QTDE_ORP"),
             qtrec,
-            getField.apply("QTSOL_ORPP", "QTSOL_ORP"),
+            qtsolVal,
             getField.apply("QTFALTA_ORPP", "QTFALTA_ORP"),
             precusto,
             getField.apply("PRECOPUB_ORPP", "PRECO_ORP"),
@@ -1302,6 +1307,8 @@ public class OrcamentoController {
         if (fab != null && codigo != null) {
             BigDecimal qtSol = getBigDecimal(item, "QTSOL_ORPP");
             if (qtSol == null) qtSol = getBigDecimal(item, "QTSOL_ORP");
+            if (qtSol == null) qtSol = qtrec;
+            if (qtSol == null) qtSol = getBigDecimal(item, "QTALOC_ORPP");
             BigDecimal qtAloc = getBigDecimal(item, "QTALOC_ORPP");
             if (qtAloc == null) qtAloc = getBigDecimal(item, "QTALOC_ORP");
             BigDecimal qtFalta = getBigDecimal(item, "QTFALTA_ORPP");

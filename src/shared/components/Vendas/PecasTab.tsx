@@ -631,6 +631,9 @@ export const PecasTab: React.FC<PecasTabProps> = ({
     const newItem: ItemOrcamento = {
       ...searchItem as ItemOrcamento,
       REQUIS_ORPP: itens.length + 1,
+      QTSOL_ORPP: searchItem.QTALOC_ORPP || 1,
+      QTREC_ORPP: searchItem.QTALOC_ORPP || 1,
+      QTALOC_ORPP: searchItem.QTALOC_ORPP || 1,
       PRECOPUB_ORPP: nivelPreco,
       PRECOTOT_ORPP: (searchItem.QTALOC_ORPP || 0) * nivelPreco * (1 - (searchItem.VLRDESC_ORPP || 0) / 100),
       PERC_NIVEL_ORPP: percNiv,

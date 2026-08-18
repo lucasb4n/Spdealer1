@@ -74,6 +74,8 @@ export default function OrcamentoPage() {
   const [masperList, setMasperList] = useState<any[]>([]);
   const [showLimiteModal, setShowLimiteModal] = useState(false);
   const [limiteInfo, setLimiteInfo] = useState<{ cliente: string; valorPedido: number; limite: number; saldoPendente: number; disponivel: number } | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successModalData, setSuccessModalData] = useState<{ title: string; message: string } | null>(null);
 
   const { control, setValue, watch, handleSubmit, reset, formState: { errors } } = useForm<Partial<Orcamento>>({
     defaultValues: defaultOrcamento,
@@ -132,7 +134,11 @@ export default function OrcamentoPage() {
         if (!isEditing) {
           navigate(`/vendas/orcamento/${data.numero}`, { replace: true });
         }
-        alert('Orçamento salvo com sucesso!');
+        setSuccessModalData({
+          title: 'Gravado com Sucesso',
+          message: `Atendimento nº ${data.numero || numero} salvo com sucesso!`,
+        });
+        setShowSuccessModal(true);
       } else {
         setError(data.error || 'Erro ao salvar');
       }
@@ -142,37 +148,36 @@ export default function OrcamentoPage() {
     } finally {
       setIsSaving(false);
     }
-  }, [itens, isEditing, numero, navigate]);
+  }, [itens, isEditing, numero, navigate, parcelas, totais.totger]);
 
   const handleImprimir = useCallback(async () => {
     if (!isEditing || !numero) {
-      alert('Salve o orçamento antes de imprimir.');
+      setError('Salve o orçamento antes de imprimir.');
       return;
     }
     try {
-      const resp = await fetch(`${API_BASE}/${numero}/imprimir`, { credentials: 'include' })
+      const resp = await fetch(`${API_BASE}/${numero}/imprimir`, { credentials: 'include' });
       if (!resp.ok) {
-        const txt = await resp.text().catch(() => '')
-        alert('Erro ao gerar PDF: ' + (txt || `HTTP ${resp.status}`))
-        return
+        const txt = await resp.text().catch(() => '');
+        setError('Erro ao gerar PDF: ' + (txt || `HTTP ${resp.status}`));
+        return;
       }
-      const blob = await resp.blob()
-      const url = URL.createObjectURL(blob)
-      window.open(url, '_blank')
-      setTimeout(() => URL.revokeObjectURL(url), 30000)
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
     } catch (err: any) {
-      alert('Erro ao imprimir: ' + (err?.message || String(err)))
+      setError('Erro ao imprimir: ' + (err?.message || String(err)));
     }
-  }, [isEditing, numero])
+  }, [isEditing, numero]);
 
   const handleFaturar = useCallback(async () => {
     if (!isEditing) return;
     const tipoOrp = watch('TIPO_ORP');
     if (tipoOrp !== 'P') {
-      alert('Apenas pedidos confirmados podem ser faturados. Transforme o orçamento em pedido primeiro.');
+      setError('Apenas pedidos podem ser faturados. Transforme o orçamento em pedido primeiro.');
       return;
     }
-    if (!window.confirm('Confirma o faturamento deste pedido? Esta ação gerará a Nota Fiscal.')) return;
 
     setIsSaving(true);
     setError(null);
@@ -187,7 +192,11 @@ export default function OrcamentoPage() {
       const data = await response.json();
 
       if (data.success) {
-        alert(`Pedido faturado com sucesso!\nNota Fiscal: ${data.numeroNota}\nSerie: ${data.serie}`);
+        setSuccessModalData({
+          title: 'Pedido Faturado com Sucesso!',
+          message: `Nota Fiscal nº ${data.numeroNota || ''} (Série ${data.serie || '001'}) gerada com sucesso!`,
+        });
+        setShowSuccessModal(true);
         if (data.pdfBase64) {
           const link = document.createElement('a');
           link.href = `data:application/pdf;base64,${data.pdfBase64}`;
@@ -412,13 +421,13 @@ export default function OrcamentoPage() {
   const handleVirarPedido = useCallback(async () => {
     const codCli = watch('CODCLI_ORP');
     if (!codCli || Number(codCli) <= 0) {
-      alert('Selecione um cliente antes de virar pedido.');
+      setError('Selecione um cliente antes de virar pedido.');
       return;
     }
     try {
       const response = await fetch(`/api/clientes/${codCli}/limite-disponivel`);
       if (!response.ok) {
-        alert('Erro ao consultar o valor disponível do cliente.');
+        setError('Erro ao consultar o valor disponível do cliente.');
         return;
       }
       const data = await response.json();
@@ -439,13 +448,40 @@ export default function OrcamentoPage() {
         return;
       }
 
-      setValue('TIPO_ORP', 'P');
-      alert('Status alterado para Pedido! Clique no botão "Gravar" para salvar e gerar os registros em pecfal.');
+      if (isEditing && numero) {
+        setIsSaving(true);
+        try {
+          const transformRes = await fetch(`${API_BASE}/${numero}/transformar-pedido`, { method: 'POST' });
+          const transformData = await transformRes.json();
+          if (transformData.success) {
+            setValue('TIPO_ORP', 'P');
+            setSuccessModalData({
+              title: 'Orçamento Transformado em Pedido!',
+              message: `O orçamento nº ${numero} foi transformado em Pedido com sucesso. A alocação de estoque e os registros de peças faltantes (pecfal) foram gerados automaticamente.`
+            });
+            setShowSuccessModal(true);
+            loadOrcamento(parseInt(numero));
+          } else {
+            setError(transformData.error || 'Erro ao transformar orçamento em pedido');
+          }
+        } catch (err: any) {
+          setError('Erro ao transformar orçamento em pedido: ' + (err?.message || ''));
+        } finally {
+          setIsSaving(false);
+        }
+      } else {
+        setValue('TIPO_ORP', 'P');
+        setSuccessModalData({
+          title: 'Status Alterado para Pedido',
+          message: 'O tipo do atendimento foi alterado para Pedido. Clique no botão "Concluir e Salvar" para salvar e gerar os registros.'
+        });
+        setShowSuccessModal(true);
+      }
     } catch (err) {
-      alert('Erro ao consultar o valor disponível do cliente.');
+      setError('Erro ao consultar o valor disponível do cliente.');
       console.error(err);
     }
-  }, [watch, setValue, totais.totger]);
+  }, [watch, setValue, totais.totger, isEditing, numero, loadOrcamento]);
 
   if (isLoading) {
     return (
@@ -856,6 +892,41 @@ export default function OrcamentoPage() {
                 }}
               >
                 {isSaving ? 'Revertendo...' : 'Confirmar Reversão'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSuccessModal && successModalData && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.6)', zIndex: 1100,
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <div style={{
+            background: '#fff', borderRadius: 12, width: '100%', maxWidth: 460,
+            padding: '1.5rem', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#1e293b', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ color: '#16a34a', fontSize: '1.2rem', fontWeight: 'bold' }}>✓</span>
+                {successModalData.title}
+              </h3>
+              <button onClick={() => setShowSuccessModal(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#64748b', lineHeight: 1 }}>×</button>
+            </div>
+            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '0.875rem', marginBottom: '1.25rem', fontSize: '0.875rem', color: '#166534', lineHeight: 1.5 }}>
+              {successModalData.message}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                style={{
+                  padding: '0.5rem 1.25rem', borderRadius: 6, border: 'none',
+                  background: '#16a34a', color: '#fff', fontWeight: 600, cursor: 'pointer', fontSize: '0.8125rem'
+                }}
+              >
+                OK
               </button>
             </div>
           </div>

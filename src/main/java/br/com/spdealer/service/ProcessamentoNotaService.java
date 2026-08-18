@@ -21,6 +21,7 @@ public class ProcessamentoNotaService {
 
     private final JdbcTemplate jdbcTemplate;
     private final CalculadorTributarioService calculadorTributario;
+    private final OrcamentoService orcamentoService;
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter DATE_COMP3 = DateTimeFormatter.ofPattern("yyyyMMdd");
@@ -51,10 +52,10 @@ public class ProcessamentoNotaService {
                 """;
             
             Map<String, Object> orcamento = jdbcTemplate.queryForMap(checkSql, numeroPadded, filialPadded);
-            String tipoOrp = (String) orcamento.get("TIPO_ORP");
-            Integer fechadoOrp = (Integer) orcamento.get("FECHADO_ORP");
+            String tipoOrp = getStringValue(orcamento, "TIPO_ORP");
+            Integer fechadoOrp = getIntValue(orcamento, "FECHADO_ORP");
             
-            if (!"O".equals(tipoOrp)) {
+            if (tipoOrp != null && !"O".equalsIgnoreCase(tipoOrp)) {
                 result.put("success", false);
                 result.put("error", "Orçamento não pode ser transformado. Status atual: " + tipoOrp);
                 return result;
@@ -75,7 +76,7 @@ public class ProcessamentoNotaService {
             jdbcTemplate.update(updateOrcamentoSql, numeroPadded, filialPadded);
             
             String itensSql = """
-                SELECT FILIAL_ORPP, NUMERO_ORPP, FAB_ORPP, CODIGO_ORPP, QTALOC_ORPP
+                SELECT FILIAL_ORPP, NUMERO_ORPP, REQUIS_ORPP, FAB_ORPP, CODIGO_ORPP, QTSOL_ORPP, QTREC_ORPP, QTALOC_ORPP, QTFALTA_ORPP, MOTIVO_ORPP, NOVO_ORPP
                 FROM orcampp
                 WHERE NUMERO_ORPP = ? AND FILIAL_ORPP = ?
                 """;
@@ -83,11 +84,11 @@ public class ProcessamentoNotaService {
             
             int itensAlocados = 0;
             for (Map<String, Object> item : itens) {
-                BigDecimal qtaloc = (BigDecimal) item.get("QTALOC_ORPP");
-                if (qtaloc != null && qtaloc.compareTo(BigDecimal.ZERO) > 0) {
-                    String fabOrpp = (String) item.get("FAB_ORPP");
-                    String codigoOrpp = (String) item.get("CODIGO_ORPP");
-                    
+                BigDecimal qtaloc = getBigDecimalValue(item, "QTALOC_ORPP");
+                String fabOrpp = getStringValue(item, "FAB_ORPP");
+                String codigoOrpp = getStringValue(item, "CODIGO_ORPP");
+                
+                if (qtaloc != null && qtaloc.compareTo(BigDecimal.ZERO) > 0 && fabOrpp != null && codigoOrpp != null) {
                     String updateKardexSql = """
                         UPDATE kardex SET 
                             QTALOC_KAR = COALESCE(QTALOC_KAR, 0) + ?
@@ -100,6 +101,31 @@ public class ProcessamentoNotaService {
                     } else {
                         log.warn("Item não encontrado no kardex para alocação: FAB={}, CODIGO={}", fabOrpp, codigoOrpp);
                     }
+                }
+
+                // Processar pecfal se houver quantidade faltante para o item do pedido
+                if (fabOrpp != null && codigoOrpp != null && orcamentoService != null) {
+                    String requisStr = getStringValue(item, "REQUIS_ORPP");
+                    int seq = 1;
+                    if (requisStr != null) {
+                        try { seq = Integer.parseInt(requisStr.trim()); } catch (Exception ignored) {}
+                    }
+                    BigDecimal qtSol = getBigDecimalValue(item, "QTSOL_ORPP");
+                    if (qtSol == null || qtSol.compareTo(BigDecimal.ZERO) <= 0) {
+                        qtSol = getBigDecimalValue(item, "QTREC_ORPP");
+                    }
+                    if (qtSol == null || qtSol.compareTo(BigDecimal.ZERO) <= 0) {
+                        qtSol = qtaloc;
+                    }
+
+                    BigDecimal qtFalta = getBigDecimalValue(item, "QTFALTA_ORPP");
+                    String motivo = getStringValue(item, "MOTIVO_ORPP");
+                    String novoOrpp = getStringValue(item, "NOVO_ORPP");
+
+                    orcamentoService.processarPecfal(
+                        numeroPadded, seq, fabOrpp, codigoOrpp, "P",
+                        qtSol, qtaloc, qtFalta, motivo, novoOrpp, 0
+                    );
                 }
             }
             
@@ -795,6 +821,11 @@ public class ProcessamentoNotaService {
         return parcelas;
     }
     
+    private String getStringValue(Map<String, Object> dados, String campo) {
+        if (dados == null || !dados.containsKey(campo) || dados.get(campo) == null) return null;
+        return dados.get(campo).toString().trim();
+    }
+
     private Integer getIntValue(Map<String, Object> dados, String campo) {
         if (dados == null || !dados.containsKey(campo) || dados.get(campo) == null) return 0;
         Object valor = dados.get(campo);

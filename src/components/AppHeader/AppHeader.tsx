@@ -3,7 +3,7 @@ import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCog, faBell, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faBell, faUser, faBook } from '@fortawesome/free-solid-svg-icons';
 import UserProfilePanel from './UserProfilePanel';
 import { AssetService } from 'services/AssetService';
 import './AppHeader.css';
@@ -109,6 +109,9 @@ const AppHeader: React.FC<AppHeaderProps> = ({ title = 'SPDealer', sidebarCollap
 
       <div className="header-right">
         <div className="header-icons">
+          <button className="icon-button" title="Manual do Sistema" onClick={() => navigate('/manual')}>
+            <FontAwesomeIcon icon={faBook} />
+          </button>
           <div className="settings-menu-container" ref={dropdownRef}>
             <button className="icon-button settings-button" title="Configurações" onClick={toggleDropdown}>
               <FontAwesomeIcon icon={faCog} />

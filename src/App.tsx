@@ -68,6 +68,7 @@ import ReportsLanding from 'pages/ReportsLanding';
 import ConfiguracoesGeraisModule from 'components/Modules/ConfiguracoesGeraisModule';
 import Login from 'pages/Login';
 import ClienteFormOriginalDemo from 'pages/ClienteFormOriginalDemo';
+import ManualPage from 'pages/ManualPage';
 import './App.css';
 
 function App() {
@@ -152,6 +153,7 @@ function App() {
                 <Route path="/vendas/orcamento/:numero" element={<OrcamentoPage />} />
                 <Route path="/demo/cliente-form-original" element={<ClienteFormOriginalDemo />} />
                 <Route path="/relatorios" element={<ReportsLanding />} />
+                <Route path="/manual" element={<ManualPage />} />
                 <Route path="*" element={<Navigate to="/workspace" replace />} />
               </Routes>
             </WorkspaceLayout>

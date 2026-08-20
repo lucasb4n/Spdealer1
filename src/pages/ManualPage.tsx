@@ -19,9 +19,17 @@ import {
   faTruckLoading,
   faClipboardCheck,
   faCartPlus,
-  faTags,
   faBarcode,
-  faFileExcel
+  faPrint,
+  faBan,
+  faSync,
+  faCalculator,
+  faFileContract,
+  faClock,
+  faTractor,
+  faChartLine,
+  faListCheck,
+  faSitemap
 } from '@fortawesome/free-solid-svg-icons';
 import './ManualPage.css';
 
@@ -64,7 +72,7 @@ const ManualPage: React.FC = () => {
           <input
             type="text"
             className="manual-search-input"
-            placeholder="Pesquisar função (ex: F4, Permissão, Pecfal)..."
+            placeholder="Pesquisar função (ex: F4, NFe, TMO, O.S., Permissão)..."
             value={searchQuery}
             onChange={handleSearch}
           />
@@ -286,7 +294,7 @@ const ManualPage: React.FC = () => {
           )}
 
           {/* ========================================================================= */}
-          {/* SEÇÃO 2: PEÇAS (DETALHADA ITEM POR ITEM E MECÂNICAS) */}
+          {/* SEÇÃO 2: PEÇAS */}
           {/* ========================================================================= */}
           {activeSection === 'pecas' && (
             <div className="manual-section">
@@ -363,7 +371,7 @@ const ManualPage: React.FC = () => {
                     <li className="step-item">
                       <div className="step-number">3</div>
                       <div className="step-text">
-                        <strong>Aba Custos & Preços:</strong> Definição da margem de lucro (markup), preço balcão, preço atacado, preço para garantia, custo de reposição e custo médio calculado.
+                        <strong>Aba Custos & Preços:</strong> Definição da margem de lucro (markup), preço balcão, preço atacado, preço para garantia, custo de reposição e custo médio calculated.
                       </div>
                     </li>
                   </ul>
@@ -635,38 +643,184 @@ const ManualPage: React.FC = () => {
           )}
 
           {/* ========================================================================= */}
-          {/* SEÇÃO 3: FISCAL */}
+          {/* SEÇÃO 3: FISCAL (DETALHADA ITEM POR ITEM) */}
           {/* ========================================================================= */}
           {activeSection === 'fiscal' && (
             <div className="manual-section">
               <div className="manual-section-title">
                 <FontAwesomeIcon icon={faFileInvoiceDollar} style={{ color: '#0d9488' }} />
-                <span>Módulo Fiscal & NF-e</span>
+                <span>Módulo Fiscal & NF-e — Detalhamento dos Itens de Menu</span>
               </div>
               <p className="manual-section-subtitle">
-                Emissão, validação e transmissão de Notas Fiscais Eletrônicas de Saída e Entrada.
+                O módulo Fiscal gerencia a emissão de documentos fiscais eletrônicos (NF-e/NFC-e), o monitoramento de transmissão junto à SEFAZ, o enquadramento de operações tributárias (CFOP) e o controle de livros fiscais.
               </p>
 
+              {/* ITEM FILHO 1: EMISSÃO DE NF-E */}
               <div className="manual-card">
                 <div className="manual-card-title">
-                  <FontAwesomeIcon icon={faFileInvoiceDollar} style={{ color: '#0284c7' }} />
-                  <span>1. Emissão de NF-e e Monitor SEFAZ</span>
+                  <FontAwesomeIcon icon={faPrint} style={{ color: '#0284c7' }} />
+                  <span>Item Filho 1: Emissão de NF-e (Nota Fiscal Eletrônica de Saída e Entrada)</span>
                 </div>
                 <div className="manual-card-content">
                   <p>
-                    Ao faturar um pedido de venda ou nota de serviço, a NF-e é transmitida à SEFAZ em tempo real.
+                    A tela de <strong>Emissão de NF-e</strong> realiza o faturamento e transmissão oficial dos documentos fiscais para a Secretaria da Fazenda (SEFAZ).
                   </p>
                   <ul className="step-list">
                     <li className="step-item">
                       <div className="step-number">1</div>
                       <div className="step-text">
-                        <strong>Operação Fiscal & CFOP:</strong> O sistema determina automaticamente a alíquota de ICMS, PIS, COFINS e IPI com base na natureza de operação configurada.
+                        <strong>Origem da Nota:</strong> Pode ser gerada a partir da conversão de um Pedido de Venda de Peças, faturamento de uma Ordem de Serviço concluída ou digitação direta (Devolução, Remessa para Conserto, Transferência).
                       </div>
                     </li>
                     <li className="step-item">
                       <div className="step-number">2</div>
                       <div className="step-text">
-                        <strong>Danfe e XML:</strong> Após a autorização da SEFAZ, o arquivo XML e a impressão da DANFE são disponibilizados instantaneamente.
+                        <strong>Preenchimento e Validação de Dados:</strong> O formulário consolida os dados do Destinatário (CNPJ/CPF, Inscrição Estadual, Endereço IBGE), dados dos Produtos (NCM, CEST, Quantidade, Valor) e retenções de impostos.
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">3</div>
+                      <div className="step-text">
+                        <strong>Transmissão e Impressão da DANFE:</strong> Ao clicar em <em>Transmitir SEFAZ</em>, a nota é assinada digitalmente com o certificado da empresa. Autorizada a nota, o sistema disponibiliza o download do arquivo <strong>XML oficial</strong> e a impressão instantânea da <strong>DANFE em PDF</strong>.
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">4</div>
+                      <div className="step-text">
+                        <strong>Cancelamento & Carta de Correção (CC-e):</strong> Permite solicitar o Cancelamento da NF-e dentro do prazo legal de 24 horas (desde que a mercadoria não tenha circulado) ou emitir uma Carta de Correção Eletrônica (CC-e) para retificar campos que não afetem alíquotas ou valores.
+                      </div>
+                    </li>
+                  </ul>
+
+                  {/* Mockup do Formulário de NF-e */}
+                  <div className="form-print-mockup">
+                    <div className="mockup-header">
+                      <div className="mockup-header-dots">
+                        <span className="dot dot-red"></span>
+                        <span className="dot dot-yellow"></span>
+                        <span className="dot dot-green"></span>
+                      </div>
+                      <span>Emissão e Transmissão de NF-e • Painel Fiscal</span>
+                    </div>
+                    <div className="mockup-body">
+                      <div className="mockup-grid">
+                        <div className="mockup-field">
+                          <label>Número da NF-e / Série</label>
+                          <input type="text" value="000.045.182 / Série 001" readOnly />
+                        </div>
+                        <div className="mockup-field">
+                          <label>Status SEFAZ</label>
+                          <input type="text" style={{ background: '#dcfce7', color: '#15803d', fontWeight: 700 }} value="100 - Autorizado o Uso da NF-e" readOnly />
+                        </div>
+                        <div className="mockup-field">
+                          <label>Chave de Acesso (44 Dígitos)</label>
+                          <input type="text" value="3526 0812 3456 7800 0190 5500 1000 0451 8210 9876 5432" readOnly />
+                        </div>
+                      </div>
+                      <div className="mockup-footer-actions">
+                        <button className="mockup-btn mockup-btn-secondary">Emitir CC-e</button>
+                        <button className="mockup-btn mockup-btn-accent">Baixar XML</button>
+                        <button className="mockup-btn mockup-btn-primary">Imprimir DANFE</button>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* ITEM FILHO 2: MONITOR DE NF-E */}
+              <div className="manual-card">
+                <div className="manual-card-title">
+                  <FontAwesomeIcon icon={faSync} style={{ color: '#0d9488' }} />
+                  <span>Item Filho 2: Monitor de NF-e (Gestão de Status & Contingência SEFAZ)</span>
+                </div>
+                <div className="manual-card-content">
+                  <p>
+                    O <strong>Monitor de NF-e</strong> é o painel de controle das comunicações entre o SPDealer e os servidores da SEFAZ.
+                  </p>
+                  <ul className="step-list">
+                    <li className="step-item">
+                      <div className="step-number">1</div>
+                      <div className="step-text">
+                        <strong>Acompanhamento em Tempo Real:</strong> Filtre todas as notas fiscais emitidas no dia pelos status: <em>Autorizada</em>, <em>Rejeitada</em>, <em>Denegada</em>, <em>Cancelada</em> ou <em>Em Processamento</em>.
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">2</div>
+                      <div className="step-text">
+                        <strong>Tratamento de Rejeições Frequentes:</strong>
+                        <br />
+                        • <em>Rejeição 204 (Duplicidade de NF-e):</em> Ocorre quando o número da nota já foi enviado anteriormente. O sistema permite ajustar a numeração automática.
+                        <br />
+                        • <em>Rejeição por NCM / CEST Incompatível:</em> Alerta que o código NCM da peça exige o preenchimento do código CEST de Substituição Tributária.
+                        <br />
+                        • <em>Rejeição de Inscrição Estadual:</em> Indica divergência entre o CNPJ e o número da IE do cliente no cadastro do Sintegra/SEFAZ.
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">3</div>
+                      <div className="step-text">
+                        <strong>Modo de Contingência (SVC-AN / SVC-RS):</strong> Em casos de queda ou instabilidade nos servidores da SEFAZ estadual, o Monitor permite alternar para a transmissão em contingência via ambiente virtual de segurança, evitando a paralisação do faturamento de vendas.
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* ITEM FILHO 3: CADASTRO DE OPERAÇÕES FISCAIS E CFOP */}
+              <div className="manual-card">
+                <div className="manual-card-title">
+                  <FontAwesomeIcon icon={faCalculator} style={{ color: '#0284c7' }} />
+                  <span>Item Filho 3: Cadastro de Operações Fiscais e CFOP (Natop)</span>
+                </div>
+                <div className="manual-card-content">
+                  <p>
+                    A tela de <strong>Operações Fiscais (Natop)</strong> parametriza a inteligência tributária do sistema, determinando como cada nota fiscal deve ser calculada.
+                  </p>
+                  <ul className="step-list">
+                    <li className="step-item">
+                      <div className="step-number">1</div>
+                      <div className="step-text">
+                        <strong>Mapeamento por Natureza de Operação:</strong> Define regras para Venda Estadual (ex: CFOP 5.102 / 5.405), Venda Interestadual (ex: CFOP 6.102 / 6.405), Devoluções (ex: CFOP 5.202 / 6.202) e Remessas.
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">2</div>
+                      <div className="step-text">
+                        <strong>Enquadramento Tributário & CST:</strong> Configuração das alíquotas padrão de ICMS, percentual de Redução de Base de Cálculo, Margem de Valor Agregado (MVA) para Substituição Tributária (ST), IPI, PIS e COFINS.
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">3</div>
+                      <div className="step-text">
+                        <strong>Suporte ao Simples Nacional e Regime Normal:</strong> Tratamento automático para CSOSN (101, 102, 500) ou CST de Lucro Presumido/Real (00, 10, 60).
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* ITEM FILHO 4: LIVROS E OBRIGAÇÕES FISCAIS */}
+              <div className="manual-card">
+                <div className="manual-card-title">
+                  <FontAwesomeIcon icon={faFileContract} style={{ color: '#0d9488' }} />
+                  <span>Item Filho 4: Livros e Obrigações Fiscais</span>
+                </div>
+                <div className="manual-card-content">
+                  <p>
+                    O submódulo de <strong>Obrigações Fiscais</strong> gera relatórios e arquivos mensais consolidados para apoio ao departamento de contabilidade da empresa.
+                  </p>
+                  <ul className="step-list">
+                    <li className="step-item">
+                      <div className="step-number">1</div>
+                      <div className="step-text">
+                        <strong>Relatório de Apuração por CFOP:</strong> Resumo de todas as entradas e saídas do mês separadas por código de operação fiscal.
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">2</div>
+                      <div className="step-text">
+                        <strong>Exportação de Lote XML:</strong> Compactação de todos os arquivos XMLs autorizados e cancelados do mês em um único arquivo zip para envio à contabilidade.
                       </div>
                     </li>
                   </ul>
@@ -676,27 +830,275 @@ const ManualPage: React.FC = () => {
           )}
 
           {/* ========================================================================= */}
-          {/* SEÇÃO 4: SERVIÇO */}
+          {/* SEÇÃO 4: SERVIÇO (DETALHADA ITEM POR ITEM) */}
           {/* ========================================================================= */}
           {activeSection === 'servico' && (
             <div className="manual-section">
               <div className="manual-section-title">
                 <FontAwesomeIcon icon={faWrench} style={{ color: '#0d9488' }} />
-                <span>Módulo de Serviços & O.S.</span>
+                <span>Módulo de Serviços — Detalhamento Completo dos Itens de Menu</span>
               </div>
               <p className="manual-section-subtitle">
-                Controle completo das ordens de serviço, tempos de mão de obra (TMO), garantia e modelos de máquina.
+                O módulo de Serviços controla todo o fluxo de oficina mecânica, recepção de máquinas/equipamentos, apontamento de tempo de mão de obra (TMO), garantias e manutenção preventiva/corretiva.
               </p>
 
+              {/* ITEM FILHO 1: ABERTURA E GESTÃO DE ORDENS DE SERVIÇO */}
               <div className="manual-card">
                 <div className="manual-card-title">
                   <FontAwesomeIcon icon={faWrench} style={{ color: '#0284c7' }} />
-                  <span>1. Manutenção de Ordens de Serviço e TMO</span>
+                  <span>Item Filho 1: Abertura e Gestão de Ordens de Serviço (O.S.)</span>
                 </div>
                 <div className="manual-card-content">
                   <p>
-                    Cadastre os tipos de OS (Revisão, Garantia, Manutenção Interna) e atribua os tempos padrão de mão de obra (TMO) aos mecânicos e técnicos.
+                    A tela de <strong>Ordens de Serviço (O.S.)</strong> é a central de atendimento da oficina técnica.
                   </p>
+                  <ul className="step-list">
+                    <li className="step-item">
+                      <div className="step-number">1</div>
+                      <div className="step-text">
+                        <strong>Recepção do Equipamento:</strong> Seleção do Cliente, identificação do Equipamento (Modelo do Trator/Máquina, Número de Série, Chassi), registro do Horímetro/Hodômetro atual e descrição detalhada do <em>Defeito / Sintoma Relatado</em> pelo cliente.
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">2</div>
+                      <div className="step-text">
+                        <strong>Ciclo de Vida da O.S.:</strong>
+                        <br />
+                        • <em>Aberta:</em> O.S. criada na recepção.
+                        <br />
+                        • <em>Em Análise / Orçamento:</em> Técnico avaliando defeito e apontando peças/mão de obra necessárias.
+                        <br />
+                        • <em>Em Execução:</em> Serviço aprovado e mecânico trabalhando na máquina.
+                        <br />
+                        • <em>Aguardando Peças:</em> Peças faltantes solicitadas ao almoxarifado.
+                        <br />
+                        • <em>Concluída / Pronta:</em> Testes finalizados pelo chefe de oficina.
+                        <br />
+                        • <em>Faturada:</em> Enviada para o caixa/faturamento com emissão de nota fiscal de serviço e peças.
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">3</div>
+                      <div className="step-text">
+                        <strong>Requisição de Peças & Apontamento de Técnicos:</strong> Permite requisitar peças do estoque diretamente na O.S. (com baixa automática no Kardex) e alocar os mecânicos executores de cada tarefa.
+                      </div>
+                    </li>
+                  </ul>
+
+                  {/* Mockup da O.S. */}
+                  <div className="form-print-mockup">
+                    <div className="mockup-header">
+                      <div className="mockup-header-dots">
+                        <span className="dot dot-red"></span>
+                        <span className="dot dot-yellow"></span>
+                        <span className="dot dot-green"></span>
+                      </div>
+                      <span>Ordem de Serviço Técnica • Atendimento Oficina</span>
+                    </div>
+                    <div className="mockup-body">
+                      <div className="mockup-grid">
+                        <div className="mockup-field">
+                          <label>Nº da O.S.</label>
+                          <input type="text" value="OS-00892" readOnly />
+                        </div>
+                        <div className="mockup-field">
+                          <label>Cliente</label>
+                          <input type="text" value="00109 - AGRO AGRI S/A" readOnly />
+                        </div>
+                        <div className="mockup-field">
+                          <label>Modelo / Horímetro</label>
+                          <input type="text" value="TRATOR CASE 180 (3.420h)" readOnly />
+                        </div>
+                      </div>
+
+                      <table className="mockup-table">
+                        <thead>
+                          <tr>
+                            <th>Cód. TMO</th>
+                            <th>Descrição do Serviço / Mão de Obra</th>
+                            <th>Técnico Resp.</th>
+                            <th>Horas Est.</th>
+                            <th>Vlr Hora (R$)</th>
+                            <th>Total (R$)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>TMO-102</td>
+                            <td>REVISAO DO SISTEMA HIDRAULICO 1000H</td>
+                            <td>CARLOS MECANICO</td>
+                            <td>4.00h</td>
+                            <td>160,00</td>
+                            <td>640,00</td>
+                          </tr>
+                          <tr>
+                            <td>TMO-050</td>
+                            <td>TROCA DE KITS DE VEDACAO DA BOMBA</td>
+                            <td>CARLOS MECANICO</td>
+                            <td>2.50h</td>
+                            <td>160,00</td>
+                            <td>400,00</td>
+                          </tr>
+                        </tbody>
+                      </table>
+
+                      <div className="mockup-footer-actions">
+                        <button className="mockup-btn mockup-btn-secondary">Requisitar Peças</button>
+                        <button className="mockup-btn mockup-btn-accent">Apontar Horas</button>
+                        <button className="mockup-btn mockup-btn-primary">Faturar O.S.</button>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* ITEM FILHO 2: CADASTRO DE TIPOS DE O.S. */}
+              <div className="manual-card">
+                <div className="manual-card-title">
+                  <FontAwesomeIcon icon={faSitemap} style={{ color: '#0d9488' }} />
+                  <span>Item Filho 2: Cadastro de Tipos de O.S. (Tipificação de Serviços)</span>
+                </div>
+                <div className="manual-card-content">
+                  <p>
+                    A tela de <strong>Tipos de O.S.</strong> categoriza a natureza comercial e financeira dos atendimentos prestados pela oficina.
+                  </p>
+                  <ul className="step-list">
+                    <li className="step-item">
+                      <div className="step-number">1</div>
+                      <div className="step-text">
+                        <strong>Tipos Padrão do Sistema:</strong>
+                        <br />
+                        • <em>V1 - V4 (Venda Comercial / Balcão):</em> Serviços tarifados e cobrados diretamente do cliente final.
+                        <br />
+                        • <em>D1 - D4 (Demonstração / Cortesia):</em> Atendimentos sem cobrança comercial de mão de obra.
+                        <br />
+                        • <em>I1 - I4 (Manutenção Interna):</em> Serviços de preparação de máquinas do estoque próprio ou reforma de frota interna.
+                        <br />
+                        • <em>Garantia (Fábrica):</em> Serviços prestados sob cobertura da garantia do fabricante, cujo reembolso será solicitado diretamente à montadora.
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">2</div>
+                      <div className="step-text">
+                        <strong>Regras de Tabela de Preços e Impostos:</strong> Cada Tipo de O.S. vincula a tabela de valor de mão de obra aplicável e o enquadramento fiscal para emissão de Nota Fiscal de Serviços (NFS-e / ISSQN).
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* ITEM FILHO 3: TIPOS DE TMO */}
+              <div className="manual-card">
+                <div className="manual-card-title">
+                  <FontAwesomeIcon icon={faClock} style={{ color: '#0284c7' }} />
+                  <span>Item Filho 3: Tipos de TMO (Tempo Mão de Obra e Valor Hora)</span>
+                </div>
+                <div className="manual-card-content">
+                  <p>
+                    O cadastro de <strong>Tipos de TMO</strong> padroniza a tabela de tempos de reparo e o valor da hora técnica faturada.
+                  </p>
+                  <ul className="step-list">
+                    <li className="step-item">
+                      <div className="step-number">1</div>
+                      <div className="step-text">
+                        <strong>Tabela de Tempos Padrão:</strong> Cadastre o código do TMO, descrição da tarefa (ex: <em>Regulagem de Válvulas Motor 6 Cilindros</em>) e o tempo padrão estimado em horas decimais.
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">2</div>
+                      <div className="step-text">
+                        <strong>Categorias e Valor de Hora:</strong> Defina valores de hora diferenciados por especialidade (ex: Hora Mecânica Geral R$ 150,00, Hora Diagnóstico Eletrônico R$ 220,00, Hora Campo / Viagem R$ 250,00).
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">3</div>
+                      <div className="step-text">
+                        <strong>Apuração de Eficiência Técnica:</strong> Permite comparar o tempo padrão cadastrado no TMO com as horas reais apontadas pelo mecânico, gerando índices de eficiência operacional da equipe.
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* ITEM FILHO 4: MANUTENÇÃO DE GRUPOS DE REPARO */}
+              <div className="manual-card">
+                <div className="manual-card-title">
+                  <FontAwesomeIcon icon={faListCheck} style={{ color: '#0d9488' }} />
+                  <span>Item Filho 4: Manutenção de Grupos de Reparo</span>
+                </div>
+                <div className="manual-card-content">
+                  <p>
+                    A tela de <strong>Grupos de Reparo</strong> organiza os serviços por especialidades técnicas da máquina.
+                  </p>
+                  <ul className="step-list">
+                    <li className="step-item">
+                      <div className="step-number">1</div>
+                      <div className="step-text">
+                        <strong>Estruturação por Sistemas:</strong> Agrupe os TMOs em famílias funcionais: <em>01 - Motor</em>, <em>02 - Transmissão / Câmbio</em>, <em>03 - Sistema Hidráulico</em>, <em>04 - Sistema Elétrico / Injeção</em>, <em>05 - Chassi / Suspensão</em>, <em>06 - Ar Condicionado / Cabine</em>.
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">2</div>
+                      <div className="step-text">
+                        <strong>Checklist de Inspeção:</strong> Permite vincular roteiros de checagem obrigatórios que o mecânico deve conferir ao executar um reparo naquele grupo específico.
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* ITEM FILHO 5: MODELOS DE MÁQUINAS E EQUIPAMENTOS */}
+              <div className="manual-card">
+                <div className="manual-card-title">
+                  <FontAwesomeIcon icon={faTractor} style={{ color: '#0284c7' }} />
+                  <span>Item Filho 5: Modelos de Máquinas e Equipamentos (Dossiê Técnico)</span>
+                </div>
+                <div className="manual-card-content">
+                  <p>
+                    O cadastro de <strong>Modelos de Máquinas</strong> mantém o catálogo completo de equipamentos atendidos e o histórico de cada máquina do cliente.
+                  </p>
+                  <ul className="step-list">
+                    <li className="step-item">
+                      <div className="step-number">1</div>
+                      <div className="step-text">
+                        <strong>Catálogo de Modelos:</strong> Cadastro de Marcas (Case, New Holland, John Deere, Massey Ferguson), Famílias, Potência de Motor e especificações de série.
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">2</div>
+                      <div className="step-text">
+                        <strong>Dossiê Técnico da Máquina:</strong> Registro individual por Número de Série do chassis. Permite consultar o histórico de todas as O.S. já abertas para aquele equipamento desde a venda, com a relação completa de peças já trocadas e mecânicos que atuaram na máquina.
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* ITEM FILHO 6: RELATÓRIOS DE SERVIÇOS POR TIPO */}
+              <div className="manual-card">
+                <div className="manual-card-title">
+                  <FontAwesomeIcon icon={faChartLine} style={{ color: '#0d9488' }} />
+                  <span>Item Filho 6: Relatórios de Serviços por Tipo (Gestão de Produtividade)</span>
+                </div>
+                <div className="manual-card-content">
+                  <p>
+                    O painel de <strong>Relatórios de Serviços</strong> fornece indicadores gerenciais para acompanhamento do desempenho da oficina.
+                  </p>
+                  <ul className="step-list">
+                    <li className="step-item">
+                      <div className="step-number">1</div>
+                      <div className="step-text">
+                        <strong>Produtividade da Equipe:</strong> Relatório de Horas Vendidas vs. Horas Trabalhadas por técnico no mês.
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">2</div>
+                      <div className="step-text">
+                        <strong>Faturamento por Tipo de O.S.:</strong> Gráfico comparativo de receitas geradas por serviços faturados (Venda Balcão), serviços em garantia e custos de manutenção interna da frota.
+                      </div>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>

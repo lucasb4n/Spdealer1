@@ -159,7 +159,7 @@ const ManualPage: React.FC = () => {
                       <div className="mockup-grid">
                         <div className="mockup-field">
                           <label>Usuário / Operador</label>
-                          <input type="text" value="kevin.vendas" readOnly />
+                          <input type="text" value="carlos.vendas" readOnly />
                         </div>
                         <div className="mockup-field">
                           <label>Senha de Acesso</label>
@@ -205,21 +205,21 @@ const ManualPage: React.FC = () => {
                     <li className="step-item">
                       <div className="step-number" style={{ background: '#0284c7' }}>A</div>
                       <div className="step-text">
-                        <strong>Exemplo — Usuário Kevin (Vendedor de Balcão / Oficina):</strong>
+                        <strong>Exemplo — Usuário Carlos (Vendedor de Balcão / Oficina):</strong>
                         <br />
-                        O operador <em>Kevin</em> faz parte do Grupo de Atendimento e Peças. O Administrador configurou o perfil dele para acessar apenas funções operacionais.
+                        O operador <em>Carlos</em> faz parte do Grupo de Atendimento e Peças. O Administrador configurou o perfil dele para acessar apenas funções operacionais.
                         <br />
-                        <strong>O que o Kevin enxerga no menu:</strong> Apenas as abas <strong style={{ color: '#0d9488' }}>Peças</strong> e <strong style={{ color: '#0d9488' }}>Serviço</strong>. As abas de <em>Financeiro</em>, <em>Fiscal</em> e <em>CRM</em> ficam <u>totalmente ocultas e inacessíveis</u> para ele.
+                        <strong>O que o Carlos enxerga no menu:</strong> Apenas as abas <strong style={{ color: '#0d9488' }}>Peças</strong> e <strong style={{ color: '#0d9488' }}>Serviço</strong>. As abas de <em>Financeiro</em>, <em>Fiscal</em> e <em>CRM</em> ficam <u>totalmente ocultas e inacessíveis</u> para ele.
                       </div>
                     </li>
                     <li className="step-item">
                       <div className="step-number" style={{ background: '#0d9488' }}>B</div>
                       <div className="step-text">
-                        <strong>Exemplo — Usuária Lorena (Tesouraria / Financeiro):</strong>
+                        <strong>Exemplo — Usuária Mariana (Tesouraria / Financeiro):</strong>
                         <br />
-                        A operadora <em>Lorena</em> trabalha no departamento financeiro. Suas atribuições envolvem controle de caixas, contas a pagar e receber.
+                        A operadora <em>Mariana</em> trabalha no departamento financeiro. Suas atribuições envolvem controle de caixas, contas a pagar e receber.
                         <br />
-                        <strong>O que a Lorena enxerga no menu:</strong> Exclusivamente a aba <strong style={{ color: '#0d9488' }}>Financeiro</strong> (Caixas, Bancos, Contas a Pagar/Receber e Fluxo de Caixa). O módulo de <em>Peças</em>, <em>Serviços</em> e <em>Parâmetros</em> não aparecem na tela dela.
+                        <strong>O que a Mariana enxerga no menu:</strong> Exclusivamente a aba <strong style={{ color: '#0d9488' }}>Financeiro</strong> (Caixas, Bancos, Contas a Pagar/Receber e Fluxo de Caixa). O módulo de <em>Peças</em>, <em>Serviços</em> e <em>Parâmetros</em> não aparecem na tela dela.
                       </div>
                     </li>
                   </ul>
@@ -237,7 +237,7 @@ const ManualPage: React.FC = () => {
                     <div className="mockup-body">
                       <div className="mockup-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
                         <div style={{ background: '#ffffff', padding: '14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                          <h5 style={{ margin: '0 0 10px 0', color: '#0284c7', fontWeight: 700 }}>Menu do Usuário Kevin (Vendas)</h5>
+                          <h5 style={{ margin: '0 0 10px 0', color: '#0284c7', fontWeight: 700 }}>Menu do Usuário Carlos (Vendas)</h5>
                           <div style={{ background: '#0d9488', color: '#fff', padding: '8px 12px', borderRadius: '6px', marginBottom: '6px', fontSize: '13px', fontWeight: 600 }}>
                             <FontAwesomeIcon icon={faBoxes} style={{ marginRight: '8px' }} /> Peças (Liberado)
                           </div>
@@ -250,7 +250,7 @@ const ManualPage: React.FC = () => {
                         </div>
 
                         <div style={{ background: '#ffffff', padding: '14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                          <h5 style={{ margin: '0 0 10px 0', color: '#0d9488', fontWeight: 700 }}>Menu da Usuária Lorena (Financeiro)</h5>
+                          <h5 style={{ margin: '0 0 10px 0', color: '#0d9488', fontWeight: 700 }}>Menu da Usuária Mariana (Financeiro)</h5>
                           <div style={{ background: '#0d9488', color: '#fff', padding: '8px 12px', borderRadius: '6px', marginBottom: '6px', fontSize: '13px', fontWeight: 600 }}>
                             <FontAwesomeIcon icon={faWallet} style={{ marginRight: '8px' }} /> Financeiro (Liberado)
                           </div>

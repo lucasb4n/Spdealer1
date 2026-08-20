@@ -13,7 +13,6 @@ import {
   faLightbulb,
   faCheckCircle,
   faShieldAlt,
-  faLayerGroup,
   faUserLock,
   faExclamationTriangle,
   faTruckLoading,
@@ -21,7 +20,6 @@ import {
   faCartPlus,
   faBarcode,
   faPrint,
-  faBan,
   faSync,
   faCalculator,
   faFileContract,
@@ -29,7 +27,15 @@ import {
   faTractor,
   faChartLine,
   faListCheck,
-  faSitemap
+  faSitemap,
+  faUniversity,
+  faMoneyBillWave,
+  faReceipt,
+  faChartPie,
+  faExchangeAlt,
+  faPercentage,
+  faFilePdf,
+  faPiggyBank
 } from '@fortawesome/free-solid-svg-icons';
 import './ManualPage.css';
 
@@ -72,7 +78,7 @@ const ManualPage: React.FC = () => {
           <input
             type="text"
             className="manual-search-input"
-            placeholder="Pesquisar função (ex: F4, NFe, TMO, O.S., Permissão)..."
+            placeholder="Pesquisar função (ex: Caixa, DRE, Receber, Pagar, F4)..."
             value={searchQuery}
             onChange={handleSearch}
           />
@@ -371,7 +377,7 @@ const ManualPage: React.FC = () => {
                     <li className="step-item">
                       <div className="step-number">3</div>
                       <div className="step-text">
-                        <strong>Aba Custos & Preços:</strong> Definição da margem de lucro (markup), preço balcão, preço atacado, preço para garantia, custo de reposição e custo médio calculated.
+                        <strong>Aba Custos & Preços:</strong> Definição da margem de lucro (markup), preço balcão, preço atacado, preço para garantia, custo de reposição e custo médio calculado.
                       </div>
                     </li>
                   </ul>
@@ -643,7 +649,7 @@ const ManualPage: React.FC = () => {
           )}
 
           {/* ========================================================================= */}
-          {/* SEÇÃO 3: FISCAL (DETALHADA ITEM POR ITEM) */}
+          {/* SEÇÃO 3: FISCAL */}
           {/* ========================================================================= */}
           {activeSection === 'fiscal' && (
             <div className="manual-section">
@@ -830,7 +836,7 @@ const ManualPage: React.FC = () => {
           )}
 
           {/* ========================================================================= */}
-          {/* SEÇÃO 4: SERVIÇO (DETALHADA ITEM POR ITEM) */}
+          {/* SEÇÃO 4: SERVIÇO */}
           {/* ========================================================================= */}
           {activeSection === 'servico' && (
             <div className="manual-section">
@@ -1105,39 +1111,438 @@ const ManualPage: React.FC = () => {
           )}
 
           {/* ========================================================================= */}
-          {/* SEÇÃO 5: FINANCEIRO */}
+          {/* SEÇÃO 5: FINANCEIRO (DETALHADA ITEM POR ITEM E MOCKUPS) */}
           {/* ========================================================================= */}
           {activeSection === 'financeiro' && (
             <div className="manual-section">
               <div className="manual-section-title">
                 <FontAwesomeIcon icon={faWallet} style={{ color: '#0d9488' }} />
-                <span>Módulo Financeiro & Fluxo de Caixa</span>
+                <span>Módulo Financeiro & Fluxo de Caixa — Detalhamento dos Itens de Menu</span>
               </div>
               <p className="manual-section-subtitle">
-                Gestão integrada de contas a receber, contas a pagar, movimento de caixa e consolidação bancária.
+                O módulo Financeiro garante o controle das contas a receber, pagamento de compromissos com fornecedores, gestão de caixa físico e contas bancárias, conciliação e demonstrativos de resultado (DRE).
               </p>
 
+              {/* ITEM FILHO 1: MOVIMENTAÇÃO DE CAIXAS E BANCOS */}
               <div className="manual-card">
                 <div className="manual-card-title">
-                  <FontAwesomeIcon icon={faWallet} style={{ color: '#0284c7' }} />
-                  <span>1. Movimentação de Caixas e Bancos</span>
+                  <FontAwesomeIcon icon={faUniversity} style={{ color: '#0284c7' }} />
+                  <span>Item Filho 1: Movimentação de Caixas e Bancos (Lançamentos & Consolidação)</span>
                 </div>
                 <div className="manual-card-content">
                   <p>
-                    Lance entradas, saídas e transferências entre contas bancárias com controle total de extrato e conciliação.
+                    A tela de <strong>Movimentação de Caixas e Bancos</strong> controla a tesouraria diária da empresa e todas as contas correntes bancárias cadastradas.
                   </p>
+                  <ul className="step-list">
+                    <li className="step-item">
+                      <div className="step-number">1</div>
+                      <div className="step-text">
+                        <strong>Lançamentos Operacionais:</strong>
+                        <br />
+                        • <em>Crédito (Entrada):</em> Recebimento de vendas à vista em dinheiro, Pix ou depósitos.
+                        <br />
+                        • <em>Débito (Saída):</em> Pagamentos diretos de despesas de pequeno valor e tarifas bancárias.
+                        <br />
+                        • <em>Sangria:</em> Retirada de valores acumulados no caixa em espécie para depósito no banco ou cofre.
+                        <br />
+                        • <em>Suprimento:</em> Aporte/reforço de troco inicial para abertura do caixa de balcão.
+                        <br />
+                        • <em>Transferência Interbancária:</em> Movimentação de saldos entre contas (ex: da Conta Bradesco para Conta Itaú).
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">2</div>
+                      <div className="step-text">
+                        <strong>Consolidação e Fechamento Diário:</strong> Processo de conferência ao final do expediente para validar se o Saldo Físico apurado em dinheiro coincide com o Saldo Contábil informado pelo sistema.
+                      </div>
+                    </li>
+                  </ul>
+
+                  {/* Mockup Lançamento de Caixa */}
+                  <div className="form-print-mockup">
+                    <div className="mockup-header">
+                      <div className="mockup-header-dots">
+                        <span className="dot dot-red"></span>
+                        <span className="dot dot-yellow"></span>
+                        <span className="dot dot-green"></span>
+                      </div>
+                      <span>Lançamento e Consolidação de Caixas e Bancos</span>
+                    </div>
+                    <div className="mockup-body">
+                      <div className="mockup-grid">
+                        <div className="mockup-field">
+                          <label>Conta Bancária / Caixa</label>
+                          <input type="text" value="001 - BANCO DO BRASIL C/C 45890-1" readOnly />
+                        </div>
+                        <div className="mockup-field">
+                          <label>Tipo de Operação</label>
+                          <input type="text" style={{ color: '#0284c7', fontWeight: 700 }} value="TRANSFERENCIA INTERBANCARIA" readOnly />
+                        </div>
+                        <div className="mockup-field">
+                          <label>Valor da Operação (R$)</label>
+                          <input type="text" value="15.000,00" readOnly />
+                        </div>
+                      </div>
+                      <div className="mockup-footer-actions">
+                        <span style={{ fontSize: '13px', fontWeight: 700, alignSelf: 'center', marginRight: 'auto', color: '#15803d' }}>
+                          Saldo Atual da Conta: R$ 148.520,30
+                        </span>
+                        <button className="mockup-btn mockup-btn-secondary">Registrar Sangria</button>
+                        <button className="mockup-btn mockup-btn-primary">Confirmar Lançamento</button>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
 
+              {/* ITEM FILHO 2: CONTAS A RECEBER */}
               <div className="manual-card">
                 <div className="manual-card-title">
-                  <FontAwesomeIcon icon={faFileInvoiceDollar} style={{ color: '#0d9488' }} />
-                  <span>2. Contas a Receber e Contas a Pagar</span>
+                  <FontAwesomeIcon icon={faMoneyBillWave} style={{ color: '#0d9488' }} />
+                  <span>Item Filho 2: Contas a Receber (Liquidação, Boletos e CNAB)</span>
                 </div>
                 <div className="manual-card-content">
                   <p>
-                    Acompanhe vencimentos de títulos de clientes e duplicatas de fornecedores, realizando liquidações parciais ou totais.
+                    O módulo de <strong>Contas a Receber</strong> gerencia todos os títulos, duplicatas e promissórias gerados nas vendas de peças e faturamento de ordens de serviço.
                   </p>
+                  <ul className="step-list">
+                    <li className="step-item">
+                      <div className="step-number">1</div>
+                      <div className="step-text">
+                        <strong>Origem das Duplicatas:</strong> Os títulos são gerados automaticamente quando o orçamento vira pedido de venda ou quando a nota fiscal é autorizada, respeitando a condição de pagamento negociada (ex: 30/60/90 dias).
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">2</div>
+                      <div className="step-text">
+                        <strong>Mecânica de Baixa e Liquidação:</strong>
+                        <br />
+                        • Permite baixas parciais ou totais.
+                        <br />
+                        • <em>Cálculo Automático de Juros & Multa:</em> Em parcelas em atraso, o sistema calcula os juros diários e a multa por atraso cadastrados nos parâmetros gerais.
+                        <br />
+                        • <em>Desconto Concedido:</em> Abatimentos de pontualidade autorizados.
+                        <br />
+                        • Formas de recebimento suportadas: Boleto Bancário, Pix, Cartão de Crédito/Débito, Cheque ou Dinheiro.
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">3</div>
+                      <div className="step-text">
+                        <strong>Geração de Boletos e Arquivo CNAB (Remessa/Retorno):</strong> Permite a emissão de boletos bancários com código de barras e QR Code Pix. Gera o arquivo de remessa CNAB 240/400 para envio ao banco e processa a leitura automatizada do arquivo de retorno bancário para dar baixa em lote nos títulos pagos pelos clientes.
+                      </div>
+                    </li>
+                  </ul>
+
+                  {/* Mockup Contas a Receber */}
+                  <div className="form-print-mockup">
+                    <div className="mockup-header">
+                      <div className="mockup-header-dots">
+                        <span className="dot dot-red"></span>
+                        <span className="dot dot-yellow"></span>
+                        <span className="dot dot-green"></span>
+                      </div>
+                      <span>Baixa e Liquidação de Título a Receber • Contas a Receber</span>
+                    </div>
+                    <div className="mockup-body">
+                      <div className="mockup-grid">
+                        <div className="mockup-field">
+                          <label>Nº Título / Parcela</label>
+                          <input type="text" value="REC-45182 / Parcela 01/02" readOnly />
+                        </div>
+                        <div className="mockup-field">
+                          <label>Cliente</label>
+                          <input type="text" value="00310 - AGROPECUARIA SÃO JOSE" readOnly />
+                        </div>
+                        <div className="mockup-field">
+                          <label>Valor Original (R$)</label>
+                          <input type="text" value="2.500,00" readOnly />
+                        </div>
+                      </div>
+
+                      <div className="mockup-grid">
+                        <div className="mockup-field">
+                          <label>Dias de Atraso</label>
+                          <input type="text" style={{ color: '#e11d48', fontWeight: 700 }} value="12 Dias em Atraso" readOnly />
+                        </div>
+                        <div className="mockup-field">
+                          <label>Juros / Multa (+) (R$)</label>
+                          <input type="text" value="65,00" readOnly />
+                        </div>
+                        <div className="mockup-field">
+                          <label>Valor Total Cobrado (R$)</label>
+                          <input type="text" className="highlight" value="2.565,00" readOnly />
+                        </div>
+                      </div>
+
+                      <div className="mockup-footer-actions">
+                        <button className="mockup-btn mockup-btn-secondary">Gerar Remessa CNAB</button>
+                        <button className="mockup-btn mockup-btn-accent">Imprimir Boleto PDF</button>
+                        <button className="mockup-btn mockup-btn-primary">Confirmar Recebimento</button>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* ITEM FILHO 3: CONTAS A PAGAR */}
+              <div className="manual-card">
+                <div className="manual-card-title">
+                  <FontAwesomeIcon icon={faReceipt} style={{ color: '#0284c7' }} />
+                  <span>Item Filho 3: Contas a Pagar (Títulos de Fornecedores & Despesas)</span>
+                </div>
+                <div className="manual-card-content">
+                  <p>
+                    O módulo de <strong>Contas a Pagar</strong> controla todos os compromissos financeiros e obrigações da concessionária.
+                  </p>
+                  <ul className="step-list">
+                    <li className="step-item">
+                      <div className="step-number">1</div>
+                      <div className="step-text">
+                        <strong>Lançamentos de Títulos:</strong>
+                        <br />
+                        • <em>Importação XML:</em> As faturas de fornecedores de peças são lançadas automaticamente ao dar entrada na NF-e de compras.
+                        <br />
+                        • <em>Lançamento Manual:</em> Cadastro direto de contas recorrentes (Aluguel, Energia Elétrica, Água, Folha de Pagamento, Impostos).
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">2</div>
+                      <div className="step-text">
+                        <strong>Rateio por Centro de Custo & Plano de Contas:</strong> Permite classificar a despesa na conta contábil/gerencial adequada (ex: <em>Despesas com Vendas</em>, <em>Manutenção da Frota</em>, <em>Impostos sobre Faturamento</em>).
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">3</div>
+                      <div className="step-text">
+                        <strong>Programação de Pagamento & Liquidação:</strong> Agendamento de pagamentos futuros e execução da baixa com conciliação do meio de saída (Pix, Transferência bancária, Cheque).
+                      </div>
+                    </li>
+                  </ul>
+
+                  {/* Mockup Contas a Pagar */}
+                  <div className="form-print-mockup">
+                    <div className="mockup-header">
+                      <div className="mockup-header-dots">
+                        <span className="dot dot-red"></span>
+                        <span className="dot dot-yellow"></span>
+                        <span className="dot dot-green"></span>
+                      </div>
+                      <span>Gestão e Baixa de Contas a Pagar • Fornecedores</span>
+                    </div>
+                    <div className="mockup-body">
+                      <div className="mockup-grid">
+                        <div className="mockup-field">
+                          <label>Fornecedor / Favorecido</label>
+                          <input type="text" value="F-00120 - FABRICA DE TRATORES S/A" readOnly />
+                        </div>
+                        <div className="mockup-field">
+                          <label>Nº Documento / Fatura</label>
+                          <input type="text" value="NF-884920 / Desc: Peças Reposição" readOnly />
+                        </div>
+                        <div className="mockup-field">
+                          <label>Valor a Pagar (R$)</label>
+                          <input type="text" value="18.400,00" readOnly />
+                        </div>
+                      </div>
+                      <div className="mockup-footer-actions">
+                        <button className="mockup-btn mockup-btn-secondary">Agendar Pagamento</button>
+                        <button className="mockup-btn mockup-btn-primary">Efetuar Baixa / Pix</button>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* ITEM FILHO 4: MANUTENÇÃO E PROJEÇÃO DO FLUXO DE CAIXA */}
+              <div className="manual-card">
+                <div className="manual-card-title">
+                  <FontAwesomeIcon icon={faExchangeAlt} style={{ color: '#0d9488' }} />
+                  <span>Item Filho 4: Manutenção e Projeção do Fluxo de Caixa</span>
+                </div>
+                <div className="manual-card-content">
+                  <p>
+                    A <strong>Manutenção do Fluxo de Caixa</strong> é a ferramenta estratégica para acompanhamento da saúde financeira e liquidez da empresa.
+                  </p>
+                  <ul className="step-list">
+                    <li className="step-item">
+                      <div className="step-number">1</div>
+                      <div className="step-text">
+                        <strong>Cálculo do Saldo Projetado:</strong> O sistema consolida as informações em tempo real:
+                        <br />
+                        <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0284c7' }}>
+                          Saldo Inicial em Bancos + Recebimentos Previstos - Pagamentos Previstos = Saldo Final Projetado
+                        </span>
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">2</div>
+                      <div className="step-text">
+                        <strong>Visão Diária, Semanal e Mensal:</strong> Exibe a grade dia a dia, destacando com alertas visuais os dias em que houver risco de saldo negativo (insuficiência de caixa) para que a diretoria possa antecipar recebíveis ou postergar pagamentos.
+                      </div>
+                    </li>
+                  </ul>
+
+                  {/* Mockup Fluxo de Caixa */}
+                  <div className="form-print-mockup">
+                    <div className="mockup-header">
+                      <div className="mockup-header-dots">
+                        <span className="dot dot-red"></span>
+                        <span className="dot dot-yellow"></span>
+                        <span className="dot dot-green"></span>
+                      </div>
+                      <span>Grade de Manutenção do Fluxo de Caixa Projetado</span>
+                    </div>
+                    <div className="mockup-body">
+                      <table className="mockup-table">
+                        <thead>
+                          <tr>
+                            <th>Data</th>
+                            <th>Saldo Inicial (R$)</th>
+                            <th>(+) Recebimentos Prev.</th>
+                            <th>(-) Pagamentos Prev.</th>
+                            <th>(=) Saldo Projetado (R$)</th>
+                            <th>Status Liquidez</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>20/08/2026</td>
+                            <td>120.000,00</td>
+                            <td>35.000,00</td>
+                            <td>18.000,00</td>
+                            <td>137.000,00</td>
+                            <td style={{ color: '#15803d', fontWeight: 700 }}>✓ Positivo</td>
+                          </tr>
+                          <tr>
+                            <td>21/08/2026</td>
+                            <td>137.000,00</td>
+                            <td>12.000,00</td>
+                            <td>45.000,00</td>
+                            <td>104.000,00</td>
+                            <td style={{ color: '#15803d', fontWeight: 700 }}>✓ Positivo</td>
+                          </tr>
+                          <tr style={{ background: '#fefce8' }}>
+                            <td>22/08/2026</td>
+                            <td>104.000,00</td>
+                            <td>5.000,00</td>
+                            <td>98.000,00</td>
+                            <td>11.000,00</td>
+                            <td style={{ color: '#b45309', fontWeight: 700 }}>⚠️ Atencao / Limite</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* ITEM FILHO 5: RELATÓRIOS FINANCEIROS E DRE */}
+              <div className="manual-card">
+                <div className="manual-card-title">
+                  <FontAwesomeIcon icon={faChartPie} style={{ color: '#0284c7' }} />
+                  <span>Item Filho 5: Relatórios Financeiros & DRE (Demonstração do Resultado do Exercício)</span>
+                </div>
+                <div className="manual-card-content">
+                  <p>
+                    O módulo de <strong>Relatórios Financeiros e DRE</strong> fornece a apuração do resultado contábil e gerencial da empresa em determinado período.
+                  </p>
+                  <ul className="step-list">
+                    <li className="step-item">
+                      <div className="step-number">1</div>
+                      <div className="step-text">
+                        <strong>Demonstrativo do Resultado do Exercício (DRE):</strong>
+                        <br />
+                        • <em>Receita Bruta Operacional:</em> Venda de Peças + Faturamento de Serviços.
+                        <br />
+                        • <em>Deduções & Impostos:</em> ICMS, PIS, COFINS, ISSQN, Devoluções.
+                        <br />
+                        • <em>Custos Operacionais (CMV / CSV):</em> Custo das Mercadorias Vendidas e Custo dos Serviços Prestados.
+                        <br />
+                        • <em>Margem Bruta de Lucro:</em> Lucro bruto gerado pelas operações.
+                        <br />
+                        • <em>Despesas Operacionais:</em> Despesas com Pessoal, Administrativas, Vendas e Financeiras.
+                        <br />
+                        • <em>Resultado Líquido do Período:</em> Lucro ou Prejuízo Líquido apurado.
+                      </div>
+                    </li>
+                    <li className="step-item">
+                      <div className="step-number">2</div>
+                      <div className="step-text">
+                        <strong>Relatórios de Inadimplência (Aging List):</strong> Posição analítica dos títulos a receber vencidos agrupados por faixas de atraso (1-30 dias, 31-60 dias, 61-90 dias e acima de 90 dias) para direcionamento da equipe de cobrança.
+                      </div>
+                    </li>
+                  </ul>
+
+                  {/* Mockup do DRE */}
+                  <div className="form-print-mockup">
+                    <div className="mockup-header">
+                      <div className="mockup-header-dots">
+                        <span className="dot dot-red"></span>
+                        <span className="dot dot-yellow"></span>
+                        <span className="dot dot-green"></span>
+                      </div>
+                      <span>Demonstrativo do Resultado do Exercício • DRE Gerencial</span>
+                    </div>
+                    <div className="mockup-body">
+                      <table className="mockup-table">
+                        <thead>
+                          <tr>
+                            <th>Estrutura da DRE</th>
+                            <th>Valor Apurado (R$)</th>
+                            <th>% sobre Receita Bruta</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr style={{ fontWeight: 700, background: '#f1f5f9' }}>
+                            <td>(+) RECEITA BRUTA OPERACIONAL</td>
+                            <td>450.000,00</td>
+                            <td>100.00 %</td>
+                          </tr>
+                          <tr>
+                            <td>(-) Deduções e Impostos Fiscais</td>
+                            <td>(- 54.000,00)</td>
+                            <td>12.00 %</td>
+                          </tr>
+                          <tr style={{ fontWeight: 700 }}>
+                            <td>(=) RECEITA LIQUIDA OPERACIONAL</td>
+                            <td>396.000,00</td>
+                            <td>88.00 %</td>
+                          </tr>
+                          <tr>
+                            <td>(-) Custo das Mercadorias e Serviços (CMV/CSV)</td>
+                            <td>(- 210.000,00)</td>
+                            <td>46.66 %</td>
+                          </tr>
+                          <tr style={{ fontWeight: 700, background: '#f0fdf4', color: '#166534' }}>
+                            <td>(=) LUCRO BRUTO OPERACIONAL</td>
+                            <td>186.000,00</td>
+                            <td>41.33 %</td>
+                          </tr>
+                          <tr>
+                            <td>(-) Despesas Operacionais (Admin/Vendas)</td>
+                            <td>(- 92.000,00)</td>
+                            <td>20.44 %</td>
+                          </tr>
+                          <tr style={{ fontWeight: 800, background: '#dcfce7', color: '#15803d', fontSize: '13px' }}>
+                            <td>(=) LUCRO LIQUIDO DO PERIODO</td>
+                            <td>R$ 94.000,00</td>
+                            <td>20.88 %</td>
+                          </tr>
+                        </tbody>
+                      </table>
+
+                      <div className="mockup-footer-actions">
+                        <button className="mockup-btn mockup-btn-secondary">Exportar Excel</button>
+                        <button className="mockup-btn mockup-btn-primary">Imprimir DRE PDF</button>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </div>
